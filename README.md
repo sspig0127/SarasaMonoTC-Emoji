@@ -205,6 +205,24 @@ open http://localhost:8765/verify-emoji.html
 
 ---
 
+## VHS 終端機錄影設定
+
+[VHS](https://github.com/charmbracelet/vhs) 使用 Headless Chromium + xterm.js 渲染終端機畫面，
+需使用 **Lite 變體**（glyf 格式）才能正確顯示 emoji（Color 變體的 CBDT/CBLC 點陣圖在 Chromium 中支援不穩定）。
+
+### 4K 錄製設定
+
+```tape
+Set FontFamily "SarasaMonoTCEmojiLite"
+Set FontSize 46
+Set LetterSpacing 2
+Set LineHeight 1.0
+Set Width 3840
+Set Height 2160
+```
+
+---
+
 ## 技術細節
 
 ### Color 變體
