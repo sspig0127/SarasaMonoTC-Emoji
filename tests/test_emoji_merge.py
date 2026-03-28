@@ -135,6 +135,38 @@ class TestScaleGlyph:
         _scale_glyph(g, 1.0 + 5e-7)
         assert list(g.coordinates) == original_coords
 
+    # --- T2: int16 range protection ---
+
+    def test_simple_glyph_raises_on_out_of_range_bbox(self):
+        """ValueError must be raised when scaled bbox exceeds int16 range."""
+        # scale 0.5: (0,0)→(70000,70000) → xMax=yMax=35000 > 32767
+        g = _simple_glyph([(0, 0), (70000, 70000)])
+        with pytest.raises(ValueError, match="int16 range"):
+            _scale_glyph(g, 0.5)
+
+    def test_simple_glyph_raises_on_negative_out_of_range(self):
+        """ValueError must be raised when scaled bbox goes below int16 minimum."""
+        # scale 0.5: (-70000,-70000)→(0,0) → xMin=yMin=-35000 < -32768
+        g = _simple_glyph([(-70000, -70000), (0, 0)])
+        with pytest.raises(ValueError, match="int16 range"):
+            _scale_glyph(g, 0.5)
+
+    def test_composite_glyph_raises_on_out_of_range_offset(self):
+        """ValueError must be raised when scaled composite offset exceeds int16."""
+        # offset 70000 * 0.5 = 35000 > 32767
+        g = _composite_glyph([("base", 70000, 0)])
+        with pytest.raises(ValueError, match="int16 range"):
+            _scale_glyph(g, 0.5)
+
+    def test_error_message_contains_field_name_and_value(self):
+        """Error message must identify the offending field and its value."""
+        g = _simple_glyph([(0, 0), (70000, 70000)])
+        with pytest.raises(ValueError) as exc_info:
+            _scale_glyph(g, 0.5)
+        msg = str(exc_info.value)
+        assert "35000" in msg  # the out-of-range value
+        assert "int16" in msg
+
 
 # ---------------------------------------------------------------------------
 # detect_font_widths — requires Sarasa source font

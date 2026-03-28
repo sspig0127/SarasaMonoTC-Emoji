@@ -37,10 +37,10 @@
   - `_scale_glyph()` 縮放後 bbox 為整數且在 int16 範圍內
 - [x] CI/CD：GitHub Actions workflow，PR 觸發自動測試
 
-#### T2 — UPM 縮放保護
-- [ ] `_scale_glyph()` 加 int16 範圍驗證（-32768 ~ 32767）
-- [ ] 若縮放後超界，raise `ValueError` 並說明原因
-- [ ] 在 `merge_emoji_lite()` 加縮放結果摘要 log（yMin/yMax 樣本）
+#### T2 — UPM 縮放保護 ✅
+- [x] `_scale_glyph()` 加 int16 範圍驗證（-32768 ~ 32767）
+- [x] 若縮放後超界，raise `ValueError` 並說明原因
+- [x] 在 `merge_emoji_lite()` 加縮放結果摘要 log（yMin/yMax 樣本）
 
 #### T3 — verify-emoji.html 加 Lite 切換
 - [ ] 加入變體切換器（Color / Lite 下拉選單）

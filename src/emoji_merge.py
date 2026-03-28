@@ -24,6 +24,11 @@ from fontTools.ttLib.tables._g_l_y_f import Glyph as TTGlyph
 
 from .config import FontConfig
 
+# TrueType glyph header fields (xMin/yMin/xMax/yMax) and component offsets
+# are packed as int16 in the binary format.
+_INT16_MIN = -32768
+_INT16_MAX = 32767
+
 # Codepoint ranges to skip when extracting emoji
 # These are either already handled by Sarasa or are not user-visible emoji
 _SKIP_CODEPOINT_RANGES = [
@@ -257,6 +262,22 @@ def _force_decompile_cbdt(emoji_font: TTFont) -> None:
                         _ = glyph_data.data  # trigger bitmap decompile
 
 
+def _check_int16(value: int, field: str, scale: float) -> None:
+    """Raise ValueError if value is outside the int16 range [-32768, 32767].
+
+    Args:
+        value: Rounded integer to validate
+        field: Field name for the error message (e.g. 'xMax', 'comp.y')
+        scale: The scale factor that produced this value (for diagnostics)
+    """
+    if not (_INT16_MIN <= value <= _INT16_MAX):
+        raise ValueError(
+            f"_scale_glyph: {field}={value} exceeds int16 range "
+            f"[{_INT16_MIN}, {_INT16_MAX}] after scaling by {scale:.6f}. "
+            f"Source glyph coordinate is out of range for the target UPM."
+        )
+
+
 def _scale_glyph(glyph, scale: float) -> None:
     """Scale a TrueType glyph's coordinates in-place.
 
@@ -270,6 +291,9 @@ def _scale_glyph(glyph, scale: float) -> None:
     Args:
         glyph: Expanded TTGlyph object to scale in-place
         scale: Scale factor (target_upm / source_upm)
+
+    Raises:
+        ValueError: If any scaled bbox or component offset exceeds int16 range.
     """
     if abs(scale - 1.0) < 1e-6:
         return  # no-op if same UPM
@@ -283,15 +307,27 @@ def _scale_glyph(glyph, scale: float) -> None:
         # (xMin/yMin/xMax/yMax) are packed as int16 — must be rounded integers.
         bounds = glyph.coordinates.calcBounds()
         if bounds is not None:
-            glyph.xMin = otRound(bounds[0])
-            glyph.yMin = otRound(bounds[1])
-            glyph.xMax = otRound(bounds[2])
-            glyph.yMax = otRound(bounds[3])
+            xMin = otRound(bounds[0])
+            yMin = otRound(bounds[1])
+            xMax = otRound(bounds[2])
+            yMax = otRound(bounds[3])
+            _check_int16(xMin, "xMin", scale)
+            _check_int16(yMin, "yMin", scale)
+            _check_int16(xMax, "xMax", scale)
+            _check_int16(yMax, "yMax", scale)
+            glyph.xMin = xMin
+            glyph.yMin = yMin
+            glyph.xMax = xMax
+            glyph.yMax = yMax
     elif glyph.numberOfContours < 0 and hasattr(glyph, "components"):
         # Composite glyph: scale component translation offsets
         for comp in glyph.components:
-            comp.x = otRound(comp.x * scale)
-            comp.y = otRound(comp.y * scale)
+            x = otRound(comp.x * scale)
+            y = otRound(comp.y * scale)
+            _check_int16(x, "comp.x", scale)
+            _check_int16(y, "comp.y", scale)
+            comp.x = x
+            comp.y = y
 
 
 def _collect_glyph_deps(
@@ -443,6 +479,24 @@ def merge_emoji_lite(
                 empty.numberOfContours = 0
                 base_glyf[glyph_name] = empty
     print(f"  Copied {copied} glyph outlines from emoji font (scaled ×{upm_scale:.4f})")
+
+    # Scaling summary: collect bbox range across all copied glyphs so the caller
+    # can verify the scale result relative to Sarasa's ascender/descender at a glance.
+    if abs(upm_scale - 1.0) > 1e-6 and copied > 0:
+        ymin_vals: list[int] = []
+        ymax_vals: list[int] = []
+        for name in emoji_glyphs_to_add:
+            g = base_glyf.glyphs.get(name)
+            if g is not None and hasattr(g, "yMax") and g.numberOfContours != 0:
+                ymin_vals.append(getattr(g, "yMin", 0))
+                ymax_vals.append(getattr(g, "yMax", 0))
+        if ymin_vals:
+            print(
+                f"  Scaled bbox summary: "
+                f"yMin [{min(ymin_vals)}..{max(ymin_vals)}], "
+                f"yMax [{min(ymax_vals)}..{max(ymax_vals)}] "
+                f"({len(ymin_vals)} glyphs sampled)"
+            )
 
     # Step 6: update hmtx (and vmtx if present)
     # IMPORTANT: access vmtx BEFORE updating maxp.numGlyphs.
