@@ -93,10 +93,17 @@ def detect_font_widths(base_font: TTFont) -> tuple[int, int]:
     if half_width and full_width and full_width == 2 * half_width:
         return half_width, full_width
 
-    # Fallback: scan hmtx for the most common 2:1 width pair
+    # Fallback: scan hmtx for the most common 2:1 width pair.
+    # Require each width to appear in ≥ 1% of all glyphs so that rare/orphan
+    # glyphs with an accidental 2:1 ratio don't produce a misleading result.
     widths = Counter(w for w, _ in hmtx.metrics.values() if w > 0)
-    for w, _ in widths.most_common(20):
-        if w * 2 in widths:
+    total = sum(widths.values())
+    min_count = max(1, total // 100)  # 1% threshold
+    for w, count in widths.most_common(20):
+        if count < min_count:
+            continue
+        double_count = widths.get(w * 2, 0)
+        if double_count >= min_count:
             return w, w * 2
 
     top = widths.most_common(5)

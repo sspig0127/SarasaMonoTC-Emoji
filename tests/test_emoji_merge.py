@@ -172,6 +172,27 @@ class TestScaleGlyph:
 # detect_font_widths — requires Sarasa source font
 # ---------------------------------------------------------------------------
 
+def _mock_font(width_list: list) -> object:
+    """Minimal font mock with empty cmap to force the fallback detection path."""
+    metrics = {f"g{i}": (w, 0) for i, w in enumerate(width_list)}
+
+    class _Hmtx:
+        def __init__(self):
+            self.metrics = metrics
+        def __getitem__(self, name):
+            return metrics[name]
+
+    class _Cmap:
+        def getBestCmap(self):
+            return {}  # No 'A' or '一' → forces fallback
+
+    class _Font:
+        def __getitem__(self, key):
+            return {"cmap": _Cmap(), "hmtx": _Hmtx()}[key]
+
+    return _Font()
+
+
 class TestDetectFontWidths:
     def test_sarasa_returns_500_1000(self, sarasa_font):
         """Sarasa Mono TC UPM=1000 → half=500, full=1000."""
@@ -183,6 +204,31 @@ class TestDetectFontWidths:
         """Detected widths must always satisfy full == 2 * half."""
         half, full = detect_font_widths(sarasa_font)
         assert full == 2 * half
+
+    # --- T4: fallback 1% threshold (pure logic, no font files needed) ---
+
+    def test_fallback_accepts_dominant_pair(self):
+        """Fallback must accept a 2:1 pair where both widths meet the 1% threshold."""
+        widths = [500] * 100 + [1000] * 100
+        half, full = detect_font_widths(_mock_font(widths))
+        assert half == 500
+        assert full == 1000
+
+    def test_fallback_rejects_low_count_pair(self):
+        """Fallback must reject a 2:1 pair where each width appears in <1% of glyphs."""
+        # 400 glyphs at w=700 (no 2:1 partner), only 2 at w=100, 2 at w=200
+        # threshold = max(1, 404//100) = 4; count(100)=2 < 4 → rejected → ValueError
+        widths = [700] * 400 + [100] * 2 + [200] * 2
+        with pytest.raises(ValueError):
+            detect_font_widths(_mock_font(widths))
+
+    def test_fallback_threshold_ignores_tiny_minority(self):
+        """Dominant pair (500/1000) must win even when a spurious low-count pair exists."""
+        # 200 glyphs at 500, 200 at 1000 (dominant), 1 at 100, 1 at 200 (spurious)
+        widths = [500] * 200 + [1000] * 200 + [100] * 1 + [200] * 1
+        half, full = detect_font_widths(_mock_font(widths))
+        assert half == 500
+        assert full == 1000
 
 
 # ---------------------------------------------------------------------------

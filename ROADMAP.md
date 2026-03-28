@@ -11,7 +11,7 @@
 | **v1.0** | 初始版本：Color 變體（CBDT/CBLC） | ✅ 已發佈 |
 | **v1.1** | 新增 Lite 變體（glyf 單色） | ✅ 已發佈 |
 | **v1.2** | 修正 Lite emoji 尺寸（UPM 2048→1000 縮放） | ✅ 已發佈 |
-| **v1.3** | 測試框架 + 健壯性改善 | 🔨 進行中（T1 ✅） |
+| **v1.3** | 測試框架 + 健壯性改善 | ✅ 完成（T1–T4） |
 | **v2.0** | ZWJ 序列 / 旗幟 / 膚色變體支援 | 🔮 未來 |
 | **v2.x** | COLRv1 第三變體（彩色向量） | 🔮 未來 |
 
@@ -47,10 +47,10 @@
 - [x] Lite 模式下切換至 `output/fonts-lite/` 路徑
 - [x] 加入「emoji 視覺尺寸對比文字」測試 case
 
-#### T4 — 建構健壯性
-- [ ] 平行建構失敗時清理 partial output
-- [ ] `detect_font_widths()` fallback 加最低佔比門檻（≥ 1% glyph）
-- [ ] 建構耗時紀錄（每個 style 幾秒，總計）
+#### T4 — 建構健壯性 ✅
+- [x] 平行建構失敗時清理 partial output
+- [x] `detect_font_widths()` fallback 加最低佔比門檻（≥ 1% glyph）
+- [x] 建構耗時紀錄（每個 style 幾秒，總計）
 
 ---
 

@@ -19,6 +19,7 @@ Usage:
 import argparse
 import json
 import sys
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict
@@ -51,6 +52,24 @@ def get_config_value(yaml_config: Dict[str, Any], *keys: str, default: Any = Non
     return value
 
 
+def _cleanup_partial_outputs(
+    output_dir: Path, family_name_compact: str, styles: list
+) -> None:
+    """Remove output files for all targeted styles.
+
+    Called after a failed parallel build to avoid leaving a mix of new and
+    old font files in the output directory (inconsistent state).
+    """
+    removed = 0
+    for style in styles:
+        path = output_dir / f"{family_name_compact}-{style}.ttf"
+        if path.exists():
+            path.unlink()
+            print(f"  Removed: {path.name}")
+            removed += 1
+    print(f"  Cleaned up {removed} partial output file(s)")
+
+
 def build_single_font(
     style: str,
     base_font_path: Path,
@@ -76,6 +95,7 @@ def build_single_font(
     Returns:
         Output file path string
     """
+    style_start = time.monotonic()
     print(f"\nBuilding {config.family_name_compact}-{style}...")
 
     # Merge emoji into base font
@@ -135,7 +155,8 @@ def build_single_font(
     output_path = output_dir / f"{postscript_name}.ttf"
     merged_font.save(str(output_path))
     merged_font.close()
-    print(f"  Saved: {output_path}")
+    elapsed = time.monotonic() - style_start
+    print(f"  Saved: {output_path} ({elapsed:.1f}s)")
     return str(output_path)
 
 
@@ -285,6 +306,8 @@ Configuration priority: CLI args > config.yaml > defaults
         p = font_paths[style]
         print(f"  {style}: {p['base_font_path'].name} + {p['emoji_font_path'].name}")
 
+    build_start = time.monotonic()
+
     if parallel <= 1:
         for style in styles:
             p = font_paths[style]
@@ -294,25 +317,34 @@ Configuration priority: CLI args > config.yaml > defaults
                 lite=is_lite,
             )
     else:
-        with ProcessPoolExecutor(max_workers=parallel) as executor:
-            futures = {}
-            for style in styles:
-                p = font_paths[style]
-                future = executor.submit(
-                    build_single_font,
-                    style, p["base_font_path"], p["emoji_font_path"],
-                    p["display_name"], output_dir, config, metadata,
-                    is_lite,
-                )
-                futures[future] = style
+        try:
+            with ProcessPoolExecutor(max_workers=parallel) as executor:
+                futures = {}
+                for style in styles:
+                    p = font_paths[style]
+                    future = executor.submit(
+                        build_single_font,
+                        style, p["base_font_path"], p["emoji_font_path"],
+                        p["display_name"], output_dir, config, metadata,
+                        is_lite,
+                    )
+                    futures[future] = style
 
-            for future in as_completed(futures):
-                style = futures[future]
-                try:
-                    future.result()
-                except Exception as e:
-                    print(f"Error building {style}: {e}")
-                    raise
+                for future in as_completed(futures):
+                    style = futures[future]
+                    try:
+                        future.result()
+                    except Exception as e:
+                        print(f"\nError building {style}: {e}")
+                        for f in futures:
+                            f.cancel()
+                        raise
+        except Exception:
+            print("\nParallel build failed — cleaning up partial outputs...")
+            _cleanup_partial_outputs(output_dir, config.family_name_compact, styles)
+            raise
+
+    build_elapsed = time.monotonic() - build_start
 
     # Generate manifest for verify-emoji.html
     manifest = {
@@ -331,7 +363,7 @@ Configuration priority: CLI args > config.yaml > defaults
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
     print(f"\nGenerated manifest: {manifest_path}")
-    print(f"Build complete! Fonts saved to: {output_dir}")
+    print(f"Build complete! Fonts saved to: {output_dir} (total: {build_elapsed:.1f}s)")
 
 
 if __name__ == "__main__":
