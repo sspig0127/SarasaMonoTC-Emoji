@@ -1,0 +1,58 @@
+# SarasaMonoTC-Emoji Build Configuration
+# Derived from Sarasa Gothic (更紗黑體) + NotoColorEmoji
+# License: SIL Open Font License 1.1
+
+# Font metadata
+font:
+  family_name: "SarasaMonoTCEmoji"
+  version: "1.0"
+  author: "sspig0127"
+  # Full copyright notice — updated after running:
+  #   uv run python -c "
+  #   from fontTools.ttLib import TTFont
+  #   f = TTFont('fonts/SarasaMonoTC-Regular.ttf')
+  #   [print(r.toUnicode()) for r in f['name'].names if r.nameID == 0]
+  #   "
+  copyright: "Portions copyright Sarasa Gothic authors. NotoColorEmoji copyright Google LLC. See LICENSE for details."
+  description: "Sarasa Mono TC (更紗黑體繁中等寬) with embedded NotoColorEmoji — color emoji for terminals and editors"
+  url: "https://github.com/sspig0127/SarasaMonoTC-Emoji"
+  license: "This Font Software is licensed under the SIL Open Font License, Version 1.1."
+  license_url: "https://openfontlicense.org"
+
+# Source fonts directory
+fonts_dir: "fonts"
+
+# Styles configuration
+# base_font: Sarasa Mono TC TTF for this style
+# emoji_font: NotoColorEmoji (shared across all styles)
+styles:
+  Regular:
+    base_font: "SarasaMonoTC-Regular.ttf"
+    emoji_font: "NotoColorEmoji.ttf"
+    display_name: "Regular"
+  Italic:
+    base_font: "SarasaMonoTC-Italic.ttf"
+    emoji_font: "NotoColorEmoji.ttf"
+    display_name: "Italic"
+  Bold:
+    base_font: "SarasaMonoTC-Bold.ttf"
+    emoji_font: "NotoColorEmoji.ttf"
+    display_name: "Bold"
+  BoldItalic:
+    base_font: "SarasaMonoTC-BoldItalic.ttf"
+    emoji_font: "NotoColorEmoji.ttf"
+    display_name: "Bold Italic"
+
+# Build options
+build:
+  styles: "Regular,Italic,Bold,BoldItalic"
+  output_dir: "output/fonts"
+  parallel: 4
+
+# Emoji merge options
+emoji:
+  # emoji advance width = half_width * emoji_width_multiplier
+  # 2 = occupies 2 columns (same as CJK full-width), standard for monospace terminals
+  emoji_width_multiplier: 2
+  # Skip codepoints already in base font to preserve Sarasa's existing glyphs
+  skip_existing: true

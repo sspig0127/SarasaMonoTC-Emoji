@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SarasaMonoTCEmoji — 驗證頁面</title>
+<style>
+  :root { --font: 'SarasaMonoTCEmoji', 'Sarasa Mono TC', monospace; }
+  body { font-family: sans-serif; margin: 40px; background: #1e1e2e; color: #cdd6f4; }
+  h1, h2 { color: #cba6f7; }
+  h2 { margin-top: 2em; border-bottom: 1px solid #313244; padding-bottom: 0.3em; }
+  .mono { font-family: var(--font); font-size: 18px; line-height: 2; background: #181825; padding: 16px 20px; border-radius: 8px; margin: 8px 0; white-space: pre; }
+  .label { font-size: 12px; color: #6c7086; margin-bottom: 2px; font-family: monospace; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  select { background: #313244; color: #cdd6f4; border: 1px solid #45475a; padding: 4px 8px; border-radius: 4px; font-size: 14px; }
+  .status { padding: 8px 12px; border-radius: 6px; font-size: 13px; display: inline-block; margin-top: 8px; }
+  .ok { background: #a6e3a1; color: #1e1e2e; }
+  .err { background: #f38ba8; color: #1e1e2e; }
+</style>
+</head>
+<body>
+
+<h1>SarasaMonoTCEmoji — 渲染驗證</h1>
+<p>選擇字重：
+  <select id="styleSelect" onchange="applyStyle()">
+    <option value="Regular">Regular</option>
+    <option value="Italic">Italic</option>
+    <option value="Bold">Bold</option>
+    <option value="BoldItalic">Bold Italic</option>
+  </select>
+  <span id="loadStatus"></span>
+</p>
+
+<h2>1. CJK ↔ Emoji 寬度對齊（每行應整齊對齊）</h2>
+<div class="label">CJK 全寬 vs emoji（各佔 2 columns）</div>
+<div class="mono" id="test-align">一😀二😂三🎉
+ABABABABABABAB
+一一😀😀二二😂</div>
+
+<h2>2. 常用 emoji 彩色渲染</h2>
+<div class="grid">
+  <div>
+    <div class="label">表情</div>
+    <div class="mono">😀😃😄😁😆😅😂🤣
+☺️😊😇🙂🙃😉😌
+😍🥰😘😗😙😚😋</div>
+  </div>
+  <div>
+    <div class="label">符號 / 物件</div>
+    <div class="mono">❤️🧡💛💚💙💜🖤🤍
+⭐🔥💯✨🎉🎊🏆
+📁📂🗂️📝💻🖥️⌨️</div>
+  </div>
+  <div>
+    <div class="label">動物</div>
+    <div class="mono">🐶🐱🐭🐹🐰🦊🐻
+🐼🐨🐯🦁🐮🐷🐸
+🐙🦑🦞🦀🐟🐠🐡</div>
+  </div>
+  <div>
+    <div class="label">食物 / 飲料</div>
+    <div class="mono">🍎🍊🍋🍇🍓🫐🍑
+🥑🍆🥦🥕🌽🫑🧅
+☕🍵🧋🍺🍻🥂🍷</div>
+  </div>
+</div>
+
+<h2>3. 程式碼場景模擬（CJK + Emoji + ASCII）</h2>
+<div class="label">終端機 / 編輯器常見混排情境</div>
+<div class="mono"># 建構完成 ✅ 3 個 style
+[ERROR] 找不到字體檔案 ❌ fonts/SarasaMonoTC-Bold.ttf
+→ 請執行 download_fonts.py 🚀
+⚠️  警告：emoji 寬度 1200 ≠ 預期 full_width 1000
+git commit -m "feat: 加入彩色 emoji 支援 🎨"</div>
+
+<h2>4. Emoji Unicode 範圍覆蓋測試</h2>
+<div class="label">各 Unicode 區塊抽樣（應顯示彩色，非豆腐）</div>
+<div class="mono">U+2600 ☀️☁️⛅🌤️🌈⚡❄️🌊
+U+1F300 🌍🌏🌕🌙⭐🌟💫✨
+U+1F600 😀😂🤔😎🥳🤩😴🤐
+U+1F680 🚀✈️🚂🚗🛳️🏍️🛺🚁
+U+1F900 🤯🥺🤮🥴🤠🥸🤡👹
+U+1FA70 🧋🫂🪄🪅🪆🎭🎪🪩</div>
+
+<script>
+async function loadFonts() {
+  let manifest;
+  try {
+    const resp = await fetch('output/fonts/fonts-manifest.json');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    manifest = await resp.json();
+  } catch(e) {
+    document.getElementById('loadStatus').innerHTML =
+      `<span class="status err">✗ 找不到 output/fonts/fonts-manifest.json，請先執行 build.py</span>`;
+    return;
+  }
+
+  const select = document.getElementById('styleSelect');
+  select.innerHTML = manifest.fonts.map(f =>
+    `<option value="${f.style}" data-file="${f.filename}">${f.display_name}</option>`
+  ).join('');
+
+  try {
+    await loadFont(manifest.fonts[0]);
+    document.getElementById('loadStatus').innerHTML =
+      `<span class="status ok">✓ ${manifest.family_name} v${manifest.version} 載入成功</span>`;
+  } catch(e) {
+    document.getElementById('loadStatus').innerHTML =
+      `<span class="status err">⚠ 字體載入失敗（${e.message}）— 此瀏覽器可能不支援 CBDT/CBLC 格式，請改用 Chrome</span>`;
+  }
+}
+
+async function loadFont(fontInfo) {
+  const url = `output/fonts/${fontInfo.filename}`;
+  const isBold = fontInfo.style.includes('Bold');
+  const isItalic = fontInfo.style.includes('Italic');
+  const face = new FontFace('SarasaMonoTCEmoji', `url(${url})`, {
+    weight: isBold ? '700' : '400',
+    style: isItalic ? 'italic' : 'normal',
+  });
+  await face.load();
+  document.fonts.add(face);
+}
+
+async function applyStyle() {
+  const select = document.getElementById('styleSelect');
+  const opt = select.selectedOptions[0];
+  await loadFont({ style: opt.value, filename: opt.dataset.file });
+  const isBold = opt.value.includes('Bold');
+  const isItalic = opt.value.includes('Italic');
+  document.querySelectorAll('.mono').forEach(el => {
+    el.style.fontWeight = isBold ? '700' : '400';
+    el.style.fontStyle = isItalic ? 'italic' : 'normal';
+  });
+}
+
+loadFonts();
+</script>
+</body>
+</html>

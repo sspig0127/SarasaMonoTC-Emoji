@@ -1,0 +1,296 @@
+#!/usr/bin/env python3
+"""
+SarasaMonoTC-Emoji Font Builder
+
+Merges NotoColorEmoji (CBDT/CBLC color bitmap) into Sarasa Mono TC,
+producing a monospace font with embedded color emoji support.
+
+Background:
+  No existing open-source project provides this combination.
+  thedemons/merge_color_emoji_font (the only public reference) uses
+  FontLab GUI. This is a Python/fonttools automated implementation.
+
+Usage:
+    uv run python build.py
+    uv run python build.py --styles Regular
+    uv run python build.py --styles Regular,Bold --parallel 2
+"""
+
+import argparse
+import json
+import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+from typing import Any, Dict
+
+import yaml
+
+sys.path.insert(0, str(Path(__file__).parent))
+
+from src.config import FontConfig
+from src.emoji_merge import merge_emoji, detect_font_widths
+from src.utils import update_font_names, verify_glyph_width
+
+
+def load_config(config_path: Path) -> Dict[str, Any]:
+    if not config_path.exists():
+        return {}
+    with open(config_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+
+def get_config_value(yaml_config: Dict[str, Any], *keys: str, default: Any = None) -> Any:
+    value = yaml_config
+    for key in keys:
+        if isinstance(value, dict):
+            value = value.get(key)
+        else:
+            return default
+        if value is None:
+            return default
+    return value
+
+
+def build_single_font(
+    style: str,
+    base_font_path: Path,
+    emoji_font_path: Path,
+    display_name: str,
+    output_dir: Path,
+    config: FontConfig,
+    metadata: dict,
+) -> str:
+    """Build a single font variant with color emoji merged in.
+
+    Args:
+        style: Font style key (e.g. Regular, Bold)
+        base_font_path: Path to SarasaMonoTC-{Style}.ttf
+        emoji_font_path: Path to NotoColorEmoji.ttf
+        display_name: Human-readable style name for name table
+        output_dir: Output directory
+        config: FontConfig object
+        metadata: Font metadata dict
+
+    Returns:
+        Output file path string
+    """
+    print(f"\nBuilding {config.family_name_compact}-{style}...")
+
+    # Merge emoji into base font
+    merged_font = merge_emoji(
+        base_font_path=str(base_font_path),
+        emoji_font_path=str(emoji_font_path),
+        config=config,
+    )
+
+    # Update font metadata
+    postscript_name = f"{config.family_name_compact}-{style}"
+    print("  Updating font metadata...")
+    update_font_names(
+        font=merged_font,
+        family_name=config.family_name,
+        style_name=display_name,
+        full_name=f"{config.family_name} {display_name}",
+        postscript_name=postscript_name,
+        version_str=f"Version {config.version}",
+        author=metadata.get("author", ""),
+        copyright_str=metadata.get("copyright", ""),
+        description=metadata.get("description", ""),
+        url=metadata.get("url", ""),
+        license_desc=metadata.get("license", ""),
+        license_url=metadata.get("license_url", ""),
+    )
+
+    # Verify glyph widths (detect from font at runtime)
+    print("  Verifying glyph widths...")
+    from fontTools.ttLib import TTFont as _TTFont
+    _base = _TTFont(str(base_font_path))
+    half_w, full_w = detect_font_widths(_base)
+    _base.close()
+    emoji_w = half_w * config.emoji_width_multiplier
+
+    try:
+        verify_glyph_width(
+            font=merged_font,
+            expected_widths=[0, half_w, full_w, emoji_w],
+            file_name=postscript_name,
+        )
+    except ValueError as e:
+        print(f"  Warning: {e}")
+
+    # Save
+    output_path = output_dir / f"{postscript_name}.ttf"
+    merged_font.save(str(output_path))
+    merged_font.close()
+    print(f"  Saved: {output_path}")
+    return str(output_path)
+
+
+def main():
+    default_config_path = Path(__file__).parent / "config.yaml"
+
+    parser = argparse.ArgumentParser(
+        description="Build SarasaMonoTC-Emoji font",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  uv run python build.py
+  uv run python build.py --styles Regular
+  uv run python build.py --styles Regular,Bold --parallel 2
+
+Configuration priority: CLI args > config.yaml > defaults
+        """,
+    )
+    parser.add_argument("--config", type=Path, default=default_config_path)
+    parser.add_argument("--styles", type=str, default=None,
+                        help="Comma-separated styles to build")
+    parser.add_argument("--fonts-dir", type=Path, default=None)
+    parser.add_argument("--output-dir", type=Path, default=None)
+    parser.add_argument("--parallel", type=int, default=None)
+
+    args = parser.parse_args()
+
+    yaml_config = load_config(args.config)
+
+    styles_config = get_config_value(yaml_config, "styles") or {}
+    if not styles_config:
+        print("Error: No styles defined in config.yaml")
+        sys.exit(1)
+
+    styles_str = (
+        args.styles
+        or get_config_value(yaml_config, "build", "styles")
+        or ",".join(styles_config.keys())
+    )
+    fonts_dir = args.fonts_dir or Path(get_config_value(yaml_config, "fonts_dir") or "fonts")
+    output_dir = args.output_dir or Path(
+        get_config_value(yaml_config, "build", "output_dir") or "output/fonts"
+    )
+    parallel = (
+        args.parallel
+        if args.parallel is not None
+        else get_config_value(yaml_config, "build", "parallel", default=1)
+    )
+
+    family_name = get_config_value(yaml_config, "font", "family_name") or "SarasaMonoTCEmoji"
+    version = get_config_value(yaml_config, "font", "version") or "1.0"
+
+    metadata = {
+        "author": get_config_value(yaml_config, "font", "author") or "",
+        "copyright": get_config_value(yaml_config, "font", "copyright") or "",
+        "description": get_config_value(yaml_config, "font", "description") or "",
+        "url": get_config_value(yaml_config, "font", "url") or "",
+        "license": get_config_value(yaml_config, "font", "license") or "",
+        "license_url": get_config_value(yaml_config, "font", "license_url") or "",
+    }
+
+    config = FontConfig(
+        family_name=family_name,
+        family_name_compact=family_name,
+        version=version,
+        emoji_width_multiplier=get_config_value(
+            yaml_config, "emoji", "emoji_width_multiplier", default=2
+        ),
+        skip_existing=get_config_value(
+            yaml_config, "emoji", "skip_existing", default=True
+        ),
+    )
+
+    styles = [s.strip() for s in styles_str.split(",")]
+    valid_styles = list(styles_config.keys())
+    for style in styles:
+        if style not in valid_styles:
+            print(f"Error: Invalid style '{style}'. Valid: {valid_styles}")
+            sys.exit(1)
+
+    # Validate font paths
+    font_paths: Dict[str, Dict[str, Any]] = {}
+    for style in styles:
+        style_cfg = styles_config[style]
+        base_font = style_cfg.get("base_font")
+        emoji_font = style_cfg.get("emoji_font")
+        display_name = style_cfg.get("display_name", style)
+
+        if not base_font or not emoji_font:
+            print(f"Error: Style '{style}' must have both 'base_font' and 'emoji_font'")
+            sys.exit(1)
+
+        base_path = fonts_dir / base_font
+        emoji_path = fonts_dir / emoji_font
+
+        if not base_path.exists():
+            print(f"Error: Base font not found: {base_path}")
+            print(f"  Download from: https://github.com/be5invis/Sarasa-Gothic/releases")
+            sys.exit(1)
+        if not emoji_path.exists():
+            print(f"Error: Emoji font not found: {emoji_path}")
+            print(f"  Download from: https://github.com/googlefonts/noto-emoji/releases")
+            sys.exit(1)
+
+        font_paths[style] = {
+            "base_font_path": base_path,
+            "emoji_font_path": emoji_path,
+            "display_name": display_name,
+        }
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"Building {config.family_name} v{config.version}")
+    print(f"Styles: {', '.join(styles)}")
+    print(f"Source: {fonts_dir}")
+    print(f"Output: {output_dir}")
+    print(f"Emoji width: {config.emoji_width_multiplier}x half-width")
+    print("Font mapping:")
+    for style in styles:
+        p = font_paths[style]
+        print(f"  {style}: {p['base_font_path'].name} + {p['emoji_font_path'].name}")
+
+    if parallel <= 1:
+        for style in styles:
+            p = font_paths[style]
+            build_single_font(
+                style, p["base_font_path"], p["emoji_font_path"],
+                p["display_name"], output_dir, config, metadata,
+            )
+    else:
+        with ProcessPoolExecutor(max_workers=parallel) as executor:
+            futures = {}
+            for style in styles:
+                p = font_paths[style]
+                future = executor.submit(
+                    build_single_font,
+                    style, p["base_font_path"], p["emoji_font_path"],
+                    p["display_name"], output_dir, config, metadata,
+                )
+                futures[future] = style
+
+            for future in as_completed(futures):
+                style = futures[future]
+                try:
+                    future.result()
+                except Exception as e:
+                    print(f"Error building {style}: {e}")
+                    raise
+
+    # Generate manifest for verify-emoji.html
+    manifest = {
+        "family_name": config.family_name,
+        "version": config.version,
+        "fonts": [],
+    }
+    for style in styles:
+        manifest["fonts"].append({
+            "style": style,
+            "display_name": font_paths[style]["display_name"],
+            "filename": f"{config.family_name_compact}-{style}.ttf",
+        })
+
+    manifest_path = output_dir / "fonts-manifest.json"
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+    print(f"\nGenerated manifest: {manifest_path}")
+    print(f"Build complete! Fonts saved to: {output_dir}")
+
+
+if __name__ == "__main__":
+    main()
