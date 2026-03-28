@@ -2,6 +2,21 @@
 
 **Sarasa Mono TC（更紗黑體繁中等寬）+ NotoColorEmoji — 嵌入式彩色 emoji**
 
+## 下載字體
+
+前往 [Releases](https://github.com/sspig0127/SarasaMonoTC-Emoji/releases) 下載最新版本：
+
+| 檔案 | 說明 |
+|------|------|
+| `SarasaMonoTCEmoji-Regular.ttf` | 一般 |
+| `SarasaMonoTCEmoji-Italic.ttf` | 斜體 |
+| `SarasaMonoTCEmoji-Bold.ttf` | 粗體 |
+| `SarasaMonoTCEmoji-BoldItalic.ttf` | 粗斜體 |
+
+下載所需字重的 `.ttf` 檔案，雙擊安裝即可。
+
+---
+
 ## 背景
 
 [Sarasa Gothic](https://github.com/be5invis/Sarasa-Gothic) 是優秀的 CJK 等寬字體，
@@ -33,9 +48,11 @@
 
 ---
 
-## 下載字體（必要前置步驟）
+## 自行建構
 
-### 1. Sarasa Mono TC（4 個 TTF）
+### 下載源字體
+
+#### 1. Sarasa Mono TC（4 個 TTF）
 
 前往 [Sarasa Gothic releases](https://github.com/be5invis/Sarasa-Gothic/releases) 下載最新版的：
 
@@ -53,28 +70,19 @@ fonts/
 └── SarasaMonoTC-BoldItalic.ttf
 ```
 
-### 2. NotoColorEmoji
+#### 2. NotoColorEmoji
 
-前往 [noto-emoji r	eleases](https://github.com/googlefonts/noto-emoji/releases) 下載：
+前往 [noto-emoji releases](https://github.com/googlefonts/noto-emoji/releases) 下載：
 
 ```
 NotoColorEmoji.ttf  →  放入 fonts/
 ```
 
----
-
-## 建構
+### 建構
 
 ```bash
 # 安裝依賴
 uv sync
-
-# 確認版權聲明（填入 config.yaml 的 copyright 欄位）
-python -c "
-from fontTools.ttLib import TTFont
-f = TTFont('fonts/SarasaMonoTC-Regular.ttf')
-[print(r.toUnicode()) for r in f['name'].names if r.nameID == 0]
-"
 
 # 建構全部 4 種字重
 uv run python build.py
@@ -100,7 +108,7 @@ output/fonts/
 
 ```bash
 # 基本功能驗證
-python -c "
+uv run python -c "
 from fontTools.ttLib import TTFont
 f = TTFont('output/fonts/SarasaMonoTCEmoji-Regular.ttf')
 assert 'CBDT' in f and 'CBLC' in f, 'Missing color tables'
@@ -110,8 +118,9 @@ for cp, name in [(0x1F600, '😀'), (0x1F525, '🔥'), (0x4E00, '一')]:
 print(f'OK — Total glyphs: {len(f.getGlyphOrder())}')
 "
 
-# 瀏覽器目視驗證（需先 build）
-open verify-emoji.html
+# 瀏覽器目視驗證（需先 build，再啟動本地 server）
+uv run python -m http.server 8765
+open http://localhost:8765/verify-emoji.html
 ```
 
 ---
@@ -122,6 +131,7 @@ open verify-emoji.html
 - **Emoji 寬度**：Runtime 偵測 Sarasa 的 half-width，emoji = 2× half-width（與 CJK 等寬）
 - **Emoji 範圍**：單一 codepoint（ZWJ 序列/旗幟等複雜 emoji 留待 v2）
 - **工具**：純 Python + fonttools，無需 FontForge 或 FontLab
+- **OTS 相容**：`recalcBBoxes=False` 保留 Sarasa 原始 glyph raw bytes，通過 OTS 9.2 驗證
 
 ---
 
@@ -131,4 +141,3 @@ open verify-emoji.html
 - ✅ 可自由使用、修改、再發行
 - ✅ 可與軟體捆綁發行
 - ❌ 不可單獨販售
-- ❌ 衍生作品不可使用 `Source`（Adobe Reserved Font Name）
