@@ -257,6 +257,43 @@ def _force_decompile_cbdt(emoji_font: TTFont) -> None:
                         _ = glyph_data.data  # trigger bitmap decompile
 
 
+def _scale_glyph(glyph, scale: float) -> None:
+    """Scale a TrueType glyph's coordinates in-place.
+
+    Required when the source emoji font's UPM differs from the target font's UPM
+    (e.g. Noto Emoji uses UPM 2048, Sarasa uses UPM 1000).  Without scaling,
+    emoji glyphs appear ~2× too large because their coordinates are in the larger
+    unit space but rendered against the target font's smaller metrics.
+
+    Glyph must already be expanded (decompiled) before calling this function.
+
+    Args:
+        glyph: Expanded TTGlyph object to scale in-place
+        scale: Scale factor (target_upm / source_upm)
+    """
+    if abs(scale - 1.0) < 1e-6:
+        return  # no-op if same UPM
+
+    from fontTools.misc.roundTools import otRound
+
+    if glyph.numberOfContours > 0:
+        # Simple glyph: scale all coordinate points
+        glyph.coordinates.scale((scale, scale))
+        # calcBounds() may return numpy floats; TrueType glyph header fields
+        # (xMin/yMin/xMax/yMax) are packed as int16 — must be rounded integers.
+        bounds = glyph.coordinates.calcBounds()
+        if bounds is not None:
+            glyph.xMin = otRound(bounds[0])
+            glyph.yMin = otRound(bounds[1])
+            glyph.xMax = otRound(bounds[2])
+            glyph.yMax = otRound(bounds[3])
+    elif glyph.numberOfContours < 0 and hasattr(glyph, "components"):
+        # Composite glyph: scale component translation offsets
+        for comp in glyph.components:
+            comp.x = otRound(comp.x * scale)
+            comp.y = otRound(comp.y * scale)
+
+
 def _collect_glyph_deps(
     emoji_font: TTFont,
     target_names: set[str],
@@ -371,6 +408,15 @@ def merge_emoji_lite(
         f"(name conflicts: {name_conflicts})"
     )
 
+    # Calculate UPM scale: Noto Emoji uses UPM 2048, Sarasa uses UPM 1000.
+    # Without scaling, emoji coordinates are ~2× too large in the target font's
+    # unit space and will render significantly taller than surrounding text.
+    base_upm = base_font["head"].unitsPerEm
+    emoji_upm = emoji_font["head"].unitsPerEm
+    upm_scale = base_upm / emoji_upm
+    if abs(upm_scale - 1.0) > 1e-6:
+        print(f"  UPM scale: {emoji_upm} → {base_upm} (×{upm_scale:.4f})")
+
     # Access glyf BEFORE setGlyphOrder to avoid OTS flag-encoding issue
     # (same reasoning as merge_emoji — see inline comment there)
     base_glyf = base_font["glyf"]
@@ -381,19 +427,22 @@ def merge_emoji_lite(
     new_order = original_order + emoji_glyphs_to_add
     base_font.setGlyphOrder(new_order)
 
-    # Step 5: copy glyf outlines from Noto Emoji into base font
+    # Step 5: copy glyf outlines from Noto Emoji into base font, scaled to target UPM.
+    # _collect_glyph_deps() already called glyph.expand(), so src is fully decompiled.
     copied = 0
     for glyph_name in emoji_glyphs_to_add:
         if glyph_name not in base_glyf.glyphs:
             src = emoji_glyf.glyphs.get(glyph_name)
             if src is not None:
-                base_glyf[glyph_name] = copy.deepcopy(src)
+                glyph_copy = copy.deepcopy(src)
+                _scale_glyph(glyph_copy, upm_scale)
+                base_glyf[glyph_name] = glyph_copy
                 copied += 1
             else:
                 empty = TTGlyph()
                 empty.numberOfContours = 0
                 base_glyf[glyph_name] = empty
-    print(f"  Copied {copied} glyph outlines from emoji font")
+    print(f"  Copied {copied} glyph outlines from emoji font (scaled ×{upm_scale:.4f})")
 
     # Step 6: update hmtx (and vmtx if present)
     # IMPORTANT: access vmtx BEFORE updating maxp.numGlyphs.
