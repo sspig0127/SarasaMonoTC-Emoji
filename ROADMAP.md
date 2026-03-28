@@ -131,5 +131,5 @@
 |------|------|------|
 | CBLC filtering 可能移除有效 emoji | `emoji_merge.py:181-237` | 名稱衝突時捨棄 color bitmap，以 Sarasa outline 代替 |
 | ~~Mac platform name 移除時機~~ | `build.py` | ✅ 已修正（v1.3）：在 `update_font_names()` 之後再次呼叫 `_strip_mac_name_records` |
-| config 型別未驗證 | `build.py:42-51` | `get_config_value()` 不驗證型別，錯誤訊息不友善 |
-| `emoji_width_multiplier` 無範圍檢查 | `src/config.py` | 允許無效值（< 1 或 > 4） |
+| ~~config 型別未驗證~~ | `build.py` | ✅ 已修正：新增 `get_config_int()` helper，`parallel` 與 `emoji_width_multiplier` 讀取時驗證型別與範圍 |
+| ~~`emoji_width_multiplier` 無範圍檢查~~ | `src/config.py` | ✅ 已修正：`FontConfig.__post_init__` 驗證型別為 int 且範圍在 [1, 4] |

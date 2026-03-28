@@ -52,6 +52,36 @@ def get_config_value(yaml_config: Dict[str, Any], *keys: str, default: Any = Non
     return value
 
 
+def get_config_int(
+    yaml_config: Dict[str, Any],
+    *keys: str,
+    default: int,
+    min_val: int | None = None,
+    max_val: int | None = None,
+) -> int:
+    """Like get_config_value but validates the result is an integer.
+
+    Raises SystemExit with a friendly message if the value is missing the
+    required type or is outside the allowed range — catches config.yaml typos
+    before they produce cryptic errors deep in the build pipeline.
+    """
+    value = get_config_value(yaml_config, *keys, default=default)
+    key_path = ".".join(keys)
+    if not isinstance(value, int):
+        print(
+            f"Error: config.yaml '{key_path}' must be an integer, "
+            f"got {value!r} ({type(value).__name__})"
+        )
+        sys.exit(1)
+    if min_val is not None and value < min_val:
+        print(f"Error: config.yaml '{key_path}' must be >= {min_val}, got {value}")
+        sys.exit(1)
+    if max_val is not None and value > max_val:
+        print(f"Error: config.yaml '{key_path}' must be <= {max_val}, got {value}")
+        sys.exit(1)
+    return value
+
+
 def _cleanup_partial_outputs(
     output_dir: Path, family_name_compact: str, styles: list
 ) -> None:
@@ -203,7 +233,7 @@ Configuration priority: CLI args > config.yaml > defaults
     parallel = (
         args.parallel
         if args.parallel is not None
-        else get_config_value(yaml_config, "build", "parallel", default=1)
+        else get_config_int(yaml_config, "build", "parallel", default=1, min_val=1)
     )
 
     is_lite = args.lite
@@ -242,8 +272,8 @@ Configuration priority: CLI args > config.yaml > defaults
         family_name=family_name,
         family_name_compact=family_name,
         version=version,
-        emoji_width_multiplier=get_config_value(
-            yaml_config, "emoji", "emoji_width_multiplier", default=2
+        emoji_width_multiplier=get_config_int(
+            yaml_config, "emoji", "emoji_width_multiplier", default=2, min_val=1, max_val=4
         ),
         skip_existing=get_config_value(
             yaml_config, "emoji", "skip_existing", default=True

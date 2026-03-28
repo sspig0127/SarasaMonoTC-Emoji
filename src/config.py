@@ -2,6 +2,9 @@
 
 from dataclasses import dataclass
 
+_EMOJI_WIDTH_MIN = 1
+_EMOJI_WIDTH_MAX = 4
+
 
 @dataclass
 class FontConfig:
@@ -19,3 +22,15 @@ class FontConfig:
     # Whether to skip codepoints already present in base font
     # Prevents overwriting Sarasa's existing symbol glyphs
     skip_existing: bool = True
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.emoji_width_multiplier, int):
+            raise TypeError(
+                f"emoji_width_multiplier must be an int, "
+                f"got {self.emoji_width_multiplier!r} ({type(self.emoji_width_multiplier).__name__})"
+            )
+        if not (_EMOJI_WIDTH_MIN <= self.emoji_width_multiplier <= _EMOJI_WIDTH_MAX):
+            raise ValueError(
+                f"emoji_width_multiplier must be between {_EMOJI_WIDTH_MIN} and {_EMOJI_WIDTH_MAX}, "
+                f"got {self.emoji_width_multiplier}"
+            )
