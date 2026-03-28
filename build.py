@@ -28,7 +28,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import FontConfig
-from src.emoji_merge import merge_emoji, merge_emoji_lite, detect_font_widths
+from src.emoji_merge import merge_emoji, merge_emoji_lite, detect_font_widths, _strip_mac_name_records
 from src.utils import update_font_names, verify_glyph_width
 
 
@@ -109,6 +109,10 @@ def build_single_font(
         license_desc=metadata.get("license", ""),
         license_url=metadata.get("license_url", ""),
     )
+    # update_font_names() re-introduces Mac platform (platformID=1) name records
+    # via set_font_name(..., mac=True). Strip them again so the final font only
+    # contains Windows Unicode records (platformID=3), which all modern systems use.
+    _strip_mac_name_records(merged_font)
 
     # Verify glyph widths (detect from font at runtime)
     print("  Verifying glyph widths...")

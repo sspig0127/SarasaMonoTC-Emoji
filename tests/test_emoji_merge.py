@@ -1,0 +1,236 @@
+"""Unit tests for src/emoji_merge.py core functions.
+
+Test groups:
+  - _scale_glyph: pure logic, always runs (no font files needed)
+  - detect_font_widths: requires Sarasa source font
+  - get_emoji_cmap: requires any glyf emoji font (NotoEmoji[wght].ttf available in CI)
+  - _collect_glyph_deps: requires any glyf emoji font
+"""
+
+import array
+
+import pytest
+from fontTools.ttLib.tables._g_l_y_f import Glyph, GlyphCoordinates, GlyphComponent
+
+from src.emoji_merge import (
+    _collect_glyph_deps,
+    _scale_glyph,
+    detect_font_widths,
+    get_emoji_cmap,
+)
+
+_INT16_MIN = -32768
+_INT16_MAX = 32767
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _simple_glyph(coords: list[tuple[int, int]]) -> Glyph:
+    """Build a minimal simple (non-composite) TTGlyph."""
+    g = Glyph()
+    g.numberOfContours = 1
+    g.coordinates = GlyphCoordinates(coords)
+    g.flags = array.array("B", [1] * len(coords))
+    g.endPtsOfContours = [len(coords) - 1]
+    bounds = g.coordinates.calcBounds()
+    g.xMin, g.yMin, g.xMax, g.yMax = int(bounds[0]), int(bounds[1]), int(bounds[2]), int(bounds[3])
+    return g
+
+
+def _composite_glyph(components: list[tuple[str, int, int]]) -> Glyph:
+    """Build a minimal composite TTGlyph."""
+    g = Glyph()
+    g.numberOfContours = -1
+    g.components = []
+    for name, x, y in components:
+        comp = GlyphComponent()
+        comp.glyphName = name
+        comp.x = x
+        comp.y = y
+        comp.flags = 0
+    g.components = []
+    for name, x, y in components:
+        comp = GlyphComponent()
+        comp.glyphName = name
+        comp.x = x
+        comp.y = y
+        comp.flags = 0
+        g.components.append(comp)
+    return g
+
+
+# ---------------------------------------------------------------------------
+# _scale_glyph — pure logic tests (always run)
+# ---------------------------------------------------------------------------
+
+class TestScaleGlyph:
+    def test_noop_when_scale_is_one(self):
+        """scale=1.0 should not modify the glyph at all."""
+        g = _simple_glyph([(100, 200), (300, 400)])
+        original_coords = list(g.coordinates)
+        _scale_glyph(g, 1.0)
+        assert list(g.coordinates) == original_coords
+        assert g.xMin == 100
+        assert g.yMax == 400
+
+    def test_simple_glyph_scales_coordinates(self):
+        """Simple glyph coordinates should be multiplied by the scale factor."""
+        g = _simple_glyph([(0, 0), (1000, 2000)])
+        _scale_glyph(g, 0.5)
+        coords = list(g.coordinates)
+        assert coords[0] == (0, 0)
+        assert coords[1] == (500, 1000)
+
+    def test_simple_glyph_bbox_is_integer(self):
+        """After scaling, xMin/yMin/xMax/yMax must be integers (int16-packable)."""
+        g = _simple_glyph([(100, 200), (300, 400)])
+        _scale_glyph(g, 1000 / 2048)  # realistic Noto→Sarasa scale
+        assert isinstance(g.xMin, int)
+        assert isinstance(g.yMin, int)
+        assert isinstance(g.xMax, int)
+        assert isinstance(g.yMax, int)
+
+    def test_simple_glyph_bbox_within_int16(self):
+        """Scaled bbox values for typical emoji coords must fit in int16."""
+        # Noto Emoji UPM=2048; typical glyph spans (0,0)→(1800,1800)
+        g = _simple_glyph([(0, 0), (1800, 1800)])
+        _scale_glyph(g, 1000 / 2048)
+        assert _INT16_MIN <= g.xMin <= _INT16_MAX
+        assert _INT16_MIN <= g.yMin <= _INT16_MAX
+        assert _INT16_MIN <= g.xMax <= _INT16_MAX
+        assert _INT16_MIN <= g.yMax <= _INT16_MAX
+
+    def test_simple_glyph_upm_2048_to_1000(self):
+        """Realistic Noto→Sarasa scale: bbox must shrink by ~half."""
+        g = _simple_glyph([(0, -420), (2048, 1638)])
+        _scale_glyph(g, 1000 / 2048)
+        # exact rounded values: 0, -205, 1000, 800
+        assert g.xMin == 0
+        assert g.yMin == -205
+        assert g.xMax == 1000
+        assert g.yMax == 800
+
+    def test_composite_glyph_scales_offsets(self):
+        """Composite glyph component offsets should be scaled and rounded."""
+        g = _composite_glyph([("base", 100, 200), ("accent", 300, 400)])
+        _scale_glyph(g, 0.5)
+        assert g.components[0].x == 50
+        assert g.components[0].y == 100
+        assert g.components[1].x == 150
+        assert g.components[1].y == 200
+
+    def test_composite_glyph_offsets_are_integer(self):
+        """Composite component offsets must be rounded integers after scaling."""
+        g = _composite_glyph([("base", 100, 200)])
+        _scale_glyph(g, 1000 / 2048)
+        assert isinstance(g.components[0].x, int)
+        assert isinstance(g.components[0].y, int)
+
+    def test_scale_near_one_treated_as_noop(self):
+        """Scale within 1e-6 of 1.0 is treated as no-op."""
+        g = _simple_glyph([(100, 200), (300, 400)])
+        original_coords = list(g.coordinates)
+        _scale_glyph(g, 1.0 + 5e-7)
+        assert list(g.coordinates) == original_coords
+
+
+# ---------------------------------------------------------------------------
+# detect_font_widths — requires Sarasa source font
+# ---------------------------------------------------------------------------
+
+class TestDetectFontWidths:
+    def test_sarasa_returns_500_1000(self, sarasa_font):
+        """Sarasa Mono TC UPM=1000 → half=500, full=1000."""
+        half, full = detect_font_widths(sarasa_font)
+        assert half == 500
+        assert full == 1000
+
+    def test_ratio_is_2_to_1(self, sarasa_font):
+        """Detected widths must always satisfy full == 2 * half."""
+        half, full = detect_font_widths(sarasa_font)
+        assert full == 2 * half
+
+
+# ---------------------------------------------------------------------------
+# get_emoji_cmap — requires NotoEmoji[wght].ttf (available in CI)
+# ---------------------------------------------------------------------------
+
+class TestGetEmojiCmap:
+    def test_excludes_ascii(self, noto_emoji_font):
+        """No ASCII codepoints (U+0000–U+00FF) should appear in the result."""
+        cmap = get_emoji_cmap(noto_emoji_font)
+        ascii_in_result = {cp for cp in cmap if 0x0000 <= cp <= 0x00FF}
+        assert ascii_in_result == set(), f"ASCII codepoints found: {ascii_in_result}"
+
+    def test_excludes_variation_selectors(self, noto_emoji_font):
+        """Variation selectors (U+FE00–U+FE0F) must be excluded."""
+        cmap = get_emoji_cmap(noto_emoji_font)
+        vs_in_result = {cp for cp in cmap if 0xFE00 <= cp <= 0xFE0F}
+        assert vs_in_result == set()
+
+    def test_excludes_variation_selectors_supplement(self, noto_emoji_font):
+        """Variation Selectors Supplement (U+E0100–U+E01EF) must be excluded."""
+        cmap = get_emoji_cmap(noto_emoji_font)
+        vss_in_result = {cp for cp in cmap if 0xE0100 <= cp <= 0xE01EF}
+        assert vss_in_result == set()
+
+    def test_has_common_emoji(self, noto_emoji_font):
+        """Common emoji codepoints must be present."""
+        cmap = get_emoji_cmap(noto_emoji_font)
+        for cp, name in [(0x1F600, "😀"), (0x1F525, "🔥"), (0x2764, "❤")]:
+            assert cp in cmap, f"Missing U+{cp:04X} {name}"
+
+    def test_returns_nonempty_dict(self, noto_emoji_font):
+        """Result must contain a significant number of emoji."""
+        cmap = get_emoji_cmap(noto_emoji_font)
+        assert len(cmap) > 500, f"Expected >500 emoji, got {len(cmap)}"
+
+
+# ---------------------------------------------------------------------------
+# _collect_glyph_deps — requires NotoEmoji[wght].ttf (available in CI)
+# ---------------------------------------------------------------------------
+
+class TestCollectGlyphDeps:
+    def test_components_precede_composites(self, noto_emoji_font):
+        """Component glyphs must appear before any composite that references them."""
+        cmap = get_emoji_cmap(noto_emoji_font)
+        target_names = set(cmap.values())
+        result = _collect_glyph_deps(noto_emoji_font, target_names, set())
+
+        emoji_glyf = noto_emoji_font.get("glyf")
+        if emoji_glyf is None:
+            pytest.skip("Emoji font has no glyf table")
+
+        position = {name: i for i, name in enumerate(result)}
+        for name in result:
+            if name not in emoji_glyf.glyphs:
+                continue
+            glyph = emoji_glyf[name]
+            glyph.expand(emoji_glyf)
+            if glyph.numberOfContours < 0 and hasattr(glyph, "components"):
+                for comp in glyph.components:
+                    comp_name = comp.glyphName
+                    if comp_name in position and name in position:
+                        assert position[comp_name] < position[name], (
+                            f"Component '{comp_name}' (pos {position[comp_name]}) "
+                            f"must precede composite '{name}' (pos {position[name]})"
+                        )
+
+    def test_excludes_base_existing_names(self, noto_emoji_font):
+        """Glyphs already in base font must not appear in result."""
+        cmap = get_emoji_cmap(noto_emoji_font)
+        target_names = set(cmap.values())
+        # Mark all target names as already existing
+        result = _collect_glyph_deps(noto_emoji_font, target_names, target_names)
+        assert result == [], f"Expected empty result, got {len(result)} glyphs"
+
+    def test_result_is_subset_of_emoji_glyphs(self, noto_emoji_font):
+        """Every returned name must exist in the emoji font."""
+        cmap = get_emoji_cmap(noto_emoji_font)
+        target_names = set(cmap.values())
+        result = _collect_glyph_deps(noto_emoji_font, target_names, set())
+        emoji_glyph_names = set(noto_emoji_font.getGlyphOrder())
+        for name in result:
+            assert name in emoji_glyph_names, f"Unknown glyph name: {name}"

@@ -1,0 +1,35 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.10
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Download NotoEmoji[wght].ttf
+        # ~1.9 MB monochrome variable font; required for get_emoji_cmap and
+        # _collect_glyph_deps tests.  Sarasa fonts are not downloaded (too large);
+        # tests that require them are skipped automatically via conftest.py.
+        run: |
+          mkdir -p fonts
+          curl -L -o "fonts/NotoEmoji[wght].ttf" \
+            "https://github.com/google/fonts/raw/main/ofl/notoemoji/NotoEmoji%5Bwght%5D.ttf"
+
+      - name: Run tests
+        run: uv run pytest tests/ -v --tb=short
