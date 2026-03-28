@@ -56,3 +56,15 @@ emoji:
   emoji_width_multiplier: 2
   # Skip codepoints already in base font to preserve Sarasa's existing glyphs
   skip_existing: true
+
+# Lite variant — monochrome glyf emoji
+# Emoji source: Noto Emoji variable font (google/fonts repo, SIL OFL)
+#   Download: https://github.com/google/fonts/raw/main/ofl/notoemoji/NotoEmoji%5Bwght%5D.ttf
+#   Place at: fonts/NotoEmoji[wght].ttf  (size: ~1.9 MB)
+# Benefits: ~60% smaller files, full Chromium/VHS/xterm.js compatibility,
+#           emoji render in terminal foreground color, syncs with Unicode releases yearly (September)
+lite:
+  family_name: "SarasaMonoTCEmojiLite"
+  emoji_font: "NotoEmoji[wght].ttf"
+  output_dir: "output/fonts-lite"
+  description: "Sarasa Mono TC (更紗黑體繁中等寬) with embedded Noto Emoji — monochrome emoji for VHS recording and lightweight terminals"

@@ -257,6 +257,185 @@ def _force_decompile_cbdt(emoji_font: TTFont) -> None:
                         _ = glyph_data.data  # trigger bitmap decompile
 
 
+def _collect_glyph_deps(
+    emoji_font: TTFont,
+    target_names: set[str],
+    base_existing_names: set[str],
+) -> list[str]:
+    """Collect emoji glyphs including composite dependencies.
+
+    For composite glyphs, component glyphs are visited first so their glyph
+    IDs are always lower than (and thus valid references for) the composites.
+
+    Args:
+        emoji_font: Source emoji font (glyf-based, e.g. Noto Emoji monochrome)
+        target_names: Glyph names needed from cmap (name conflicts already removed)
+        base_existing_names: Names already in base font (skip these)
+
+    Returns:
+        Ordered list of glyph names to add (components before composites)
+    """
+    emoji_glyf = emoji_font.get("glyf")
+    if emoji_glyf is None:
+        return [n for n in target_names if n not in base_existing_names]
+
+    result: list[str] = []
+    seen = set(base_existing_names)
+
+    def visit(name: str) -> None:
+        if name in seen:
+            return
+        seen.add(name)
+        if name not in emoji_glyf.glyphs:
+            return
+        glyph = emoji_glyf[name]
+        glyph.expand(emoji_glyf)  # decompile (no-op if already expanded)
+        if glyph.numberOfContours < 0 and hasattr(glyph, "components"):
+            for comp in glyph.components:
+                visit(comp.glyphName)
+        result.append(name)
+
+    for name in target_names:
+        visit(name)
+
+    return result
+
+
+def merge_emoji_lite(
+    base_font_path: str,
+    emoji_font_path: str,
+    config: FontConfig,
+) -> TTFont:
+    """Merge Noto Emoji glyf outlines (monochrome) into SarasaMonoTC.
+
+    Unlike merge_emoji() which uses CBDT/CBLC color bitmap tables, this
+    function copies glyf TrueType outlines directly — no bitmap tables needed.
+
+    Advantages over color variant:
+    - Smaller output file (~60% smaller; no bitmap data)
+    - Full Chromium/xterm.js compatibility (required for VHS recording)
+    - Emoji render in the terminal's foreground text color
+    - Works on every renderer that supports TrueType outlines
+
+    Args:
+        base_font_path: Path to SarasaMonoTC-{Style}.ttf
+        emoji_font_path: Path to NotoEmoji-Regular.ttf (glyf-based font)
+        config: FontConfig object
+
+    Returns:
+        Merged TTFont object (caller must call .save() and .close())
+    """
+    print(f"  Loading base font: {base_font_path}")
+    base_font = TTFont(base_font_path, lazy=True, recalcBBoxes=False)
+    print(f"  Loading emoji font: {emoji_font_path}")
+    emoji_font = TTFont(emoji_font_path)
+
+    # Step 1: detect widths
+    half_width, full_width = detect_font_widths(base_font)
+    emoji_width = half_width * config.emoji_width_multiplier
+    print(f"  Detected widths — half: {half_width}, full: {full_width}, emoji: {emoji_width}")
+
+    # Step 2: extract emoji cmap
+    emoji_cmap = get_emoji_cmap(emoji_font)
+    print(f"  Emoji cmap entries: {len(emoji_cmap)}")
+
+    # Step 3: filter existing codepoints
+    if config.skip_existing:
+        base_cmap = base_font["cmap"].getBestCmap() or {}
+        before = len(emoji_cmap)
+        emoji_cmap = {cp: name for cp, name in emoji_cmap.items() if cp not in base_cmap}
+        print(f"  Filtered existing codepoints: {before} → {len(emoji_cmap)}")
+
+    if not emoji_cmap:
+        print("  No new emoji to add.")
+        emoji_font.close()
+        return base_font
+
+    if "glyf" not in emoji_font:
+        raise ValueError(
+            f"Emoji font '{emoji_font_path}' has no glyf table. "
+            "Lite variant requires a glyf-based font (e.g. NotoEmoji-Regular.ttf). "
+            "Use NotoColorEmoji.ttf with build.py (without --lite) for the color variant."
+        )
+
+    # Collect glyph names that need to be added (unique cmap values, no name conflicts)
+    base_existing_names = set(base_font.getGlyphOrder())
+    target_names = {name for name in emoji_cmap.values() if name not in base_existing_names}
+
+    # Expand with composite dependencies (components must precede composites)
+    emoji_glyphs_to_add = _collect_glyph_deps(emoji_font, target_names, base_existing_names)
+
+    name_conflicts = len({n for n in emoji_cmap.values()}) - len(target_names)
+    print(
+        f"  Emoji glyphs to add: {len(emoji_glyphs_to_add)} "
+        f"(name conflicts: {name_conflicts})"
+    )
+
+    # Access glyf BEFORE setGlyphOrder to avoid OTS flag-encoding issue
+    # (same reasoning as merge_emoji — see inline comment there)
+    base_glyf = base_font["glyf"]
+    emoji_glyf = emoji_font["glyf"]
+
+    # Step 4: append emoji glyphs to glyph order
+    original_order = base_font.getGlyphOrder()
+    new_order = original_order + emoji_glyphs_to_add
+    base_font.setGlyphOrder(new_order)
+
+    # Step 5: copy glyf outlines from Noto Emoji into base font
+    copied = 0
+    for glyph_name in emoji_glyphs_to_add:
+        if glyph_name not in base_glyf.glyphs:
+            src = emoji_glyf.glyphs.get(glyph_name)
+            if src is not None:
+                base_glyf[glyph_name] = copy.deepcopy(src)
+                copied += 1
+            else:
+                empty = TTGlyph()
+                empty.numberOfContours = 0
+                base_glyf[glyph_name] = empty
+    print(f"  Copied {copied} glyph outlines from emoji font")
+
+    # Step 6: update hmtx (and vmtx if present)
+    # IMPORTANT: access vmtx BEFORE updating maxp.numGlyphs.
+    # vmtx.decompile() reads maxp.numGlyphs to compute expected byte count.
+    # If maxp is updated first, fonttools expects more bytes than the raw data
+    # provides (old count) and raises TTLibError.  Same ordering as merge_emoji().
+    base_hmtx = base_font["hmtx"]
+    for glyph_name in emoji_glyphs_to_add:
+        if glyph_name not in base_hmtx.metrics:
+            base_hmtx.metrics[glyph_name] = (emoji_width, 0)
+
+    if "vmtx" in base_font:
+        base_vmtx = base_font["vmtx"]
+        for glyph_name in emoji_glyphs_to_add:
+            if glyph_name not in base_vmtx.metrics:
+                base_vmtx.metrics[glyph_name] = (emoji_width, 0)
+
+    # Update maxp AFTER all table accesses (avoids vmtx decompile byte-count mismatch)
+    base_font["maxp"].numGlyphs = len(new_order)
+
+    # Step 7: update cmap
+    added_set = set(emoji_glyphs_to_add)
+    updated = _update_cmap(base_font, emoji_cmap, added_set)
+    print(f"  cmap entries added: {updated}")
+
+    # Step 8: update hhea and OS/2
+    if "hhea" in base_font:
+        base_font["hhea"].advanceWidthMax = max(
+            base_font["hhea"].advanceWidthMax, emoji_width
+        )
+        base_font["hhea"].numberOfHMetrics = len(base_hmtx.metrics)
+
+    from .utils import merge_os2_ranges
+    merge_os2_ranges(base_font, emoji_font)
+
+    _strip_mac_name_records(base_font)
+
+    emoji_font.close()
+    print(f"  Total glyphs after merge: {len(base_font.getGlyphOrder())}")
+    return base_font
+
+
 def merge_emoji(
     base_font_path: str,
     emoji_font_path: str,
