@@ -74,13 +74,13 @@ def update_font_names(
 
     if copyright_str:
         set_font_name(font, copyright_str, 0)
-    set_font_name(font, family_name, 1)
-    set_font_name(font, style_name, 2)
+    set_font_name(font, family_name, 1, mac=True)
+    set_font_name(font, style_name, 2, mac=True)
     set_font_name(font, unique_id, 3)
-    set_font_name(font, full_name, 4)
+    set_font_name(font, full_name, 4, mac=True)
     set_font_name(font, version_str, 5)
-    set_font_name(font, postscript_name, 6)
-    set_font_name(font, "", 7)
+    set_font_name(font, postscript_name, 6, mac=True)
+    font["name"].removeNames(nameID=7)
     if author:
         set_font_name(font, author, 8)
     if author:
