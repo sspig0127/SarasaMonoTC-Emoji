@@ -42,10 +42,10 @@
 - [x] 若縮放後超界，raise `ValueError` 並說明原因
 - [x] 在 `merge_emoji_lite()` 加縮放結果摘要 log（yMin/yMax 樣本）
 
-#### T3 — verify-emoji.html 加 Lite 切換
-- [ ] 加入變體切換器（Color / Lite 下拉選單）
-- [ ] Lite 模式下切換至 `output/fonts-lite/` 路徑
-- [ ] 加入「emoji 視覺尺寸對比文字」測試 case
+#### T3 — verify-emoji.html 加 Lite 切換 ✅
+- [x] 加入變體切換器（Color / Lite 下拉選單）
+- [x] Lite 模式下切換至 `output/fonts-lite/` 路徑
+- [x] 加入「emoji 視覺尺寸對比文字」測試 case
 
 #### T4 — 建構健壯性
 - [ ] 平行建構失敗時清理 partial output

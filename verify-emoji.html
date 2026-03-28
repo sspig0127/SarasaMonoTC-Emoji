@@ -16,12 +16,23 @@
   .status { padding: 8px 12px; border-radius: 6px; font-size: 13px; display: inline-block; margin-top: 8px; }
   .ok { background: #a6e3a1; color: #1e1e2e; }
   .err { background: #f38ba8; color: #1e1e2e; }
+  .variant-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-family: monospace; margin-left: 8px; vertical-align: middle; }
+  .badge-color { background: #fab387; color: #1e1e2e; }
+  .badge-lite  { background: #89dceb; color: #1e1e2e; }
+  .size-compare { font-family: var(--font); font-size: 18px; background: #181825; padding: 16px 20px; border-radius: 8px; margin: 8px 0; }
+  .size-compare p { margin: 0; line-height: 2.2; }
 </style>
 </head>
 <body>
 
-<h1>SarasaMonoTCEmoji — 渲染驗證</h1>
-<p>選擇字重：
+<h1 id="pageTitle">SarasaMonoTCEmoji — 渲染驗證</h1>
+<p>
+  變體：
+  <select id="variantSelect" onchange="switchVariant()">
+    <option value="color">Color（彩色 CBDT/CBLC）</option>
+    <option value="lite">Lite（單色 glyf）</option>
+  </select>
+  &nbsp; 字重：
   <select id="styleSelect" onchange="applyStyle()">
     <option value="Regular">Regular</option>
     <option value="Italic">Italic</option>
@@ -37,7 +48,7 @@
 ABABABABABABAB
 一一😀😀二二😂</div>
 
-<h2>2. 常用 emoji 彩色渲染</h2>
+<h2>2. 常用 emoji 渲染</h2>
 <div class="grid">
   <div>
     <div class="label">表情</div>
@@ -74,7 +85,7 @@ ABABABABABABAB
 git commit -m "feat: 加入彩色 emoji 支援 🎨"</div>
 
 <h2>4. Emoji Unicode 範圍覆蓋測試</h2>
-<div class="label">各 Unicode 區塊抽樣（應顯示彩色，非豆腐）</div>
+<div class="label">各 Unicode 區塊抽樣（應顯示正確字符，非豆腐）</div>
 <div class="mono">U+2600 ☀️☁️⛅🌤️🌈⚡❄️🌊
 U+1F300 🌍🌏🌕🌙⭐🌟💫✨
 U+1F600 😀😂🤔😎🥳🤩😴🤐
@@ -82,16 +93,57 @@ U+1F680 🚀✈️🚂🚗🛳️🏍️🛺🚁
 U+1F900 🤯🥺🤮🥴🤠🥸🤡👹
 U+1FA70 🧋🫂🪄🪅🪆🎭🎪🪩</div>
 
+<h2>5. Emoji 視覺尺寸對比文字</h2>
+<div class="label">emoji 高度應與相鄰文字相近，不應偏大或偏小（Lite 變體 UPM 縮放驗證）</div>
+<div class="size-compare">
+  <p>A😀B &nbsp; X😂Y &nbsp; P🔥Q &nbsp; T⭐U &nbsp; W🎉Z</p>
+  <p>文字😀Text &nbsp; 中文😂English &nbsp; 字型🔥Font</p>
+  <p>一😀一 &nbsp; 二😂二 &nbsp; 三🔥三 &nbsp; 四⭐四 &nbsp; 五🎉五</p>
+  <p>abc def 😀 ghi jkl &nbsp; 一二三 😂 四五六</p>
+</div>
+<div class="label" style="margin-top:8px">
+  ✓ 正常：emoji 與文字等高 &nbsp;|&nbsp;
+  ✗ 異常：emoji 明顯高於文字（UPM 縮放失效），或 emoji 顯示為空白（字體未含此 codepoint）
+</div>
+
 <script>
+const VARIANTS = {
+  color: {
+    dir: 'output/fonts',
+    fontFamily: 'SarasaMonoTCEmoji',
+    badgeClass: 'badge-color',
+    badgeText: 'Color',
+  },
+  lite: {
+    dir: 'output/fonts-lite',
+    fontFamily: 'SarasaMonoTCEmojiLite',
+    badgeClass: 'badge-lite',
+    badgeText: 'Lite',
+  },
+};
+
+let currentVariant = 'color';
+
+function updateFontFamily() {
+  const family = VARIANTS[currentVariant].fontFamily;
+  document.documentElement.style.setProperty(
+    '--font', `'${family}', 'Sarasa Mono TC', monospace`
+  );
+}
+
 async function loadFonts() {
+  const cfg = VARIANTS[currentVariant];
+  const statusEl = document.getElementById('loadStatus');
+  statusEl.innerHTML = '';
+
   let manifest;
   try {
-    const resp = await fetch('output/fonts/fonts-manifest.json');
+    const resp = await fetch(`${cfg.dir}/fonts-manifest.json`);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     manifest = await resp.json();
   } catch(e) {
-    document.getElementById('loadStatus').innerHTML =
-      `<span class="status err">✗ 找不到 output/fonts/fonts-manifest.json，請先執行 build.py</span>`;
+    statusEl.innerHTML =
+      `<span class="status err">✗ 找不到 ${cfg.dir}/fonts-manifest.json，請先執行 build.py${currentVariant === 'lite' ? ' --lite' : ''}</span>`;
     return;
   }
 
@@ -100,21 +152,26 @@ async function loadFonts() {
     `<option value="${f.style}" data-file="${f.filename}">${f.display_name}</option>`
   ).join('');
 
+  updateFontFamily();
+
   try {
     await loadFont(manifest.fonts[0]);
-    document.getElementById('loadStatus').innerHTML =
-      `<span class="status ok">✓ ${manifest.family_name} v${manifest.version} 載入成功</span>`;
+    const v = VARIANTS[currentVariant];
+    statusEl.innerHTML =
+      `<span class="status ok">✓ ${manifest.family_name} v${manifest.version} 載入成功</span>` +
+      `<span class="variant-badge ${v.badgeClass}">${v.badgeText}</span>`;
   } catch(e) {
-    document.getElementById('loadStatus').innerHTML =
-      `<span class="status err">⚠ 字體載入失敗（${e.message}）— 此瀏覽器可能不支援 CBDT/CBLC 格式，請改用 Chrome</span>`;
+    statusEl.innerHTML =
+      `<span class="status err">⚠ 字體載入失敗（${e.message}）— Color 變體需 Chrome（CBDT/CBLC），Lite 變體各瀏覽器均支援</span>`;
   }
 }
 
 async function loadFont(fontInfo) {
-  const url = `output/fonts/${fontInfo.filename}`;
+  const cfg = VARIANTS[currentVariant];
+  const url = `${cfg.dir}/${fontInfo.filename}`;
   const isBold = fontInfo.style.includes('Bold');
   const isItalic = fontInfo.style.includes('Italic');
-  const face = new FontFace('SarasaMonoTCEmoji', `url(${url})`, {
+  const face = new FontFace(cfg.fontFamily, `url(${url})`, {
     weight: isBold ? '700' : '400',
     style: isItalic ? 'italic' : 'normal',
   });
@@ -128,10 +185,19 @@ async function applyStyle() {
   await loadFont({ style: opt.value, filename: opt.dataset.file });
   const isBold = opt.value.includes('Bold');
   const isItalic = opt.value.includes('Italic');
-  document.querySelectorAll('.mono').forEach(el => {
+  document.querySelectorAll('.mono, .size-compare').forEach(el => {
     el.style.fontWeight = isBold ? '700' : '400';
     el.style.fontStyle = isItalic ? 'italic' : 'normal';
   });
+}
+
+async function switchVariant() {
+  currentVariant = document.getElementById('variantSelect').value;
+  document.querySelectorAll('.mono, .size-compare').forEach(el => {
+    el.style.fontWeight = '';
+    el.style.fontStyle = '';
+  });
+  await loadFonts();
 }
 
 loadFonts();
