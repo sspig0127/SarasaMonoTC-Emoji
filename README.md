@@ -205,6 +205,30 @@ open http://localhost:8765/verify-emoji.html
 
 ---
 
+## 測試（開發用）
+
+```bash
+# uv sync 已包含 pytest（dependency-groups.dev）
+uv sync
+
+# 執行全部測試
+uv run pytest tests/ -v
+
+# 只跑不需要字體檔案的純邏輯測試（CI 亦執行此組）
+uv run pytest tests/test_emoji_merge.py::TestScaleGlyph -v
+```
+
+| 測試組 | 所需檔案 | 執行環境 |
+|--------|----------|----------|
+| `TestScaleGlyph`（8 個） | 無 | 本機 / CI |
+| `TestGetEmojiCmap`、`TestCollectGlyphDeps`（8 個） | `fonts/NotoEmoji[wght].ttf` | 本機 / CI（自動下載） |
+| `TestDetectFontWidths`（2 個） | `fonts/SarasaMonoTC-Regular.ttf` | 僅本機 |
+| `TestColorOutput`、`TestLiteOutput`（14 個） | 已建構的 `output/` 字體 | 僅本機 |
+
+字體檔案不存在時，相關測試自動 skip（不算失敗）。
+
+---
+
 ## VHS 終端機錄影設定
 
 [VHS](https://github.com/charmbracelet/vhs) 使用 Headless Chromium + xterm.js 渲染終端機畫面，
