@@ -143,7 +143,8 @@ COLRv1 必須限制選取數量（由 `_select_colrv1_emoji_greedy` 控制）。
 | v1.4 | COLRv1 第三變體 |
 | v1.4.1 | 修復 COLRv1 網頁亂碼（PaintColrLayers LayerList walk）+ greedy emoji 選取 |
 | v1.4.2 | COLRv1 priority allowlist（27 個 dev emoji 保證彩色，不受 greedy 截止限制） |
-| v1.5 | BMP 符號彩色覆蓋（COLRv1: force_colrv1_codepoints；Color: force_color_codepoints）；glyph_forced_rename / color_forced_rename 機制；_update_cmap BMP guard 修正；post 3.0→2.0 升級（_color 後綴持久化）；75 tests |
+| v1.5 | BMP 符號彩色覆蓋（5 個基礎清單）；glyph_forced_rename / color_forced_rename 機制；_update_cmap BMP guard；post 3.0→2.0 升級（_color 後綴持久化）；75 tests |
+| v1.5.1 | force BMP 清單擴增：5 → 15（新增 ↩⌨☀☁⚙❄❌➡⬆⬇）；Budget 8132→8091 slots（幾何 dep 共享節省） |
 | v2.0 | ZWJ 序列 / 旗幟 / 膚色變體（🔮 規劃中） |
 
 ---

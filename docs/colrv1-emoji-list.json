@@ -1,10 +1,46 @@
 {
-  "generated": "2026-03-29T07:35:12.595992+00:00",
+  "generated": "2026-03-29T16:44:56.469284+00:00",
   "version": "1.5.0",
   "max_new_glyphs": 8136,
   "selected_count": 604,
-  "total_glyph_cost": 8134,
+  "total_glyph_cost": 8091,
   "emoji": [
+    {
+      "codepoint": "U+21A9",
+      "char": "↩",
+      "glyph_name": "uni21A9_colrv1",
+      "unicode_name": "LEFTWARDS ARROW WITH HOOK",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 5,
+      "priority": true
+    },
+    {
+      "codepoint": "U+2328",
+      "char": "⌨",
+      "glyph_name": "uni2328_colrv1",
+      "unicode_name": "KEYBOARD",
+      "geometry_deps_count": 51,
+      "new_glyph_cost": 52,
+      "priority": true
+    },
+    {
+      "codepoint": "U+2600",
+      "char": "☀",
+      "glyph_name": "uni2600_colrv1",
+      "unicode_name": "BLACK SUN WITH RAYS",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11,
+      "priority": true
+    },
+    {
+      "codepoint": "U+2601",
+      "char": "☁",
+      "glyph_name": "uni2601_colrv1",
+      "unicode_name": "CLOUD",
+      "geometry_deps_count": 2,
+      "new_glyph_cost": 3,
+      "priority": true
+    },
     {
       "codepoint": "U+263A",
       "char": "☺",
@@ -12,6 +48,15 @@
       "unicode_name": "WHITE SMILING FACE",
       "geometry_deps_count": 8,
       "new_glyph_cost": 9,
+      "priority": true
+    },
+    {
+      "codepoint": "U+2699",
+      "char": "⚙",
+      "glyph_name": "uni2699_colrv1",
+      "unicode_name": "GEAR",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 5,
       "priority": true
     },
     {
@@ -33,12 +78,57 @@
       "priority": true
     },
     {
+      "codepoint": "U+2744",
+      "char": "❄",
+      "glyph_name": "uni2744_colrv1",
+      "unicode_name": "SNOWFLAKE",
+      "geometry_deps_count": 28,
+      "new_glyph_cost": 29,
+      "priority": true
+    },
+    {
+      "codepoint": "U+274C",
+      "char": "❌",
+      "glyph_name": "uni274C_colrv1",
+      "unicode_name": "CROSS MARK",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 6,
+      "priority": true
+    },
+    {
       "codepoint": "U+2764",
       "char": "❤",
       "glyph_name": "uni2764_colrv1",
       "unicode_name": "HEAVY BLACK HEART",
       "geometry_deps_count": 5,
       "new_glyph_cost": 6,
+      "priority": true
+    },
+    {
+      "codepoint": "U+27A1",
+      "char": "➡",
+      "glyph_name": "uni27A1_colrv1",
+      "unicode_name": "BLACK RIGHTWARDS ARROW",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 3,
+      "priority": true
+    },
+    {
+      "codepoint": "U+2B06",
+      "char": "⬆",
+      "glyph_name": "uni2B06_colrv1",
+      "unicode_name": "UPWARDS BLACK ARROW",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 3,
+      "priority": true
+    },
+    {
+      "codepoint": "U+2B07",
+      "char": "⬇",
+      "glyph_name": "uni2B07_colrv1",
+      "unicode_name": "DOWNWARDS BLACK ARROW",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 1,
       "priority": true
     },
     {
@@ -128,7 +218,7 @@
       "glyph_name": "u1F519",
       "unicode_name": "BACK WITH LEFTWARDS ARROW ABOVE",
       "geometry_deps_count": 8,
-      "new_glyph_cost": 9,
+      "new_glyph_cost": 6,
       "priority": true
     },
     {
@@ -623,7 +713,7 @@
       "glyph_name": "uni26C5",
       "unicode_name": "SUN BEHIND CLOUD",
       "geometry_deps_count": 9,
-      "new_glyph_cost": 10,
+      "new_glyph_cost": 8,
       "priority": false
     },
     {
@@ -5349,96 +5439,6 @@
       "unicode_name": "CLOSED BOOK",
       "geometry_deps_count": 8,
       "new_glyph_cost": 1,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4D6",
-      "char": "📖",
-      "glyph_name": "u1F4D6",
-      "unicode_name": "OPEN BOOK",
-      "geometry_deps_count": 49,
-      "new_glyph_cost": 49,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4D7",
-      "char": "📗",
-      "glyph_name": "u1F4D7",
-      "unicode_name": "GREEN BOOK",
-      "geometry_deps_count": 8,
-      "new_glyph_cost": 1,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4D8",
-      "char": "📘",
-      "glyph_name": "u1F4D8",
-      "unicode_name": "BLUE BOOK",
-      "geometry_deps_count": 8,
-      "new_glyph_cost": 1,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4D9",
-      "char": "📙",
-      "glyph_name": "u1F4D9",
-      "unicode_name": "ORANGE BOOK",
-      "geometry_deps_count": 8,
-      "new_glyph_cost": 1,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4DA",
-      "char": "📚",
-      "glyph_name": "u1F4DA",
-      "unicode_name": "BOOKS",
-      "geometry_deps_count": 25,
-      "new_glyph_cost": 25,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4DB",
-      "char": "📛",
-      "glyph_name": "u1F4DB",
-      "unicode_name": "NAME BADGE",
-      "geometry_deps_count": 11,
-      "new_glyph_cost": 12,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4DC",
-      "char": "📜",
-      "glyph_name": "u1F4DC",
-      "unicode_name": "SCROLL",
-      "geometry_deps_count": 22,
-      "new_glyph_cost": 22,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4DD",
-      "char": "📝",
-      "glyph_name": "u1F4DD",
-      "unicode_name": "MEMO",
-      "geometry_deps_count": 25,
-      "new_glyph_cost": 24,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4DE",
-      "char": "📞",
-      "glyph_name": "u1F4DE",
-      "unicode_name": "TELEPHONE RECEIVER",
-      "geometry_deps_count": 7,
-      "new_glyph_cost": 8,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4DF",
-      "char": "📟",
-      "glyph_name": "u1F4DF",
-      "unicode_name": "PAGER",
-      "geometry_deps_count": 13,
-      "new_glyph_cost": 13,
       "priority": false
     }
   ]

@@ -65,7 +65,17 @@ emoji:
   # 修改此清單時，請同步修改 colrv1.force_colrv1_codepoints，
   # 以確保三種變體（Color / COLRv1）的 BMP 強制彩色清單一致。
   force_color_codepoints:
+    - "U+21A9"  # ↩ leftwards arrow with hook
+    - "U+2328"  # ⌨ keyboard
+    - "U+2600"  # ☀ black sun with rays
+    - "U+2601"  # ☁ cloud
+    - "U+2699"  # ⚙ gear / settings
+    - "U+2744"  # ❄ snowflake
+    - "U+274C"  # ❌ cross mark
+    - "U+27A1"  # ➡ black rightwards arrow
     - "U+2764"  # ❤ heart
+    - "U+2B06"  # ⬆ upwards black arrow
+    - "U+2B07"  # ⬇ downwards black arrow
     - "U+2B50"  # ⭐ star
     - "U+26A0"  # ⚠ warning sign
     - "U+263A"  # ☺ smiling face
@@ -125,7 +135,17 @@ colrv1:
   # Verified present in both Sarasa and Noto-COLRv1 (2026-03-29).
   # Each entry consumes greedy budget; keep list small.
   force_colrv1_codepoints:
+    - "U+21A9"  # ↩ leftwards arrow with hook
+    - "U+2328"  # ⌨ keyboard
+    - "U+2600"  # ☀ black sun with rays
+    - "U+2601"  # ☁ cloud
+    - "U+2699"  # ⚙ gear / settings
+    - "U+2744"  # ❄ snowflake
+    - "U+274C"  # ❌ cross mark
+    - "U+27A1"  # ➡ black rightwards arrow
     - "U+2764"  # ❤ heart
+    - "U+2B06"  # ⬆ upwards black arrow
+    - "U+2B07"  # ⬇ downwards black arrow
     - "U+2B50"  # ⭐ star
     - "U+26A0"  # ⚠ warning sign
     - "U+263A"  # ☺ smiling face

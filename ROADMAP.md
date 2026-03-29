@@ -16,6 +16,7 @@
 | **v1.4.1** | COLRv1 greedy 選取（修復網頁亂碼） | ✅ 完成 |
 | **v1.4.2** | COLRv1 priority allowlist（dev emoji 保證彩色） | ✅ 已發佈 |
 | **v1.5** | BMP 符號彩色覆蓋（force_color / force_colrv1_codepoints）；post 3.0→2.0 升級；75 tests | ✅ 完成 |
+| **v1.5.1** | force BMP 清單 5 → 15（↩⌨☀☁⚙❄❌➡⬆⬇）；Budget 8132→8091 slots | ✅ 完成 |
 | **v2.0** | ZWJ 序列 / 旗幟 / 膚色變體 | 🔮 未來 |
 
 ---
