@@ -329,6 +329,8 @@ Set Height 2160
 ### Color 變體
 - **Emoji 格式**：CBDT/CBLC（NotoColorEmoji 的彩色點陣圖格式）
 - **Emoji 寬度**：Runtime 偵測 Sarasa 的 half-width，emoji = 2× half-width（與 CJK 等寬）
+- **BMP 彩色覆蓋**：❤ ⭐ ⚠ ☺ ⚡ 等 BMP 符號預設使用 NotoColorEmoji 彩色點陣圖，
+  而非 Sarasa 原有單色字形（可透過 `config.yaml` 的 `emoji.force_color_codepoints` 自訂清單）
 
 ### Lite 變體
 - **Emoji 格式**：glyf TrueType outline（Noto Emoji variable font 的預設字重）
@@ -343,9 +345,11 @@ Set Height 2160
   - 完整選取清單：[`docs/colrv1-emoji-list.json`](docs/colrv1-emoji-list.json)
   - 可透過 `config.yaml` 的 `colrv1.max_new_glyphs` 調整預算
   - 可透過 `config.yaml` 的 `colrv1.priority_codepoints` 自訂優先 emoji 清單
+- **BMP 彩色覆蓋**：❤ ⭐ ⚠ ☺ ⚡ 等 BMP 符號可透過 `config.yaml` 的 `colrv1.force_colrv1_codepoints`
+  強制使用 COLRv1 向量著色，取代 Sarasa 原有單色字形
 - **Priority 清單挑選依據**：
   - Greedy 填充以 codepoint 升序排列，截止點約在 U+1F4FB，導致 U+1F500+ 的高頻 dev emoji 被排除
-  - ⚠️ ❌ ⭐ ➡️ ⚙️ 等 BMP 符號已內建於 Sarasa，不需列入（以 Sarasa 原有的單色字形渲染）
+  - ⚠️ ❌ ⭐ ➡️ ⚙️ 等 BMP 符號透過 `force_colrv1_codepoints` 單獨管理
   - Priority 清單選取標準：**在 GitHub README / Issues / PR / CI 表格中高頻出現**，且不在 Sarasa 原有 cmap 中
   - 涵蓋：工具類（🔧🔨🛠️）、安全類（🔒🔑🛡️）、狀態圓點（🔴🟡🟢🔵）、連結導覽（🔗🔍🔖）、動作類（🚀🎉🐛）等
 - **技術**：7,536 個 geometry helper glyphs（PaintGlyph 節點引用）+ 600 個空 glyf stub；paint tree 驅動彩色渲染
