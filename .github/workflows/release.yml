@@ -1,0 +1,161 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: '發佈標籤（如 v1.4.2）'
+        required: true
+      sarasa_version:
+        description: 'Sarasa Gothic 版本號'
+        required: false
+        default: '1.0.36'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # 允許建立 Release 與上傳附件
+
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+      SARASA_VERSION: ${{ github.event.inputs.sarasa_version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安裝系統工具
+        run: sudo apt-get install -y p7zip-full
+
+      - name: 快取來源字體
+        id: cache-fonts
+        uses: actions/cache@v4
+        with:
+          path: fonts/
+          key: fonts-sarasa-${{ github.event.inputs.sarasa_version }}
+
+      - name: 下載來源字體（cache miss 時執行）
+        if: steps.cache-fonts.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p fonts
+
+          # Sarasa Gothic TTF（TC Mono 四個樣式）
+          curl -L -o sarasa.7z \
+            "https://github.com/be5invis/Sarasa-Gothic/releases/download/v${SARASA_VERSION}/sarasa-gothic-ttf-${SARASA_VERSION}.7z"
+
+          # 確認 7z 中的 TC Mono 實際檔名（debug 用途）
+          echo "=== TC Mono files in archive ==="
+          7za l sarasa.7z | grep -i "mono.tc" || true
+
+          # 解壓縮（嘗試 CamelCase 格式）
+          7za e sarasa.7z -o fonts/ \
+            "SarasaMonoTC-Regular.ttf" \
+            "SarasaMonoTC-Italic.ttf" \
+            "SarasaMonoTC-Bold.ttf" \
+            "SarasaMonoTC-BoldItalic.ttf" \
+            -y || true
+
+          # 若 CamelCase 格式不存在，嘗試 kebab-case 並重命名
+          if [ ! -f "fonts/SarasaMonoTC-Regular.ttf" ]; then
+            echo "CamelCase not found, trying kebab-case..."
+            7za e sarasa.7z -o fonts/ \
+              "sarasa-mono-tc-regular.ttf" \
+              "sarasa-mono-tc-italic.ttf" \
+              "sarasa-mono-tc-bold.ttf" \
+              "sarasa-mono-tc-bolditalic.ttf" \
+              -y
+            mv fonts/sarasa-mono-tc-regular.ttf   fonts/SarasaMonoTC-Regular.ttf
+            mv fonts/sarasa-mono-tc-italic.ttf     fonts/SarasaMonoTC-Italic.ttf
+            mv fonts/sarasa-mono-tc-bold.ttf       fonts/SarasaMonoTC-Bold.ttf
+            mv fonts/sarasa-mono-tc-bolditalic.ttf fonts/SarasaMonoTC-BoldItalic.ttf
+          fi
+
+          rm -f sarasa.7z
+
+          # Noto Color Emoji（Color 變體）
+          curl -L -o fonts/NotoColorEmoji.ttf \
+            "https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf"
+
+          # Noto Emoji variable（Lite 變體）
+          curl -L -o "fonts/NotoEmoji[wght].ttf" \
+            "https://github.com/google/fonts/raw/main/ofl/notoemoji/NotoEmoji%5Bwght%5D.ttf"
+
+          # Noto COLRv1（COLRv1 變體）
+          curl -L -o fonts/Noto-COLRv1.ttf \
+            "https://github.com/googlefonts/noto-emoji/raw/main/fonts/Noto-COLRv1.ttf"
+
+      - name: 確認字體檔案完整
+        run: |
+          for f in \
+            fonts/SarasaMonoTC-Regular.ttf \
+            fonts/SarasaMonoTC-Italic.ttf \
+            fonts/SarasaMonoTC-Bold.ttf \
+            fonts/SarasaMonoTC-BoldItalic.ttf \
+            fonts/NotoColorEmoji.ttf \
+            "fonts/NotoEmoji[wght].ttf" \
+            fonts/Noto-COLRv1.ttf; do
+            if [ ! -f "$f" ]; then
+              echo "ERROR: Missing font: $f" && exit 1
+            fi
+            echo "OK: $f ($(du -sh "$f" | cut -f1))"
+          done
+
+      - name: 安裝 uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: 安裝 Python 依賴
+        run: |
+          uv python install 3.10
+          uv sync --group dev
+
+      - name: 執行測試
+        run: uv run pytest tests/ -v --tb=short
+
+      - name: 建構 Color 變體
+        run: uv run python build.py
+
+      - name: 建構 Lite 變體
+        run: uv run python build.py --lite
+
+      - name: 建構 COLRv1 變體
+        run: uv run python build.py --colrv1
+
+      - name: 確認 manifest 版本號
+        run: |
+          for manifest in \
+            output/fonts/fonts-manifest.json \
+            output/fonts-lite/fonts-manifest.json \
+            output/fonts-colrv1/fonts-manifest.json; do
+            version=$(python3 -c "import json; print(json.load(open('${manifest}'))['version'])")
+            echo "${manifest}: ${version}"
+          done
+
+      - name: 打包 zip
+        run: |
+          cd output
+          zip -r "../SarasaMonoTCEmoji-${RELEASE_TAG}.zip"        fonts/
+          zip -r "../SarasaMonoTCEmojiLite-${RELEASE_TAG}.zip"    fonts-lite/
+          zip -r "../SarasaMonoTCEmojiCOLRv1-${RELEASE_TAG}.zip"  fonts-colrv1/
+          cd ..
+          ls -lh SarasaMonoTCEmoji-*.zip
+
+      - name: 上傳至 GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${RELEASE_TAG}" &>/dev/null; then
+            echo "Release ${RELEASE_TAG} 已存在，附加 zip 附件..."
+            gh release upload "${RELEASE_TAG}" \
+              "SarasaMonoTCEmoji-${RELEASE_TAG}.zip" \
+              "SarasaMonoTCEmojiLite-${RELEASE_TAG}.zip" \
+              "SarasaMonoTCEmojiCOLRv1-${RELEASE_TAG}.zip" \
+              --clobber
+          else
+            echo "Release ${RELEASE_TAG} 不存在，建立 draft release..."
+            gh release create "${RELEASE_TAG}" --draft \
+              --title "SarasaMonoTCEmoji ${RELEASE_TAG}" \
+              "SarasaMonoTCEmoji-${RELEASE_TAG}.zip" \
+              "SarasaMonoTCEmojiLite-${RELEASE_TAG}.zip" \
+              "SarasaMonoTCEmojiCOLRv1-${RELEASE_TAG}.zip"
+          fi
