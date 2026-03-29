@@ -91,6 +91,11 @@ open http://localhost:8765/verify-emoji.html
 - **跳過已有字形**：`skip_existing: true`，保留 Sarasa 原有字形不覆蓋
 - **int16 保護**：`_scale_glyph()` 含 int16 範圍驗證（-32768 ~ 32767），超界時 raise `ValueError`
 - **平行建構**：預設 4 個 worker，失敗時自動清理 partial output
+- **post table 格式注意**：Sarasa 使用 `post` format 3.0（不儲存字形名稱）。
+  Reload 時 fonttools 從 cmap 反推名稱（`_makeGlyphName(cp)`），
+  導致自訂後綴（如 `uni2764_color`）被替換回 `uni2764`。
+  `merge_emoji` Step 9.5 在偵測到 `color_forced_rename` 時自動升級至 format 2.0，
+  以持久化儲存自訂字形名稱。**修改 `merge_emoji` 重命名邏輯時請確保此升級仍被觸發。**
 
 ### COLRv1 特有
 
@@ -132,7 +137,7 @@ COLRv1 必須限制選取數量（由 `_select_colrv1_emoji_greedy` 控制）。
 | v1.4 | COLRv1 第三變體 |
 | v1.4.1 | 修復 COLRv1 網頁亂碼（PaintColrLayers LayerList walk）+ greedy emoji 選取 |
 | v1.4.2 | COLRv1 priority allowlist（27 個 dev emoji 保證彩色，不受 greedy 截止限制） |
-| v1.5 | BMP 符號彩色覆蓋（COLRv1: force_colrv1_codepoints；Color: force_color_codepoints）；glyph_forced_rename / color_forced_rename 機制；_update_cmap BMP guard 修正 |
+| v1.5 | BMP 符號彩色覆蓋（COLRv1: force_colrv1_codepoints；Color: force_color_codepoints）；glyph_forced_rename / color_forced_rename 機制；_update_cmap BMP guard 修正；post 3.0→2.0 升級（_color 後綴持久化） |
 | v2.0 | ZWJ 序列 / 旗幟 / 膚色變體（🔮 規劃中） |
 
 ---

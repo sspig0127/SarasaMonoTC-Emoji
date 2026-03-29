@@ -86,6 +86,43 @@ class TestColorOutput:
         family = name_table.getBestFamilyName() or ""
         assert "Emoji" in family, f"Family name '{family}' does not contain 'Emoji'"
 
+    def test_post_format_2_when_force_codepoints(self, output_color_regular):
+        """Color variant with force_color_codepoints must use post format 2.0.
+
+        Sarasa source uses post format 3.0 (no stored names).  When forced
+        BMP renames are active (e.g. uni2764 → uni2764_color), merge_emoji
+        upgrades post to format 2.0 so that glyph names survive save/reload.
+        This test verifies the upgrade persisted into the built output file.
+        """
+        assert output_color_regular["post"].formatType == 2.0, (
+            "post table must be format 2.0 when force_color_codepoints is active; "
+            "format 3.0 causes _color-suffixed glyph names to be lost on reload"
+        )
+
+    def test_forced_bmp_codepoints_use_color_glyph(self, output_color_regular):
+        """Forced BMP codepoints must point to _color-suffixed glyphs in cmap.
+
+        Verifies that the save/reload cycle preserves the renamed glyphs so
+        that e.g. U+2764 ❤ maps to 'uni2764_color' (CBDT bitmap) rather than
+        reverting to Sarasa's original monochrome 'uni2764'.
+        """
+        cmap = output_color_regular["cmap"].getBestCmap() or {}
+        # Default force_color_codepoints from config.yaml
+        forced = {
+            0x2764: "❤",
+            0x2B50: "⭐",
+            0x26A0: "⚠",
+            0x263A: "☺",
+            0x26A1: "⚡",
+        }
+        for cp, char in forced.items():
+            glyph = cmap.get(cp, "")
+            assert "_color" in glyph or glyph == "smileface_color", (
+                f"U+{cp:04X} {char}: expected a '_color' glyph, got {glyph!r}. "
+                "post format 3.0 causes the renamed glyph to revert to the "
+                "base name on reload."
+            )
+
 
 # ---------------------------------------------------------------------------
 # Lite variant (glyf TrueType outlines)
