@@ -101,12 +101,17 @@
 **問題**：COLRv1 全量合併（~1,358 emoji + ~7,536 geometry deps = ~8,900+ new glyphs）
 導致部分瀏覽器 / OTS 產生亂碼。
 
-**修復**：`merge_emoji_colrv1()` 新增 greedy 選取邏輯，按 codepoint 升序累計 glyph 成本，
-在 `max_new_glyphs`（預設 8,136）預算內選取最多 emoji。
+**修復**：`merge_emoji_colrv1()` 新增兩階段選取邏輯，在 `max_new_glyphs`（預設 8,136）預算內選取最多 emoji。
 
-- 選取結果：600 個 emoji，glyph 成本恰好用滿 8,136 slots
-- 選取清單存於 `docs/colrv1-emoji-list.json`（含 codepoint、unicode name、成本）
+**Phase 1 — Priority 優先**：保證 GitHub/程式文件常用 dev emoji 必選（27 個，codepoint 升序），
+不受截止點限制（🔧 U+1F527、🔗 U+1F517、🚀 U+1F680、🔒 U+1F512 等）。
+
+**Phase 2 — Greedy 填充**：剩餘預算以 codepoint 升序選入常用舊 emoji，首個超預算則停止。
+
+- 選取結果：600 個 emoji（27 priority + 573 greedy），glyph 成本 8,132/8,136 slots
+- 選取清單存於 `docs/colrv1-emoji-list.json`（含 codepoint、unicode name、成本、priority 旗標）
 - 可透過 `config.yaml` 的 `colrv1.max_new_glyphs` 調整預算
+- 可透過 `config.yaml` 的 `colrv1.priority_codepoints` 自訂優先 emoji 清單
 - 詳見 `PLAN-COLRv1-greedy.md`
 
 ---

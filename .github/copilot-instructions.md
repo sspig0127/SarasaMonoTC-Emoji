@@ -74,6 +74,7 @@ uv run pytest tests/test_emoji_merge.py -v
 
 - **設定集中管理**：所有字體參數（字族名稱、樣式、路徑、emoji 寬度倍率等）在 `config.yaml` 修改
 - **三種 merge 函式**：`merge_emoji()`（Color）、`merge_emoji_lite()`（Lite）、`merge_emoji_colrv1()`（COLRv1）位於 `src/emoji_merge.py`
+- **COLRv1 兩階段 greedy 選取**：Phase 1 先選 `priority_codepoints`（config.yaml），Phase 2 按 codepoint 升序填充至 `max_new_glyphs` 上限（預設 8,136）
 - **Emoji 寬度**：`emoji_width_multiplier: 2`，即佔 2 個半寬欄位（與 CJK 全形字等寬）
 - **跳過已有字形**：`skip_existing: true`，保留 Sarasa 原有字形不覆蓋
 - **int16 保護**：`_scale_glyph()` 含 int16 範圍驗證（-32768 ~ 32767），超界時 raise `ValueError`
@@ -90,6 +91,7 @@ uv run pytest tests/test_emoji_merge.py -v
 | v1.2 | 修正 Lite emoji 尺寸（UPM 縮放） |
 | v1.3 | 測試框架 + 健壯性改善 |
 | v1.4 | COLRv1 第三變體 |
+| v1.4.1 | COLRv1 greedy 選取（修復網頁亂碼）+ priority allowlist（27 個 dev emoji 優先） |
 | v2.0 | ZWJ 序列 / 旗幟 / 膚色變體（🔮 規劃中） |
 
 ---

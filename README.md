@@ -315,9 +315,12 @@ Set Height 2160
 
 ### COLRv1 變體
 - **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）
-- **Emoji 數量**：600 個常用 emoji（依 codepoint 升序 greedy 選取，glyph 預算上限 8,136 slots）
+- **Emoji 數量**：600 個 emoji（glyph 預算上限 8,136 slots），採兩階段選取：
+  1. **Priority 優先**：27 個常用 dev/tooling emoji（🔧🔗🚀🔒🔑🔍🟢🟡 等）優先保證選入
+  2. **Greedy 填充**：剩餘預算依 codepoint 升序填入常用舊 emoji
   - 完整選取清單：[`docs/colrv1-emoji-list.json`](docs/colrv1-emoji-list.json)
   - 可透過 `config.yaml` 的 `colrv1.max_new_glyphs` 調整預算
+  - 可透過 `config.yaml` 的 `colrv1.priority_codepoints` 自訂優先 emoji 清單
 - **技術**：7,536 個 geometry helper glyphs（PaintGlyph 節點引用）+ 600 個空 glyf stub；paint tree 驅動彩色渲染
 - **檔案大小**：~26 MB（比 Color 小 26%；COLRv1 向量資料比 PNG 點陣圖精簡）
 - **支援環境**：Chrome/Chromium 98+、Firefox 107+；macOS 系統級支援需 macOS 13+
