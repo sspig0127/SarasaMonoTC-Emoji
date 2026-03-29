@@ -321,6 +321,11 @@ Set Height 2160
   - 完整選取清單：[`docs/colrv1-emoji-list.json`](docs/colrv1-emoji-list.json)
   - 可透過 `config.yaml` 的 `colrv1.max_new_glyphs` 調整預算
   - 可透過 `config.yaml` 的 `colrv1.priority_codepoints` 自訂優先 emoji 清單
+- **Priority 清單挑選依據**：
+  - Greedy 填充以 codepoint 升序排列，截止點約在 U+1F4FB，導致 U+1F500+ 的高頻 dev emoji 被排除
+  - ⚠️ ❌ ⭐ ➡️ ⚙️ 等 BMP 符號已內建於 Sarasa，不需列入（以 Sarasa 原有的單色字形渲染）
+  - Priority 清單選取標準：**在 GitHub README / Issues / PR / CI 表格中高頻出現**，且不在 Sarasa 原有 cmap 中
+  - 涵蓋：工具類（🔧🔨🛠️）、安全類（🔒🔑🛡️）、狀態圓點（🔴🟡🟢🔵）、連結導覽（🔗🔍🔖）、動作類（🚀🎉🐛）等
 - **技術**：7,536 個 geometry helper glyphs（PaintGlyph 節點引用）+ 600 個空 glyf stub；paint tree 驅動彩色渲染
 - **檔案大小**：~26 MB（比 Color 小 26%；COLRv1 向量資料比 PNG 點陣圖精簡）
 - **支援環境**：Chrome/Chromium 98+、Firefox 107+；macOS 系統級支援需 macOS 13+

@@ -86,9 +86,24 @@ colrv1:
   # Path for the generated emoji selection list (committed to repo for reference).
   emoji_list_path: "docs/colrv1-emoji-list.json"
   # Priority codepoints: always selected before the greedy fill phase,
-  # regardless of their codepoint value.  Use this for high-codepoint emoji
-  # that are commonly used in GitHub/programming documentation.
-  # Each entry costs at least 1 glyph slot (more if it has unique geometry deps).
+  # regardless of their codepoint value.
+  #
+  # Background: The greedy phase selects emoji in codepoint ascending order
+  # (lower = older = historically more common).  This causes commonly used
+  # GitHub/programming-doc emoji at U+1F500–U+1F9FF to be cut off, because
+  # the budget is exhausted by lower-codepoint emoji first.
+  #
+  # Selection criteria for this list:
+  #   1. NOT already in Sarasa Mono TC's cmap — BMP symbols such as ⚠️ (U+26A0),
+  #      ⚙️ (U+2699), ❌ (U+274C), ➡️ (U+27A1) are in Sarasa as text glyphs
+  #      (monochrome), so they are NOT candidates and do not need to be listed here.
+  #   2. Commonly seen in GitHub READMEs, Issues, PR descriptions, CI badge tables,
+  #      and programming documentation — verified against real-world usage.
+  #   3. All have zero geometry deps (cost = 1 glyph slot each), so adding 27
+  #      priority emoji consumes only 27 of the 8,136 budget.
+  #
+  # To customise: add or remove "U+XXXX" entries.  Run `uv run python build.py --colrv1`
+  # to rebuild; the updated selection is written to docs/colrv1-emoji-list.json.
   priority_codepoints:
     - "U+1F50D"  # 🔍 magnifying glass left
     - "U+1F50E"  # 🔎 magnifying glass right
