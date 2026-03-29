@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 改善路線圖
 
-> 最後更新：2026-03-29（v1.4.1 greedy 選取修復）
+> 最後更新：2026-03-29（v1.4.2 priority allowlist + BMP 符號彩色覆蓋評估）
 
 ---
 
@@ -14,7 +14,8 @@
 | **v1.3** | 測試框架 + 健壯性改善 | ✅ 完成（T1–T4） |
 | **v1.4** | COLRv1 第三變體（彩色向量） | ✅ 已發佈 |
 | **v1.4.1** | COLRv1 greedy 選取（修復網頁亂碼） | ✅ 完成 |
-| **v2.0** | ZWJ 序列 / 旗幟 / 膚色變體支援 | 🔮 未來 |
+| **v1.4.2** | COLRv1 priority allowlist（dev emoji 保證彩色） | ✅ 已發佈 |
+| **v2.0** | ZWJ 序列 / 旗幟 / 膚色變體 / BMP 彩色覆蓋 | 🔮 未來 |
 
 ---
 
@@ -57,7 +58,8 @@
 
 ## v2.0 — 完整 Emoji 支援（長期）
 
-目前約 40% 現代 emoji 因需要 ZWJ 序列而缺席。v2.0 目標是補齊這個缺口。
+目前約 40% 現代 emoji 因需要 ZWJ 序列而缺席。v2.0 目標是補齊這個缺口，
+並解決部分 BMP 符號在 COLRv1 變體中呈現為黑白的問題。
 
 ### 缺席類型分析
 
@@ -74,6 +76,40 @@
 - 建立 ZWJ sequence → glyph name 的對應表
 - 將 sequence 加入 GSUB ligature rules，cmap 指向分解後的 input sequence
 - 旗幟：Regional Indicator 需特殊處理（兩個字元組合）
+
+### BMP 符號彩色覆蓋（新增議題）
+
+**問題**：☺️（U+263A）、⭐（U+2B50）、⚠️（U+26A0）等 BMP 符號，
+Sarasa 原生已有單色字形，`skip_existing: true` 正確跳過 → 呈現黑白為**設計行為**。
+
+**v1.x 不修改的原因**：
+- `skip_existing` 是全域旗標；關掉會影響 **95 個** BMP codepoint，
+  包含 ZWJ（U+200D）等功能性符號 → 可能損壞字體結構
+- 無法選擇性覆蓋，風險過高
+
+**v2.0 可行方案**：新增 `force_colrv1_codepoints` 白名單（config.yaml）
+
+```yaml
+colrv1:
+  # 強制用 Noto-COLRv1 彩色字形覆蓋 Sarasa 原生字形（逐一指定，避免影響 ZWJ 等功能符號）
+  force_colrv1_codepoints:
+    - "U+263A"  # ☺ smiling face
+    - "U+2B50"  # ⭐ star
+    - "U+26A0"  # ⚠ warning
+    - "U+274C"  # ❌ cross mark
+    - "U+2764"  # ❤ heart
+```
+
+**技術評估**（已分析）：
+- Sarasa + Noto-COLRv1 共有 **95 個 BMP codepoint**，累計 564 glyph slots
+- 若只選取 ~30 個常見 emoji 符號（排除箭頭、功能符號），約需 150–200 slots
+- 需修改以下兩個位置（缺一不可）：
+  1. `_select_colrv1_emoji_greedy()`：新增 Phase 0，對 force 清單 bypass `skip_existing`
+  2. **`_update_cmap()`**：現行有 `if cp not in fmt4_win.cmap: skip` 保護，BMP codepoint 不會被覆蓋；
+     需新增 `force_set` 參數，對強制清單直接賦值覆蓋原有 cmap 指向
+- 字形名稱衝突（如 `uni2764`）由現有 `_apply_colrv1_rename` 自動處理（重命名為 `uni2764_colrv1`）
+- 強制清單消耗 greedy Phase 2 預算，需計入 slots 計算
+- 實作複雜度：**中等偏高**（涉及 2 個函式的 BMP 保護機制調整）
 
 ### 參考資源
 - [Unicode Emoji ZWJ Sequences](https://unicode.org/emoji/charts/emoji-zwj-sequences.html)
@@ -116,6 +152,29 @@
 
 ---
 
+## v1.4.2 — COLRv1 Priority Allowlist（Dev Emoji 保證彩色）✅ 已發佈
+
+**背景**：v1.4.1 greedy 選取以 codepoint 升序截止於 ~U+1F4FB，
+導致高 codepoint dev emoji（🔧 🔗 🚀 🔒 等，U+1F500+）未被選入。
+
+**修復**：兩階段選取 Phase 1 改為先保證 27 個高頻 dev/tooling emoji 入選，再以 greedy 填充其餘預算。
+
+**Phase 1 — Priority 清單挑選依據**（3 項條件）：
+1. 在 GitHub README / 技術文件中出現頻率高（🔧 ⚙️ 🚀 🔒 📦 等）
+2. **不在 BMP**（U+0000–U+FFFF）：BMP 符號 Sarasa 原生已有，`skip_existing` 正確跳過
+3. COLRv1 greedy 截止點之後（U+1F500+），greedy 無法自動選入
+
+**Phase 2 — Greedy 填充**：剩餘預算以 codepoint 升序選入，首個超預算停止。
+
+- Priority 27 個 emoji 共消耗 27 slots（每個邊際成本 = 1，零幾何依賴）
+- 詳見 `config.yaml` `colrv1.priority_codepoints` 區塊的說明註解
+
+**附帶更新**：
+- `verify-emoji.html` 新增 Section 3：GitHub/程式文件常用符號驗證（8 個分類）
+- `docs/colrv1-emoji-list.json` 新增 `priority` 欄位（bool）
+
+---
+
 ## 外部專案評估
 
 ### Sarasa-Mono-TC-Nerd（AlexisKerib/Sarasa-Mono-TC-Nerd）
@@ -150,6 +209,7 @@
 | 項目 | 位置 | 說明 |
 |------|------|------|
 | CBLC filtering 可能移除有效 emoji | `emoji_merge.py:181-237` | 名稱衝突時捨棄 color bitmap，以 Sarasa outline 代替 |
+| BMP 符號（☺️ ⭐ ⚠️ 等）在 COLRv1 呈現黑白 | `emoji_merge.py` | `skip_existing: true` 設計行為；95 個 BMP codepoint 含 ZWJ，全域關閉風險高；v2.0 規劃 `force_colrv1_codepoints` 逐項覆蓋；需同時修改 `_update_cmap`（現有 BMP guard）與 `_select_colrv1_emoji_greedy`（Phase 0） |
 | ~~Mac platform name 移除時機~~ | `build.py` | ✅ 已修正（v1.3）：在 `update_font_names()` 之後再次呼叫 `_strip_mac_name_records` |
 | ~~config 型別未驗證~~ | `build.py` | ✅ 已修正：新增 `get_config_int()` helper，`parallel` 與 `emoji_width_multiplier` 讀取時驗證型別與範圍 |
 | ~~`emoji_width_multiplier` 無範圍檢查~~ | `src/config.py` | ✅ 已修正：`FontConfig.__post_init__` 驗證型別為 int 且範圍在 [1, 4] |
