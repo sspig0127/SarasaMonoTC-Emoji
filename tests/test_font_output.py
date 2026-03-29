@@ -179,3 +179,93 @@ class TestLiteOutput:
         assert "Emoji" in family and "Lite" in family, (
             f"Family name '{family}' does not indicate Lite variant"
         )
+
+
+# ---------------------------------------------------------------------------
+# COLRv1 variant (color vector)
+# ---------------------------------------------------------------------------
+
+_MIN_COLRV1_GLYPHS = 5_000
+
+
+class TestCOLRv1Output:
+    def test_has_colr_and_cpal(self, output_colrv1_regular):
+        """COLRv1 variant must contain COLR and CPAL tables."""
+        assert "COLR" in output_colrv1_regular, "Missing COLR table"
+        assert "CPAL" in output_colrv1_regular, "Missing CPAL table"
+
+    def test_has_no_cbdt_cblc(self, output_colrv1_regular):
+        """COLRv1 variant must NOT have CBDT/CBLC tables."""
+        assert "CBDT" not in output_colrv1_regular, "COLRv1 variant must not have CBDT"
+        assert "CBLC" not in output_colrv1_regular, "COLRv1 variant must not have CBLC"
+
+    def test_has_glyf_table(self, output_colrv1_regular):
+        """COLRv1 variant must retain Sarasa's glyf table."""
+        assert "glyf" in output_colrv1_regular
+
+    def test_key_codepoints_present(self, output_colrv1_regular):
+        """Critical codepoints must be in cmap."""
+        cmap = output_colrv1_regular["cmap"].getBestCmap() or {}
+        for cp, name in _KEY_CODEPOINTS:
+            assert cp in cmap, f"Missing U+{cp:04X} {name}"
+
+    def test_emoji_glyph_width_is_double_halfwidth(self, output_colrv1_regular):
+        """Emoji advance width must equal 2× the half-width (full-width)."""
+        cmap = output_colrv1_regular["cmap"].getBestCmap() or {}
+        hmtx = output_colrv1_regular["hmtx"]
+
+        assert 0x0041 in cmap, "Missing 'A' in cmap"
+        half_width, _ = hmtx[cmap[0x0041]]
+        expected_emoji_width = half_width * 2
+
+        for cp, char in _KEY_CODEPOINTS:
+            if cp == 0x4E00:
+                continue
+            glyph_name = cmap[cp]
+            actual_width, _ = hmtx[glyph_name]
+            assert actual_width == expected_emoji_width, (
+                f"U+{cp:04X} {char}: expected width {expected_emoji_width}, "
+                f"got {actual_width}"
+            )
+
+    def test_colr_base_glyph_records_present(self, output_colrv1_regular):
+        """COLR BaseGlyphPaintRecord must contain at least one entry."""
+        colr = output_colrv1_regular["COLR"].table
+        assert hasattr(colr, "BaseGlyphList") and colr.BaseGlyphList, "Missing BaseGlyphList"
+        records = colr.BaseGlyphList.BaseGlyphPaintRecord
+        assert len(records) > 0, "COLR BaseGlyphPaintRecord is empty"
+
+    def test_emoji_glyph_has_colr_record(self, output_colrv1_regular):
+        """😀 U+1F600 glyph must have a COLR paint record."""
+        cmap = output_colrv1_regular["cmap"].getBestCmap() or {}
+        assert 0x1F600 in cmap, "Missing 😀 U+1F600 in cmap"
+        glyph_name = cmap[0x1F600]
+        colr = output_colrv1_regular["COLR"].table
+        record_names = {r.BaseGlyph for r in colr.BaseGlyphList.BaseGlyphPaintRecord}
+        assert glyph_name in record_names, (
+            f"Glyph '{glyph_name}' for U+1F600 has no COLR paint record"
+        )
+
+    def test_glyph_count_reasonable(self, output_colrv1_regular):
+        """Total glyph count must exceed the minimum after merge."""
+        count = len(output_colrv1_regular.getGlyphOrder())
+        assert count > _MIN_COLRV1_GLYPHS, (
+            f"Expected >{_MIN_COLRV1_GLYPHS} glyphs, got {count}"
+        )
+
+    def test_no_mac_platform_name_records(self, output_colrv1_regular):
+        """Mac platform (platformID=1) name records must be stripped."""
+        mac_records = [
+            r for r in output_colrv1_regular["name"].names if r.platformID == 1
+        ]
+        assert mac_records == [], (
+            f"Found {len(mac_records)} Mac platform name records; should be 0"
+        )
+
+    def test_family_name_contains_colrv1(self, output_colrv1_regular):
+        """Font family name must indicate the COLRv1 variant."""
+        name_table = output_colrv1_regular["name"]
+        family = name_table.getBestFamilyName() or ""
+        assert "COLRv1" in family or "colrv1" in family.lower(), (
+            f"Family name '{family}' does not indicate COLRv1 variant"
+        )

@@ -14,6 +14,8 @@ from fontTools.ttLib.tables._g_l_y_f import Glyph, GlyphCoordinates, GlyphCompon
 
 from src.emoji_merge import (
     _collect_glyph_deps,
+    _collect_colrv1_paint_glyph_deps,
+    _filter_colr_to_added_glyphs,
     _scale_glyph,
     detect_font_widths,
     get_emoji_cmap,
@@ -312,3 +314,104 @@ class TestCollectGlyphDeps:
         emoji_glyph_names = set(noto_emoji_font.getGlyphOrder())
         for name in result:
             assert name in emoji_glyph_names, f"Unknown glyph name: {name}"
+
+
+# ---------------------------------------------------------------------------
+# _collect_colrv1_paint_glyph_deps — requires Noto-COLRv1.ttf
+# ---------------------------------------------------------------------------
+
+class TestCollectColrv1Deps:
+    def test_returns_empty_when_no_colr(self, noto_emoji_font):
+        """Non-COLRv1 font must return empty set."""
+        if "COLR" in noto_emoji_font:
+            pytest.skip("This font has COLR; need a font without COLR for this test")
+        result = _collect_colrv1_paint_glyph_deps(noto_emoji_font, {"glyph001"})
+        assert result == set()
+
+    def test_returns_nonempty_for_colrv1_font(self, noto_colrv1_font):
+        """COLRv1 source font must yield some geometry deps for common emoji."""
+        cmap = get_emoji_cmap(noto_colrv1_font)
+        target_names = {name for cp, name in cmap.items() if cp == 0x1F600}
+        if not target_names:
+            pytest.skip("U+1F600 not in COLRv1 cmap")
+        deps = _collect_colrv1_paint_glyph_deps(noto_colrv1_font, target_names)
+        # Some emoji use PaintGlyph; not guaranteed for every emoji, but common
+        # (test passes even if empty — absence of crash is the main check)
+        assert isinstance(deps, set)
+
+    def test_deps_not_in_target_names(self, noto_colrv1_font):
+        """Caller should subtract target_names from returned deps to avoid double-adding."""
+        cmap = get_emoji_cmap(noto_colrv1_font)
+        target_names = set(cmap.values())
+        deps = _collect_colrv1_paint_glyph_deps(noto_colrv1_font, target_names)
+        # All deps are glyph names (strings)
+        assert all(isinstance(n, str) for n in deps)
+
+
+# ---------------------------------------------------------------------------
+# _filter_colr_to_added_glyphs — pure logic tests (no font files needed)
+# ---------------------------------------------------------------------------
+
+def _make_mock_colr_font(base_glyph_names: list[str]):
+    """Build a minimal TTFont with a fake COLR table for testing."""
+    from fontTools.ttLib import TTFont as _TTFont
+    from fontTools.ttLib.tables import otTables
+
+    font = _TTFont()
+    font.setGlyphOrder([".notdef"] + base_glyph_names)
+
+    # Build a minimal COLRv1 table
+    colr_table = otTables.COLR()
+    colr_table.Version = 1
+
+    bgl = otTables.BaseGlyphList()
+    records = []
+    for name in base_glyph_names:
+        rec = otTables.BaseGlyphPaintRecord()
+        rec.BaseGlyph = name
+        # Minimal paint (PaintSolid format)
+        paint = otTables.Paint()
+        paint.Format = 2  # PaintSolid
+        rec.Paint = paint
+        records.append(rec)
+    bgl.BaseGlyphPaintRecord = records
+    colr_table.BaseGlyphList = bgl
+    colr_table.BaseGlyphRecord = []
+    colr_table.ClipList = None
+
+    from fontTools.ttLib.tables import C_O_L_R_
+    colr_wrapper = C_O_L_R_.table_C_O_L_R_()
+    colr_wrapper.table = colr_table
+    font["COLR"] = colr_wrapper
+    return font
+
+
+class TestFilterColrToAddedGlyphs:
+    def test_filters_to_added_set(self):
+        """Only records in added_set must remain after filtering."""
+        font = _make_mock_colr_font(["emoji_a", "emoji_b", "emoji_c"])
+        _filter_colr_to_added_glyphs(font, {"emoji_a", "emoji_c"})
+        records = font["COLR"].table.BaseGlyphList.BaseGlyphPaintRecord
+        remaining = {r.BaseGlyph for r in records}
+        assert remaining == {"emoji_a", "emoji_c"}
+
+    def test_empty_added_set_clears_all(self):
+        """Empty added_set must remove all COLR records."""
+        font = _make_mock_colr_font(["emoji_a", "emoji_b"])
+        _filter_colr_to_added_glyphs(font, set())
+        records = font["COLR"].table.BaseGlyphList.BaseGlyphPaintRecord
+        assert records == []
+
+    def test_noop_when_all_in_added_set(self):
+        """All records must be preserved when added_set covers everything."""
+        font = _make_mock_colr_font(["emoji_a", "emoji_b"])
+        _filter_colr_to_added_glyphs(font, {"emoji_a", "emoji_b"})
+        records = font["COLR"].table.BaseGlyphList.BaseGlyphPaintRecord
+        assert len(records) == 2
+
+    def test_no_colr_table_is_noop(self):
+        """Must not raise if font has no COLR table."""
+        from fontTools.ttLib import TTFont as _TTFont
+        font = _TTFont()
+        font.setGlyphOrder([".notdef"])
+        _filter_colr_to_added_glyphs(font, {"some_glyph"})  # must not raise

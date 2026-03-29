@@ -711,3 +711,310 @@ def merge_emoji(
         print(f"  CBLC strikes: {len(base_font['CBLC'].strikes)}")
 
     return base_font
+
+
+# ---------------------------------------------------------------------------
+# COLRv1 variant
+# ---------------------------------------------------------------------------
+
+def _collect_colrv1_paint_glyph_deps(
+    emoji_font: TTFont,
+    target_names: set[str],
+) -> set[str]:
+    """Collect geometry helper glyph names referenced by PaintGlyph nodes.
+
+    Walks the COLRv1 BaseGlyphPaintRecord for each glyph in target_names,
+    recursing through all paint tree nodes to find PaintGlyph (Format=10)
+    references.  These are geometry helper glyphs whose TrueType outlines
+    are used as clip shapes and must be copied alongside the emoji glyphs.
+
+    Args:
+        emoji_font: Source emoji font with COLR v1 table
+        target_names: Glyph names we intend to copy (from cmap, no conflicts)
+
+    Returns:
+        Set of geometry dep glyph names (may overlap with target_names if
+        an emoji glyph reuses another emoji glyph as a clip shape)
+    """
+    if "COLR" not in emoji_font:
+        return set()
+    colr = emoji_font["COLR"].table
+    if not hasattr(colr, "BaseGlyphList") or colr.BaseGlyphList is None:
+        return set()
+
+    deps: set[str] = set()
+
+    def walk(paint) -> None:
+        if paint is None:
+            return
+        fmt = getattr(paint, "Format", None)
+        if fmt == 10:  # PaintGlyph — references a geometry helper
+            deps.add(paint.Glyph)
+            walk(paint.Paint)
+        else:
+            for attr in ("Paint", "SourcePaint", "BackdropPaint"):
+                child = getattr(paint, attr, None)
+                if child is not None:
+                    walk(child)
+            for child in getattr(paint, "Paints", []) or []:
+                walk(child)
+
+    for record in colr.BaseGlyphList.BaseGlyphPaintRecord:
+        if record.BaseGlyph in target_names:
+            walk(record.Paint)
+
+    return deps
+
+
+def _apply_colrv1_rename(paint, rename_map: dict[str, str]) -> None:
+    """Recursively rename PaintGlyph.Glyph references in a COLRv1 paint tree."""
+    if paint is None:
+        return
+    fmt = getattr(paint, "Format", None)
+    if fmt == 10:  # PaintGlyph
+        if paint.Glyph in rename_map:
+            paint.Glyph = rename_map[paint.Glyph]
+        _apply_colrv1_rename(paint.Paint, rename_map)
+    else:
+        for attr in ("Paint", "SourcePaint", "BackdropPaint"):
+            child = getattr(paint, attr, None)
+            if child is not None:
+                _apply_colrv1_rename(child, rename_map)
+        for child in getattr(paint, "Paints", []) or []:
+            _apply_colrv1_rename(child, rename_map)
+
+
+def _filter_colr_to_added_glyphs(
+    base_font: TTFont,
+    added_set: set[str],
+) -> None:
+    """Filter COLR BaseGlyphPaintRecord to only include added emoji glyphs.
+
+    After merging the full COLRv1 table from the source emoji font, this
+    removes records for codepoints we didn't add (either because they were
+    skipped as existing, or because their glyph names conflicted with Sarasa).
+
+    Args:
+        base_font: Font with COLR table already merged in
+        added_set: Set of emoji glyph names that were actually added
+    """
+    if "COLR" not in base_font:
+        return
+    colr = base_font["COLR"].table
+
+    if hasattr(colr, "BaseGlyphList") and colr.BaseGlyphList:
+        records = colr.BaseGlyphList.BaseGlyphPaintRecord
+        before = len(records)
+        colr.BaseGlyphList.BaseGlyphPaintRecord = [
+            r for r in records if r.BaseGlyph in added_set
+        ]
+        removed = before - len(colr.BaseGlyphList.BaseGlyphPaintRecord)
+        if removed:
+            print(f"  Filtered {removed} COLR BaseGlyphPaintRecord entries not in added set")
+
+    if hasattr(colr, "BaseGlyphRecord") and colr.BaseGlyphRecord:
+        colr.BaseGlyphRecord = [
+            r for r in colr.BaseGlyphRecord if r.BaseGlyph in added_set
+        ]
+
+    if hasattr(colr, "ClipList") and colr.ClipList:
+        colr.ClipList.clips = {
+            k: v for k, v in colr.ClipList.clips.items() if k in added_set
+        }
+
+
+def merge_emoji_colrv1(
+    base_font_path: str,
+    emoji_font_path: str,
+    config: FontConfig,
+) -> TTFont:
+    """Merge Noto COLRv1 color vector emoji into SarasaMonoTC.
+
+    COLRv1 (OpenType Color Font Format Version 1) stores emoji as paint trees
+    that reference geometry helper glyphs via PaintGlyph nodes.  This function:
+    1. Copies emoji glyph stubs (empty glyf) + geometry dep outlines (scaled)
+    2. Deep-copies and filters the COLR/CPAL tables
+    3. Renames geometry dep glyphs when their names conflict with Sarasa
+
+    Advantages over CBDT/CBLC (Color variant):
+    - Scalable vector rendering (no pixelation at high DPI)
+    - Smaller output file (~15 MB vs ~35 MB estimated)
+    - Supported in Chrome/Chromium 98+ and modern terminals
+
+    Args:
+        base_font_path: Path to SarasaMonoTC-{Style}.ttf
+        emoji_font_path: Path to Noto-COLRv1.ttf
+        config: FontConfig object
+
+    Returns:
+        Merged TTFont object (caller must call .save() and .close())
+    """
+    print(f"  Loading base font: {base_font_path}")
+    base_font = TTFont(base_font_path, lazy=True, recalcBBoxes=False)
+    print(f"  Loading emoji font: {emoji_font_path}")
+    emoji_font = TTFont(emoji_font_path)
+
+    if "COLR" not in emoji_font:
+        raise ValueError(
+            f"Emoji font '{emoji_font_path}' has no COLR table. "
+            "COLRv1 variant requires Noto-COLRv1.ttf (from googlefonts/noto-emoji)."
+        )
+
+    # Step 1: detect widths
+    half_width, full_width = detect_font_widths(base_font)
+    emoji_width = half_width * config.emoji_width_multiplier
+    print(f"  Detected widths — half: {half_width}, full: {full_width}, emoji: {emoji_width}")
+
+    # Step 2: extract emoji cmap
+    emoji_cmap = get_emoji_cmap(emoji_font)
+    print(f"  Emoji cmap entries: {len(emoji_cmap)}")
+
+    # Step 3: filter existing codepoints
+    if config.skip_existing:
+        base_cmap = base_font["cmap"].getBestCmap() or {}
+        before = len(emoji_cmap)
+        emoji_cmap = {cp: name for cp, name in emoji_cmap.items() if cp not in base_cmap}
+        print(f"  Filtered existing codepoints: {before} → {len(emoji_cmap)}")
+
+    if not emoji_cmap:
+        print("  No new emoji to add.")
+        emoji_font.close()
+        return base_font
+
+    # Calculate UPM scale: Noto-COLRv1.ttf uses UPM 1024, Sarasa uses UPM 1000.
+    base_upm = base_font["head"].unitsPerEm
+    emoji_upm = emoji_font["head"].unitsPerEm
+    upm_scale = base_upm / emoji_upm
+    if abs(upm_scale - 1.0) > 1e-6:
+        print(f"  UPM scale: {emoji_upm} → {base_upm} (×{upm_scale:.4f})")
+
+    # Step 4: build target_names (cmap values, excluding Sarasa name conflicts)
+    base_existing_names = set(base_font.getGlyphOrder())
+    target_names = {name for name in emoji_cmap.values() if name not in base_existing_names}
+    name_conflicts = len({name for name in emoji_cmap.values()}) - len(target_names)
+
+    # Step 5: collect geometry helper deps referenced by PaintGlyph nodes
+    # Access COLR table to trigger decompilation before collection
+    colr_table = emoji_font["COLR"].table
+    if hasattr(colr_table, "BaseGlyphList") and colr_table.BaseGlyphList:
+        _ = colr_table.BaseGlyphList.BaseGlyphPaintRecord  # trigger lazy load
+
+    geometry_deps = _collect_colrv1_paint_glyph_deps(emoji_font, target_names)
+    geometry_deps -= target_names  # avoid double-counting emoji used as deps
+    print(
+        f"  Target emoji: {len(target_names)}, geometry deps: {len(geometry_deps)}, "
+        f"name conflicts (skipped): {name_conflicts}"
+    )
+
+    # Step 6: rename geometry deps whose names conflict with Sarasa glyph names
+    rename_map: dict[str, str] = {}
+    for name in geometry_deps:
+        if name in base_existing_names:
+            rename_map[name] = f"{name}_colrv1"
+    if rename_map:
+        print(f"  Renaming {len(rename_map)} conflicting geometry dep(s): {sorted(rename_map)[:5]}")
+
+    # Build ordered lists: geometry deps first (referenced by paint trees), then emoji
+    geometry_deps_orig = sorted(geometry_deps)         # original names in emoji font
+    geometry_deps_final = [rename_map.get(n, n) for n in geometry_deps_orig]
+    emoji_glyphs_list = sorted(target_names)
+    emoji_glyphs_to_add = geometry_deps_final + emoji_glyphs_list
+
+    print(f"  Glyphs to add: {len(emoji_glyphs_to_add)} "
+          f"({len(geometry_deps_final)} geometry deps + {len(emoji_glyphs_list)} emoji)")
+
+    # Step 7: deep copy COLR + CPAL (COLR already decompiled above)
+    print("  Copying COLR/CPAL tables...")
+    colr_copy = copy.deepcopy(emoji_font["COLR"])
+    cpal_copy = copy.deepcopy(emoji_font["CPAL"]) if "CPAL" in emoji_font else None
+
+    # Apply rename_map so PaintGlyph refs point to the renamed geometry dep names
+    if rename_map:
+        colr_table_copy = colr_copy.table
+        if hasattr(colr_table_copy, "BaseGlyphList") and colr_table_copy.BaseGlyphList:
+            for record in colr_table_copy.BaseGlyphList.BaseGlyphPaintRecord:
+                _apply_colrv1_rename(record.Paint, rename_map)
+
+    # Step 8: access base_glyf BEFORE setGlyphOrder (OTS ordering constraint —
+    # prevents flag-encoding change that OTS rejects; see merge_emoji() comment)
+    if "glyf" in base_font:
+        base_glyf = base_font["glyf"]
+
+    # Step 9: extend glyph order
+    original_order = base_font.getGlyphOrder()
+    new_order = original_order + emoji_glyphs_to_add
+    base_font.setGlyphOrder(new_order)
+
+    # Step 10: copy geometry dep outlines (scaled) + add empty emoji stubs
+    if "glyf" in base_font:
+        emoji_glyf = emoji_font.get("glyf")
+        geo_copied = 0
+        for orig_name, final_name in zip(geometry_deps_orig, geometry_deps_final):
+            if final_name not in base_glyf.glyphs:
+                src = emoji_glyf.glyphs.get(orig_name) if emoji_glyf else None
+                if src is not None:
+                    src.expand(emoji_glyf)
+                    glyph_copy = copy.deepcopy(src)
+                    _scale_glyph(glyph_copy, upm_scale)
+                    base_glyf[final_name] = glyph_copy
+                    geo_copied += 1
+                else:
+                    empty = TTGlyph()
+                    empty.numberOfContours = 0
+                    base_glyf[final_name] = empty
+
+        for glyph_name in emoji_glyphs_list:
+            if glyph_name not in base_glyf.glyphs:
+                empty = TTGlyph()
+                empty.numberOfContours = 0
+                base_glyf[glyph_name] = empty
+
+        print(f"  Copied {geo_copied} geometry dep outlines (scaled ×{upm_scale:.4f}), "
+              f"added {len(emoji_glyphs_list)} emoji stubs")
+
+    # Step 11: update hmtx/vmtx
+    # IMPORTANT: access vmtx BEFORE updating maxp.numGlyphs (same ordering as merge_emoji)
+    base_hmtx = base_font["hmtx"]
+    geometry_deps_final_set = set(geometry_deps_final)
+    for glyph_name in emoji_glyphs_to_add:
+        if glyph_name not in base_hmtx.metrics:
+            # Geometry deps get advance=0 (internal helpers, never placed directly in text)
+            advance = 0 if glyph_name in geometry_deps_final_set else emoji_width
+            base_hmtx.metrics[glyph_name] = (advance, 0)
+
+    if "vmtx" in base_font:
+        base_vmtx = base_font["vmtx"]
+        for glyph_name in emoji_glyphs_to_add:
+            if glyph_name not in base_vmtx.metrics:
+                advance = 0 if glyph_name in geometry_deps_final_set else emoji_width
+                base_vmtx.metrics[glyph_name] = (advance, 0)
+
+    # Update maxp AFTER all table accesses (avoids vmtx decompile byte-count mismatch)
+    base_font["maxp"].numGlyphs = len(new_order)
+
+    # Step 12: attach COLR/CPAL and filter to added emoji glyphs
+    base_font["COLR"] = colr_copy
+    if cpal_copy is not None:
+        base_font["CPAL"] = cpal_copy
+    added_emoji_set = set(emoji_glyphs_list)
+    _filter_colr_to_added_glyphs(base_font, added_emoji_set)
+
+    # Step 13: update cmap
+    updated = _update_cmap(base_font, emoji_cmap, added_emoji_set)
+    print(f"  cmap entries added: {updated}")
+
+    # Step 14: update hhea and OS/2
+    if "hhea" in base_font:
+        base_font["hhea"].advanceWidthMax = max(
+            base_font["hhea"].advanceWidthMax, emoji_width
+        )
+        base_font["hhea"].numberOfHMetrics = len(base_hmtx.metrics)
+
+    from .utils import merge_os2_ranges
+    merge_os2_ranges(base_font, emoji_font)
+
+    _strip_mac_name_records(base_font)
+
+    emoji_font.close()
+    print(f"  Total glyphs after merge: {len(base_font.getGlyphOrder())}")
+    return base_font

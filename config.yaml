@@ -68,3 +68,14 @@ lite:
   emoji_font: "NotoEmoji[wght].ttf"
   output_dir: "output/fonts-lite"
   description: "Sarasa Mono TC (更紗黑體繁中等寬) with embedded Noto Emoji — monochrome emoji for VHS recording and lightweight terminals"
+
+# COLRv1 variant — color vector emoji
+# Emoji source: Noto COLRv1 font (googlefonts/noto-emoji, SIL OFL)
+#   Download: https://github.com/googlefonts/noto-emoji/blob/main/fonts/Noto-COLRv1.ttf
+#   Place at: fonts/Noto-COLRv1.ttf  (size: ~4.8 MB)
+# Benefits: ~15 MB output (vs ~35 MB CBDT), scalable vector, Chrome/Chromium 98+ support
+colrv1:
+  family_name: "SarasaMonoTCEmojiCOLRv1"
+  emoji_font: "Noto-COLRv1.ttf"
+  output_dir: "output/fonts-colrv1"
+  description: "Sarasa Mono TC (更紗黑體繁中等寬) with embedded Noto COLRv1 — color vector emoji for Chrome/Chromium terminals"

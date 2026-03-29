@@ -17,8 +17,9 @@
   .ok { background: #a6e3a1; color: #1e1e2e; }
   .err { background: #f38ba8; color: #1e1e2e; }
   .variant-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-family: monospace; margin-left: 8px; vertical-align: middle; }
-  .badge-color { background: #fab387; color: #1e1e2e; }
-  .badge-lite  { background: #89dceb; color: #1e1e2e; }
+  .badge-color  { background: #fab387; color: #1e1e2e; }
+  .badge-lite   { background: #89dceb; color: #1e1e2e; }
+  .badge-colrv1 { background: #cba6f7; color: #1e1e2e; }
   .size-compare { font-family: var(--font); font-size: 18px; background: #181825; padding: 16px 20px; border-radius: 8px; margin: 8px 0; }
   .size-compare p { margin: 0; line-height: 2.2; }
 </style>
@@ -31,6 +32,7 @@
   <select id="variantSelect" onchange="switchVariant()">
     <option value="color">Color（彩色 CBDT/CBLC）</option>
     <option value="lite">Lite（單色 glyf）</option>
+    <option value="colrv1">COLRv1（彩色向量）</option>
   </select>
   &nbsp; 字重：
   <select id="styleSelect" onchange="applyStyle()">
@@ -120,6 +122,12 @@ const VARIANTS = {
     badgeClass: 'badge-lite',
     badgeText: 'Lite',
   },
+  colrv1: {
+    dir: 'output/fonts-colrv1',
+    fontFamily: 'SarasaMonoTCEmojiCOLRv1',
+    badgeClass: 'badge-colrv1',
+    badgeText: 'COLRv1',
+  },
 };
 
 let currentVariant = 'color';
@@ -143,7 +151,7 @@ async function loadFonts() {
     manifest = await resp.json();
   } catch(e) {
     statusEl.innerHTML =
-      `<span class="status err">✗ 找不到 ${cfg.dir}/fonts-manifest.json，請先執行 build.py${currentVariant === 'lite' ? ' --lite' : ''}</span>`;
+      `<span class="status err">✗ 找不到 ${cfg.dir}/fonts-manifest.json，請先執行 build.py${currentVariant === 'lite' ? ' --lite' : currentVariant === 'colrv1' ? ' --colrv1' : ''}</span>`;
     return;
   }
 

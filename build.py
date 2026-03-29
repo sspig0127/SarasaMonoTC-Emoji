@@ -29,7 +29,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import FontConfig
-from src.emoji_merge import merge_emoji, merge_emoji_lite, detect_font_widths, _strip_mac_name_records
+from src.emoji_merge import merge_emoji, merge_emoji_lite, merge_emoji_colrv1, detect_font_widths, _strip_mac_name_records
 from src.utils import update_font_names, verify_glyph_width
 
 
@@ -109,6 +109,7 @@ def build_single_font(
     config: FontConfig,
     metadata: dict,
     lite: bool = False,
+    colrv1: bool = False,
 ) -> str:
     """Build a single font variant with emoji merged in.
 
@@ -131,6 +132,12 @@ def build_single_font(
     # Merge emoji into base font
     if lite:
         merged_font = merge_emoji_lite(
+            base_font_path=str(base_font_path),
+            emoji_font_path=str(emoji_font_path),
+            config=config,
+        )
+    elif colrv1:
+        merged_font = merge_emoji_colrv1(
             base_font_path=str(base_font_path),
             emoji_font_path=str(emoji_font_path),
             config=config,
@@ -213,9 +220,16 @@ Configuration priority: CLI args > config.yaml > defaults
     parser.add_argument("--parallel", type=int, default=None)
     parser.add_argument("--lite", action="store_true",
                         help="Build Lite variant: monochrome glyf emoji (VHS-compatible, smaller files). "
-                             "Requires NotoEmoji-Regular.ttf in fonts/ directory.")
+                             "Requires NotoEmoji[wght].ttf in fonts/ directory.")
+    parser.add_argument("--colrv1", action="store_true",
+                        help="Build COLRv1 variant: color vector emoji (Chrome 98+, smaller than CBDT). "
+                             "Requires Noto-COLRv1.ttf in fonts/ directory.")
 
     args = parser.parse_args()
+
+    if args.lite and args.colrv1:
+        print("Error: --lite and --colrv1 are mutually exclusive")
+        sys.exit(1)
 
     yaml_config = load_config(args.config)
 
@@ -237,18 +251,26 @@ Configuration priority: CLI args > config.yaml > defaults
     )
 
     is_lite = args.lite
+    is_colrv1 = args.colrv1
 
     # Determine family name, output dir, and emoji font override based on variant
-    if is_lite:
+    if is_colrv1:
+        family_name = (
+            get_config_value(yaml_config, "colrv1", "family_name")
+            or (get_config_value(yaml_config, "font", "family_name") or "SarasaMonoTCEmoji") + "COLRv1"
+        )
+        variant_emoji_font = get_config_value(yaml_config, "colrv1", "emoji_font") or "Noto-COLRv1.ttf"
+        default_output_dir = get_config_value(yaml_config, "colrv1", "output_dir") or "output/fonts-colrv1"
+    elif is_lite:
         family_name = (
             get_config_value(yaml_config, "lite", "family_name")
             or (get_config_value(yaml_config, "font", "family_name") or "SarasaMonoTCEmoji") + "Lite"
         )
-        lite_emoji_font = get_config_value(yaml_config, "lite", "emoji_font") or "NotoEmoji-Regular.ttf"
+        variant_emoji_font = get_config_value(yaml_config, "lite", "emoji_font") or "NotoEmoji[wght].ttf"
         default_output_dir = get_config_value(yaml_config, "lite", "output_dir") or "output/fonts-lite"
     else:
         family_name = get_config_value(yaml_config, "font", "family_name") or "SarasaMonoTCEmoji"
-        lite_emoji_font = None
+        variant_emoji_font = None
         default_output_dir = get_config_value(yaml_config, "build", "output_dir") or "output/fonts"
 
     output_dir = args.output_dir or Path(default_output_dir)
@@ -259,7 +281,9 @@ Configuration priority: CLI args > config.yaml > defaults
         "author": get_config_value(yaml_config, "font", "author") or "",
         "copyright": get_config_value(yaml_config, "font", "copyright") or "",
         "description": (
-            get_config_value(yaml_config, "lite", "description")
+            get_config_value(yaml_config, "colrv1", "description")
+            if is_colrv1
+            else get_config_value(yaml_config, "lite", "description")
             if is_lite
             else get_config_value(yaml_config, "font", "description")
         ) or "",
@@ -292,8 +316,8 @@ Configuration priority: CLI args > config.yaml > defaults
     for style in styles:
         style_cfg = styles_config[style]
         base_font = style_cfg.get("base_font")
-        # Lite variant overrides the emoji font for all styles
-        emoji_font = lite_emoji_font or style_cfg.get("emoji_font")
+        # Variant-specific emoji font override (COLRv1 or Lite replace per-style emoji font)
+        emoji_font = variant_emoji_font or style_cfg.get("emoji_font")
         display_name = style_cfg.get("display_name", style)
 
         if not base_font or not emoji_font:
@@ -309,7 +333,11 @@ Configuration priority: CLI args > config.yaml > defaults
             sys.exit(1)
         if not emoji_path.exists():
             print(f"Error: Emoji font not found: {emoji_path}")
-            if is_lite:
+            if is_colrv1:
+                print(f"  Download Noto-COLRv1.ttf (COLRv1 color vector font) from:")
+                print(f"    https://github.com/googlefonts/noto-emoji/blob/main/fonts/Noto-COLRv1.ttf")
+                print(f"  Place it at: {emoji_path}")
+            elif is_lite:
                 print(f"  Download NotoEmoji[wght].ttf (monochrome variable font) from:")
                 print(f"    https://github.com/google/fonts/raw/main/ofl/notoemoji/NotoEmoji%5Bwght%5D.ttf")
                 print(f"  Place it at: {emoji_path}")
@@ -325,7 +353,11 @@ Configuration priority: CLI args > config.yaml > defaults
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    variant_label = "Lite (monochrome glyf)" if is_lite else "Color (CBDT/CBLC)"
+    variant_label = (
+        "COLRv1 (color vector)" if is_colrv1
+        else "Lite (monochrome glyf)" if is_lite
+        else "Color (CBDT/CBLC)"
+    )
     print(f"Building {config.family_name} v{config.version} [{variant_label}]")
     print(f"Styles: {', '.join(styles)}")
     print(f"Source: {fonts_dir}")
@@ -344,7 +376,7 @@ Configuration priority: CLI args > config.yaml > defaults
             build_single_font(
                 style, p["base_font_path"], p["emoji_font_path"],
                 p["display_name"], output_dir, config, metadata,
-                lite=is_lite,
+                lite=is_lite, colrv1=is_colrv1,
             )
     else:
         try:
@@ -356,7 +388,7 @@ Configuration priority: CLI args > config.yaml > defaults
                         build_single_font,
                         style, p["base_font_path"], p["emoji_font_path"],
                         p["display_name"], output_dir, config, metadata,
-                        is_lite,
+                        is_lite, is_colrv1,
                     )
                     futures[future] = style
 

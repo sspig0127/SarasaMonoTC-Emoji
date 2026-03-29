@@ -22,20 +22,25 @@ if str(_ROOT) not in sys.path:
 FONTS_DIR = _ROOT / "fonts"
 OUTPUT_COLOR_DIR = _ROOT / "output" / "fonts"
 OUTPUT_LITE_DIR = _ROOT / "output" / "fonts-lite"
+OUTPUT_COLRV1_DIR = _ROOT / "output" / "fonts-colrv1"
 
 _SARASA_REGULAR = FONTS_DIR / "SarasaMonoTC-Regular.ttf"
 _NOTO_COLOR_EMOJI = FONTS_DIR / "NotoColorEmoji.ttf"
 _NOTO_EMOJI = FONTS_DIR / "NotoEmoji[wght].ttf"
+_NOTO_COLRV1 = FONTS_DIR / "Noto-COLRv1.ttf"
 _OUTPUT_COLOR_REGULAR = OUTPUT_COLOR_DIR / "SarasaMonoTCEmoji-Regular.ttf"
 _OUTPUT_LITE_REGULAR = OUTPUT_LITE_DIR / "SarasaMonoTCEmojiLite-Regular.ttf"
+_OUTPUT_COLRV1_REGULAR = OUTPUT_COLRV1_DIR / "SarasaMonoTCEmojiCOLRv1-Regular.ttf"
 
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "requires_sarasa: test requires Sarasa source font")
     config.addinivalue_line("markers", "requires_noto_color: test requires NotoColorEmoji.ttf")
     config.addinivalue_line("markers", "requires_noto_lite: test requires NotoEmoji[wght].ttf")
+    config.addinivalue_line("markers", "requires_noto_colrv1: test requires Noto-COLRv1.ttf")
     config.addinivalue_line("markers", "requires_output_color: test requires built Color output")
     config.addinivalue_line("markers", "requires_output_lite: test requires built Lite output")
+    config.addinivalue_line("markers", "requires_output_colrv1: test requires built COLRv1 output")
 
 
 @pytest.fixture(scope="session")
@@ -79,10 +84,30 @@ def output_color_regular():
 
 
 @pytest.fixture(scope="session")
+def noto_colrv1_font():
+    if not _NOTO_COLRV1.exists():
+        pytest.skip(f"Noto-COLRv1.ttf not found: {_NOTO_COLRV1}")
+    from fontTools.ttLib import TTFont
+    font = TTFont(str(_NOTO_COLRV1))
+    yield font
+    font.close()
+
+
+@pytest.fixture(scope="session")
 def output_lite_regular():
     if not _OUTPUT_LITE_REGULAR.exists():
         pytest.skip(f"Lite output not found: {_OUTPUT_LITE_REGULAR}")
     from fontTools.ttLib import TTFont
     font = TTFont(str(_OUTPUT_LITE_REGULAR))
+    yield font
+    font.close()
+
+
+@pytest.fixture(scope="session")
+def output_colrv1_regular():
+    if not _OUTPUT_COLRV1_REGULAR.exists():
+        pytest.skip(f"COLRv1 output not found: {_OUTPUT_COLRV1_REGULAR}")
+    from fontTools.ttLib import TTFont
+    font = TTFont(str(_OUTPUT_COLRV1_REGULAR))
     yield font
     font.close()
