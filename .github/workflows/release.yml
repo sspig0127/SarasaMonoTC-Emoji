@@ -45,7 +45,7 @@ jobs:
             "https://github.com/be5invis/Sarasa-Gothic/releases/download/v${SARASA_VERSION}/SarasaMonoTC-TTF-${SARASA_VERSION}.7z"
 
           # 解壓縮全部檔案（TC 包內只有 TC Mono TTF，不需要篩選）
-          7za e sarasa-tc.7z -o fonts/ -y
+          7za e sarasa-tc.7z -ofonts/ -y
           rm -f sarasa-tc.7z
 
           echo "=== Extracted Sarasa fonts ==="
