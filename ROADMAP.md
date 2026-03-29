@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 改善路線圖
 
-> 最後更新：2026-03-29
+> 最後更新：2026-03-29（v1.4.1 greedy 選取修復）
 
 ---
 
@@ -13,6 +13,7 @@
 | **v1.2** | 修正 Lite emoji 尺寸（UPM 2048→1000 縮放） | ✅ 已發佈 |
 | **v1.3** | 測試框架 + 健壯性改善 | ✅ 完成（T1–T4） |
 | **v1.4** | COLRv1 第三變體（彩色向量） | ✅ 已發佈 |
+| **v1.4.1** | COLRv1 greedy 選取（修復網頁亂碼） | ✅ 完成 |
 | **v2.0** | ZWJ 序列 / 旗幟 / 膚色變體支援 | 🔮 未來 |
 
 ---
@@ -88,11 +89,25 @@
 | 比較項目 | CBDT/CBLC（Color） | glyf（Lite） | COLRv1 |
 |---------|-------------------|-------------|--------|
 | 顏色 | ✅ 彩色 | ❌ 單色 | ✅ 彩色 |
+| Emoji 數量 | 1,358 | 1,358 | 600（greedy 選取） |
 | 檔案大小 | ~35 MB | ~25 MB | ~26 MB（實測） |
 | VHS/Chromium | ⚠️ 不穩定 | ✅ 完全支援 | ✅ Chrome 98+ |
 | 向量縮放 | ❌ 點陣圖 | ✅ 向量 | ✅ 向量 |
 
 來源字體：`Noto-COLRv1.ttf`（`googlefonts/noto-emoji` repo 的 `fonts/` 目錄）
+
+## v1.4.1 — COLRv1 Greedy 選取（修復網頁亂碼）✅ 完成
+
+**問題**：COLRv1 全量合併（~1,358 emoji + ~7,536 geometry deps = ~8,900+ new glyphs）
+導致部分瀏覽器 / OTS 產生亂碼。
+
+**修復**：`merge_emoji_colrv1()` 新增 greedy 選取邏輯，按 codepoint 升序累計 glyph 成本，
+在 `max_new_glyphs`（預設 8,136）預算內選取最多 emoji。
+
+- 選取結果：600 個 emoji，glyph 成本恰好用滿 8,136 slots
+- 選取清單存於 `docs/colrv1-emoji-list.json`（含 codepoint、unicode name、成本）
+- 可透過 `config.yaml` 的 `colrv1.max_new_glyphs` 調整預算
+- 詳見 `PLAN-COLRv1-greedy.md`
 
 ---
 
@@ -133,3 +148,4 @@
 | ~~Mac platform name 移除時機~~ | `build.py` | ✅ 已修正（v1.3）：在 `update_font_names()` 之後再次呼叫 `_strip_mac_name_records` |
 | ~~config 型別未驗證~~ | `build.py` | ✅ 已修正：新增 `get_config_int()` helper，`parallel` 與 `emoji_width_multiplier` 讀取時驗證型別與範圍 |
 | ~~`emoji_width_multiplier` 無範圍檢查~~ | `src/config.py` | ✅ 已修正：`FontConfig.__post_init__` 驗證型別為 int 且範圍在 [1, 4] |
+| ~~COLRv1 全量合併導致網頁亂碼~~ | `src/emoji_merge.py` | ✅ 已修正（v1.4.1）：greedy 選取限制新增 glyph ≤ 8,136 slots |
