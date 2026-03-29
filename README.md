@@ -1,5 +1,8 @@
 # SarasaMonoTC-Emoji
 
+[![Tests](https://github.com/sspig0127/SarasaMonoTC-Emoji/actions/workflows/test.yml/badge.svg)](https://github.com/sspig0127/SarasaMonoTC-Emoji/actions/workflows/test.yml)
+[![Release](https://github.com/sspig0127/SarasaMonoTC-Emoji/actions/workflows/release.yml/badge.svg)](https://github.com/sspig0127/SarasaMonoTC-Emoji/actions/workflows/release.yml)
+
 **Sarasa Mono TC（更紗黑體繁中等寬）+ Emoji — 嵌入式 emoji，支援三種變體**
 
 ## 變體說明
@@ -185,6 +188,25 @@ uv run python build.py --styles Regular
 uv run python build.py --lite --styles Regular
 uv run python build.py --colrv1 --styles Regular
 ```
+
+### 自動發佈 Workflow
+
+GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workflows/release.yml`），
+不需要在本機執行三段建構與 zip 打包。
+
+**觸發方式：** GitHub repo → Actions → **Build and Release** → Run workflow
+
+| 輸入參數 | 說明 | 預設值 |
+|----------|------|--------|
+| `release_tag` | 發佈標籤（如 `v1.5.0`） | 必填 |
+| `sarasa_version` | Sarasa Gothic 版本號 | `1.0.36` |
+
+**執行流程：** 下載來源字體 → 執行 66 個測試 → 建構三種變體 → 打包 zip → 上傳至指定 Release
+
+- 若 Release 已存在：以 `--clobber` 覆蓋現有附件
+- 若 Release 不存在：建立 draft release，由維護者手動 publish
+
+---
 
 ### 輸出
 

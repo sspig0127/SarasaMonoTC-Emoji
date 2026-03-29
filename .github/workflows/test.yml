@@ -22,10 +22,18 @@ jobs:
       - name: Install dependencies
         run: uv sync --group dev
 
+      - name: Cache NotoEmoji[wght].ttf
+        id: cache-noto-emoji
+        uses: actions/cache@v4
+        with:
+          path: fonts/NotoEmoji[wght].ttf
+          key: noto-emoji-wght
+
       - name: Download NotoEmoji[wght].ttf
         # ~1.9 MB monochrome variable font; required for get_emoji_cmap and
         # _collect_glyph_deps tests.  Sarasa fonts are not downloaded (too large);
         # tests that require them are skipped automatically via conftest.py.
+        if: steps.cache-noto-emoji.outputs.cache-hit != 'true'
         run: |
           mkdir -p fonts
           curl -L -o "fonts/NotoEmoji[wght].ttf" \
