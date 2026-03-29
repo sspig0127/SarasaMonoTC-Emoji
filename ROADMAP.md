@@ -12,8 +12,8 @@
 | **v1.1** | 新增 Lite 變體（glyf 單色） | ✅ 已發佈 |
 | **v1.2** | 修正 Lite emoji 尺寸（UPM 2048→1000 縮放） | ✅ 已發佈 |
 | **v1.3** | 測試框架 + 健壯性改善 | ✅ 完成（T1–T4） |
+| **v1.4** | COLRv1 第三變體（彩色向量） | ✅ 已發佈 |
 | **v2.0** | ZWJ 序列 / 旗幟 / 膚色變體支援 | 🔮 未來 |
-| **v2.x** | COLRv1 第三變體（彩色向量） | 🚧 已實作，待測試建構 |
 
 ---
 
@@ -81,9 +81,9 @@
 
 ---
 
-## v2.x — COLRv1 變體（彩色向量）
+## v1.4 — COLRv1 變體（彩色向量）✅ 已發佈
 
-作為「彩色但輕量」的第三選項。**實作已完成**（見 `PLAN-COLRv1.md`），等待下載 `Noto-COLRv1.ttf` 進行實際建構測試。
+作為「彩色但輕量」的第三選項。使用 `--colrv1` 旗標建構，詳見 `PLAN-COLRv1.md`。
 
 | 比較項目 | CBDT/CBLC（Color） | glyf（Lite） | COLRv1 |
 |---------|-------------------|-------------|--------|
@@ -92,7 +92,7 @@
 | VHS/Chromium | ⚠️ 不穩定 | ✅ 完全支援 | ✅ Chrome 98+ |
 | 向量縮放 | ❌ 點陣圖 | ✅ 向量 | ✅ 向量 |
 
-來源字體：`Noto-COLRv1.ttf`（已在 `googlefonts/noto-emoji` repo 的 `fonts/` 目錄）
+來源字體：`Noto-COLRv1.ttf`（`googlefonts/noto-emoji` repo 的 `fonts/` 目錄）
 
 ---
 

@@ -1,15 +1,16 @@
 # SarasaMonoTC-Emoji
 
-**Sarasa Mono TC（更紗黑體繁中等寬）+ Emoji — 嵌入式 emoji，支援彩色與單色兩種變體**
+**Sarasa Mono TC（更紗黑體繁中等寬）+ Emoji — 嵌入式 emoji，支援三種變體**
 
 ## 變體說明
 
-| 變體 | 字族名稱 | Emoji 格式 | 適用場景 |
-|------|----------|------------|----------|
-| **Color**（彩色） | `SarasaMonoTCEmoji` | CBDT/CBLC 彩色點陣圖 | 日常終端機、編輯器 |
-| **Lite**（單色） | `SarasaMonoTCEmojiLite` | glyf TrueType outline | VHS 錄影、輕量部署 |
+| 變體 | 字族名稱 | Emoji 格式 | 大小 | 適用場景 |
+|------|----------|------------|------|----------|
+| **Color**（彩色） | `SarasaMonoTCEmoji` | CBDT/CBLC 彩色點陣圖 | ~35 MB | 日常終端機、編輯器 |
+| **Lite**（單色） | `SarasaMonoTCEmojiLite` | glyf TrueType outline | ~25 MB | VHS 錄影、輕量部署 |
+| **COLRv1**（彩色向量） | `SarasaMonoTCEmojiCOLRv1` | COLRv1 向量 paint tree | ~26 MB | Chrome/Chromium 終端機 |
 
-兩個變體可同時安裝，不互相衝突。
+三個變體可同時安裝，不互相衝突。
 
 ---
 
@@ -34,6 +35,17 @@
 | `SarasaMonoTCEmojiLite-Italic.ttf` | 斜體 |
 | `SarasaMonoTCEmojiLite-Bold.ttf` | 粗體 |
 | `SarasaMonoTCEmojiLite-BoldItalic.ttf` | 粗斜體 |
+
+### COLRv1 變體
+
+> Chrome/Chromium 98+ 原生支援，彩色向量可縮放，比 Color 小 26%
+
+| 檔案 | 說明 |
+|------|------|
+| `SarasaMonoTCEmojiCOLRv1-Regular.ttf` | 一般 |
+| `SarasaMonoTCEmojiCOLRv1-Italic.ttf` | 斜體 |
+| `SarasaMonoTCEmojiCOLRv1-Bold.ttf` | 粗體 |
+| `SarasaMonoTCEmojiCOLRv1-BoldItalic.ttf` | 粗斜體 |
 
 下載所需字重的 `.ttf` 檔案，雙擊安裝即可。
 
@@ -76,6 +88,14 @@
 | Noto Emoji（單色）| [google/fonts ofl/notoemoji](https://github.com/google/fonts/tree/main/ofl/notoemoji) | SIL OFL 1.1 |
 | **SarasaMonoTCEmojiLite（本專案）** | 衍生作品 | SIL OFL 1.1 |
 
+### COLRv1 變體
+
+| 字體 | 來源 | 授權 |
+|------|------|------|
+| Sarasa Mono TC | [be5invis/Sarasa-Gothic](https://github.com/be5invis/Sarasa-Gothic) | SIL OFL 1.1 |
+| Noto COLRv1 | [googlefonts/noto-emoji](https://github.com/googlefonts/noto-emoji) | SIL OFL 1.1 |
+| **SarasaMonoTCEmojiCOLRv1（本專案）** | 衍生作品 | SIL OFL 1.1 |
+
 版權聲明：見 [LICENSE](LICENSE)
 
 ---
@@ -94,6 +114,7 @@ Emoji 標準由 Unicode Consortium 維護（[UTS #51](https://unicode.org/report
 更新依據：
 - **Color 變體**：追蹤 `googlefonts/noto-emoji` releases → 更新 `fonts/NotoColorEmoji.ttf`
 - **Lite 變體**：追蹤 `google/fonts` 的 `ofl/notoemoji/` → 更新 `fonts/NotoEmoji[wght].ttf`
+- **COLRv1 變體**：追蹤 `googlefonts/noto-emoji` main → 更新 `fonts/Noto-COLRv1.ttf`
 
 ---
 
@@ -136,6 +157,14 @@ curl -L -o fonts/NotoEmoji\[wght\].ttf \
   "https://github.com/google/fonts/raw/main/ofl/notoemoji/NotoEmoji%5Bwght%5D.ttf"
 ```
 
+#### 4. Noto COLRv1（COLRv1 變體用）
+
+前往 [noto-emoji fonts/](https://github.com/googlefonts/noto-emoji/blob/main/fonts/) 下載：
+
+```
+Noto-COLRv1.ttf  →  放入 fonts/
+```
+
 ### 建構
 
 ```bash
@@ -148,26 +177,36 @@ uv run python build.py
 # Lite 變體（單色 glyf，VHS 相容）
 uv run python build.py --lite
 
+# COLRv1 變體（彩色向量，Chrome 98+）
+uv run python build.py --colrv1
+
 # 只建構 Regular（快速測試）
 uv run python build.py --styles Regular
 uv run python build.py --lite --styles Regular
+uv run python build.py --colrv1 --styles Regular
 ```
 
 ### 輸出
 
 ```
 output/
-├── fonts/                          # Color 變體
+├── fonts/                               # Color 變體
 │   ├── SarasaMonoTCEmoji-Regular.ttf
 │   ├── SarasaMonoTCEmoji-Italic.ttf
 │   ├── SarasaMonoTCEmoji-Bold.ttf
 │   ├── SarasaMonoTCEmoji-BoldItalic.ttf
 │   └── fonts-manifest.json
-└── fonts-lite/                     # Lite 變體
-    ├── SarasaMonoTCEmojiLite-Regular.ttf
-    ├── SarasaMonoTCEmojiLite-Italic.ttf
-    ├── SarasaMonoTCEmojiLite-Bold.ttf
-    ├── SarasaMonoTCEmojiLite-BoldItalic.ttf
+├── fonts-lite/                          # Lite 變體
+│   ├── SarasaMonoTCEmojiLite-Regular.ttf
+│   ├── SarasaMonoTCEmojiLite-Italic.ttf
+│   ├── SarasaMonoTCEmojiLite-Bold.ttf
+│   ├── SarasaMonoTCEmojiLite-BoldItalic.ttf
+│   └── fonts-manifest.json
+└── fonts-colrv1/                        # COLRv1 變體
+    ├── SarasaMonoTCEmojiCOLRv1-Regular.ttf
+    ├── SarasaMonoTCEmojiCOLRv1-Italic.ttf
+    ├── SarasaMonoTCEmojiCOLRv1-Bold.ttf
+    ├── SarasaMonoTCEmojiCOLRv1-BoldItalic.ttf
     └── fonts-manifest.json
 ```
 
@@ -198,6 +237,18 @@ for cp, name in [(0x1F600, '😀'), (0x1F525, '🔥'), (0x4E00, '一')]:
 print(f'OK — Total glyphs: {len(f.getGlyphOrder())}')
 "
 
+# COLRv1 變體驗證
+uv run python -c "
+from fontTools.ttLib import TTFont
+f = TTFont('output/fonts-colrv1/SarasaMonoTCEmojiCOLRv1-Regular.ttf')
+assert 'COLR' in f and 'CPAL' in f, 'Missing COLR/CPAL tables'
+assert 'CBDT' not in f, 'Should not have CBDT'
+cmap = f['cmap'].getBestCmap()
+for cp, name in [(0x1F600, '😀'), (0x1F525, '🔥'), (0x4E00, '一')]:
+    assert cp in cmap, f'Missing U+{cp:04X} {name}'
+print(f'OK — Total glyphs: {len(f.getGlyphOrder())}')
+"
+
 # 瀏覽器目視驗證
 uv run python -m http.server 8765
 open http://localhost:8765/verify-emoji.html
@@ -220,10 +271,11 @@ uv run pytest tests/test_emoji_merge.py::TestScaleGlyph -v
 
 | 測試組 | 所需檔案 | 執行環境 |
 |--------|----------|----------|
-| `TestScaleGlyph`（8 個） | 無 | 本機 / CI |
+| `TestScaleGlyph`、`TestFilterColrToAddedGlyphs`（12 個） | 無 | 本機 / CI |
 | `TestGetEmojiCmap`、`TestCollectGlyphDeps`（8 個） | `fonts/NotoEmoji[wght].ttf` | 本機 / CI（自動下載） |
+| `TestCollectColrv1Deps`（3 個） | `fonts/Noto-COLRv1.ttf` | 僅本機 |
 | `TestDetectFontWidths`（2 個） | `fonts/SarasaMonoTC-Regular.ttf` | 僅本機 |
-| `TestColorOutput`、`TestLiteOutput`（14 個） | 已建構的 `output/` 字體 | 僅本機 |
+| `TestColorOutput`、`TestLiteOutput`、`TestCOLRv1Output`（24 個） | 已建構的 `output/` 字體 | 僅本機 |
 
 字體檔案不存在時，相關測試自動 skip（不算失敗）。
 
@@ -257,6 +309,13 @@ Set Height 2160
 - **Emoji 格式**：glyf TrueType outline（Noto Emoji variable font 的預設字重）
 - **檔案大小**：比 Color 變體約小 30%（無點陣圖資料）
 - **渲染**：Emoji 以終端機前景色顯示（單色），完整支援 Chromium/xterm.js
+
+### COLRv1 變體
+- **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）
+- **技術**：~30 個 geometry helper glyphs（PaintGlyph 節點引用）+ 1358 個空 glyf stub；paint tree 驅動彩色渲染
+- **檔案大小**：~26 MB（比 Color 小 26%；COLRv1 向量資料比 PNG 點陣圖精簡）
+- **支援環境**：Chrome/Chromium 98+、Firefox 107+；macOS 系統級支援需 macOS 13+
+- **名稱衝突處理**：`glyph06742` 與 Sarasa 衝突時自動重命名為 `glyph06742_colrv1`
 
 ### 共同
 - **Emoji 範圍**：單一 codepoint（ZWJ 序列/旗幟等複雜 emoji 留待 v2）
