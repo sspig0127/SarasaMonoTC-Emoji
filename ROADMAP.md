@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 改善路線圖
 
-> 最後更新：2026-03-29（v1.5 Color 變體 BMP 彩色覆蓋 + 73 tests）
+> 最後更新：2026-03-30（v1.5 完成；75 tests；CBLC debug log 強化）
 
 ---
 
@@ -15,45 +15,35 @@
 | **v1.4** | COLRv1 第三變體（彩色向量） | ✅ 已發佈 |
 | **v1.4.1** | COLRv1 greedy 選取（修復網頁亂碼） | ✅ 完成 |
 | **v1.4.2** | COLRv1 priority allowlist（dev emoji 保證彩色） | ✅ 已發佈 |
-| **v1.5** | BMP 符號彩色覆蓋（force_colrv1_codepoints）| ✅ 完成 |
+| **v1.5** | BMP 符號彩色覆蓋（force_color / force_colrv1_codepoints）；post 3.0→2.0 升級；75 tests | ✅ 完成 |
 | **v2.0** | ZWJ 序列 / 旗幟 / 膚色變體 | 🔮 未來 |
 
 ---
 
-## v1.3 — 測試框架與健壯性（近期）
+## v2.0 — 完整 Emoji 支援（長期）
 
-### 目標
-建立可靠的測試基礎，防止後續開發引入回歸問題；補強邊界條件處理。
+目前約 40% 現代 emoji 因需要 ZWJ 序列而缺席。v2.0 目標是補齊這個缺口。
 
-### 功能清單
+### 缺席類型分析
 
-#### T1 — 基本測試框架 ✅
-- [x] 建立 `tests/` 目錄結構
-- [x] `tests/test_font_output.py`：驗證建構結果
-  - 所有 emoji glyph 寬度 = 2× half-width
-  - 關鍵 codepoint 存在（😀 U+1F600、🔥 U+1F525、一 U+4E00）
-  - Color 版有 CBDT/CBLC、無 glyf-only emoji；Lite 版反之
-  - 建構前後 glyph 總數合理範圍（Sarasa 原始 + emoji 數量）
-- [x] `tests/test_emoji_merge.py`：單元測試核心函式
-  - `detect_font_widths()` 正確偵測已知字體
-  - `get_emoji_cmap()` 過濾 ASCII / Variation Selector
-  - `_scale_glyph()` 縮放後 bbox 為整數且在 int16 範圍內
-- [x] CI/CD：GitHub Actions workflow，PR 觸發自動測試
+| 類型 | 範例 | 數量 | 技術需求 |
+|------|------|------|----------|
+| 膚色變體 | 👋🏻（U+1F44B + U+1F3FB） | 125+ 個基底 | codepoint sequence → GSUB ligature |
+| ZWJ 家庭 | 👨‍👩‍👧‍👦 | 100+ 個 | ZWJ（U+200D）序列 |
+| 旗幟 | 🇺🇸（U+1F1FA + U+1F1F8） | 250+ 面 | Regional Indicator 雙字元 |
+| 性別變體 | 🏃‍♀️ vs 🏃‍♂️ | 70+ 個 | ZWJ + U+2640/2642 |
+| 職業 emoji | 👩‍💻 | 100+ 個 | ZWJ 序列 |
 
-#### T2 — UPM 縮放保護 ✅
-- [x] `_scale_glyph()` 加 int16 範圍驗證（-32768 ~ 32767）
-- [x] 若縮放後超界，raise `ValueError` 並說明原因
-- [x] 在 `merge_emoji_lite()` 加縮放結果摘要 log（yMin/yMax 樣本）
+### 技術方向
+- 解析 NotoColorEmoji 的 GSUB table（LookupType 4：Ligature Substitution）
+- 建立 ZWJ sequence → glyph name 的對應表
+- 將 sequence 加入 GSUB ligature rules，cmap 指向分解後的 input sequence
+- 旗幟：Regional Indicator 需特殊處理（兩個字元組合）
 
-#### T3 — verify-emoji.html 加 Lite 切換 ✅
-- [x] 加入變體切換器（Color / Lite 下拉選單）
-- [x] Lite 模式下切換至 `output/fonts-lite/` 路徑
-- [x] 加入「emoji 視覺尺寸對比文字」測試 case
-
-#### T4 — 建構健壯性 ✅
-- [x] 平行建構失敗時清理 partial output
-- [x] `detect_font_widths()` fallback 加最低佔比門檻（≥ 1% glyph）
-- [x] 建構耗時紀錄（每個 style 幾秒，總計）
+### 參考資源
+- [Unicode Emoji ZWJ Sequences](https://unicode.org/emoji/charts/emoji-zwj-sequences.html)
+- [OpenType GSUB Ligature Substitution](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#42-lookup-type-4-ligature-substitution-subtable)
+- [noto-emoji GSUB 實作](https://github.com/googlefonts/noto-emoji/blob/main/add_emoji_gsub.py)
 
 ---
 
@@ -91,7 +81,11 @@
 **CBLC 順序限制**：`emoji_glyphs_to_add` 保持 NotoColorEmoji glyph order（嚴格遞增 ID 要求），
 rename 後的字形在原始位置插入，不附加至末尾。
 
+**post table 升級**：Sarasa 使用 post format 3.0（不儲存字形名稱）。`color_forced_rename` 啟用時，
+`merge_emoji` Step 9.5 自動升級至 format 2.0，使 `uni2764_color` 等自訂後綴在 save/reload 後持久化。
+
 **預設清單**（5 個，config.yaml）：❤ U+2764、⭐ U+2B50、⚠ U+26A0、☺ U+263A、⚡ U+26A1（兩變體相同）
+⚠ 修改其中一個清單時，請同步修改另一個（`emoji.force_color_codepoints` ↔ `colrv1.force_colrv1_codepoints`）。
 
 ### 測試
 
@@ -103,47 +97,29 @@ rename 後的字形在原始位置插入，不附加至末尾。
 
 ---
 
-## v2.0 — 完整 Emoji 支援（長期）
+## v1.4.2 — COLRv1 Priority Allowlist（Dev Emoji 保證彩色）✅ 已發佈
 
-目前約 40% 現代 emoji 因需要 ZWJ 序列而缺席。v2.0 目標是補齊這個缺口，
-並解決部分 BMP 符號在 COLRv1 變體中呈現為黑白的問題。
+**背景**：v1.4.1 greedy 選取以 codepoint 升序截止於 ~U+1F4FB，
+導致高 codepoint dev emoji（🔧 🔗 🚀 🔒 等，U+1F500+）未被選入。
 
-### 缺席類型分析
+**修復**：兩階段選取 Phase 1 改為先保證 27 個高頻 dev/tooling emoji 入選，再以 greedy 填充其餘預算。
 
-| 類型 | 範例 | 數量 | 技術需求 |
-|------|------|------|----------|
-| 膚色變體 | 👋🏻（U+1F44B + U+1F3FB） | 125+ 個基底 | codepoint sequence → GSUB ligature |
-| ZWJ 家庭 | 👨‍👩‍👧‍👦 | 100+ 個 | ZWJ（U+200D）序列 |
-| 旗幟 | 🇺🇸（U+1F1FA + U+1F1F8） | 250+ 面 | Regional Indicator 雙字元 |
-| 性別變體 | 🏃‍♀️ vs 🏃‍♂️ | 70+ 個 | ZWJ + U+2640/2642 |
-| 職業 emoji | 👩‍💻 | 100+ 個 | ZWJ 序列 |
+**Phase 1 — Priority 清單挑選依據**（3 項條件）：
+1. 在 GitHub README / 技術文件中出現頻率高（🔧 ⚙️ 🚀 🔒 📦 等）
+2. **不在 BMP**（U+0000–U+FFFF）：BMP 符號 Sarasa 原生已有，`skip_existing` 正確跳過；
+   若需 BMP 符號顯示彩色，改用 `force_colrv1_codepoints`（v1.5 新增）
+3. COLRv1 greedy 截止點之後（U+1F500+），greedy 無法自動選入
 
-### 技術方向
-- 解析 NotoColorEmoji 的 GSUB table（LookupType 4：Ligature Substitution）
-- 建立 ZWJ sequence → glyph name 的對應表
-- 將 sequence 加入 GSUB ligature rules，cmap 指向分解後的 input sequence
-- 旗幟：Regional Indicator 需特殊處理（兩個字元組合）
+**Phase 2 — Greedy 填充**：剩餘預算以 codepoint 升序選入，首個超預算停止。
 
-### 參考資源
-- [Unicode Emoji ZWJ Sequences](https://unicode.org/emoji/charts/emoji-zwj-sequences.html)
-- [OpenType GSUB Ligature Substitution](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#42-lookup-type-4-ligature-substitution-subtable)
-- [noto-emoji GSUB 實作](https://github.com/googlefonts/noto-emoji/blob/main/add_emoji_gsub.py)
+- Priority 27 個 emoji 共消耗 27 slots（每個邊際成本 = 1，零幾何依賴）
+- 詳見 `config.yaml` `colrv1.priority_codepoints` 區塊的說明註解
+
+**附帶更新**：
+- `verify-emoji.html` 新增 Section 3：GitHub/程式文件常用符號驗證（8 個分類）
+- `docs/colrv1-emoji-list.json` 新增 `priority` 欄位（bool）
 
 ---
-
-## v1.4 — COLRv1 變體（彩色向量）✅ 已發佈
-
-作為「彩色但輕量」的第三選項。使用 `--colrv1` 旗標建構，詳見 `PLAN-COLRv1.md`。
-
-| 比較項目 | CBDT/CBLC（Color） | glyf（Lite） | COLRv1 |
-|---------|-------------------|-------------|--------|
-| 顏色 | ✅ 彩色 | ❌ 單色 | ✅ 彩色 |
-| Emoji 數量 | 1,358 | 1,358 | 600（greedy 選取） |
-| 檔案大小 | ~35 MB | ~25 MB | ~26 MB（實測） |
-| VHS/Chromium | ⚠️ 不穩定 | ✅ 完全支援 | ✅ Chrome 98+ |
-| 向量縮放 | ❌ 點陣圖 | ✅ 向量 | ✅ 向量 |
-
-來源字體：`Noto-COLRv1.ttf`（`googlefonts/noto-emoji` repo 的 `fonts/` 目錄）
 
 ## v1.4.1 — COLRv1 Greedy 選取（修復網頁亂碼）✅ 完成
 
@@ -165,26 +141,56 @@ rename 後的字形在原始位置插入，不附加至末尾。
 
 ---
 
-## v1.4.2 — COLRv1 Priority Allowlist（Dev Emoji 保證彩色）✅ 已發佈
+## v1.4 — COLRv1 變體（彩色向量）✅ 已發佈
 
-**背景**：v1.4.1 greedy 選取以 codepoint 升序截止於 ~U+1F4FB，
-導致高 codepoint dev emoji（🔧 🔗 🚀 🔒 等，U+1F500+）未被選入。
+作為「彩色但輕量」的第三選項。使用 `--colrv1` 旗標建構，詳見 `PLAN-COLRv1.md`。
 
-**修復**：兩階段選取 Phase 1 改為先保證 27 個高頻 dev/tooling emoji 入選，再以 greedy 填充其餘預算。
+| 比較項目 | CBDT/CBLC（Color） | glyf（Lite） | COLRv1 |
+|---------|-------------------|-------------|--------|
+| 顏色 | ✅ 彩色 | ❌ 單色 | ✅ 彩色 |
+| Emoji 數量 | 1,358 | 1,358 | 600（greedy 選取） |
+| 檔案大小 | ~35 MB | ~25 MB | ~26 MB（實測） |
+| VHS/Chromium | ⚠️ 不穩定 | ✅ 完全支援 | ✅ Chrome 98+ |
+| 向量縮放 | ❌ 點陣圖 | ✅ 向量 | ✅ 向量 |
 
-**Phase 1 — Priority 清單挑選依據**（3 項條件）：
-1. 在 GitHub README / 技術文件中出現頻率高（🔧 ⚙️ 🚀 🔒 📦 等）
-2. **不在 BMP**（U+0000–U+FFFF）：BMP 符號 Sarasa 原生已有，`skip_existing` 正確跳過
-3. COLRv1 greedy 截止點之後（U+1F500+），greedy 無法自動選入
+來源字體：`Noto-COLRv1.ttf`（`googlefonts/noto-emoji` repo 的 `fonts/` 目錄）
 
-**Phase 2 — Greedy 填充**：剩餘預算以 codepoint 升序選入，首個超預算停止。
+---
 
-- Priority 27 個 emoji 共消耗 27 slots（每個邊際成本 = 1，零幾何依賴）
-- 詳見 `config.yaml` `colrv1.priority_codepoints` 區塊的說明註解
+## v1.3 — 測試框架與健壯性 ✅ 完成
 
-**附帶更新**：
-- `verify-emoji.html` 新增 Section 3：GitHub/程式文件常用符號驗證（8 個分類）
-- `docs/colrv1-emoji-list.json` 新增 `priority` 欄位（bool）
+### 目標
+建立可靠的測試基礎，防止後續開發引入回歸問題；補強邊界條件處理。
+
+### 功能清單
+
+#### T1 — 基本測試框架 ✅
+- [x] 建立 `tests/` 目錄結構
+- [x] `tests/test_font_output.py`：驗證建構結果
+  - 所有 emoji glyph 寬度 = 2× half-width
+  - 關鍵 codepoint 存在（😀 U+1F600、🔥 U+1F525、一 U+4E00）
+  - Color 版有 CBDT/CBLC、無 glyf-only emoji；Lite 版反之
+  - 建構前後 glyph 總數合理範圍（Sarasa 原始 + emoji 數量）
+- [x] `tests/test_emoji_merge.py`：單元測試核心函式
+  - `detect_font_widths()` 正確偵測已知字體
+  - `get_emoji_cmap()` 過濾 ASCII / Variation Selector
+  - `_scale_glyph()` 縮放後 bbox 為整數且在 int16 範圍內
+- [x] CI/CD：GitHub Actions workflow，PR 觸發自動測試
+
+#### T2 — UPM 縮放保護 ✅
+- [x] `_scale_glyph()` 加 int16 範圍驗證（-32768 ~ 32767）
+- [x] 若縮放後超界，raise `ValueError` 並說明原因
+- [x] 在 `merge_emoji_lite()` 加縮放結果摘要 log（yMin/yMax 樣本）
+
+#### T3 — verify-emoji.html 加 Lite / COLRv1 切換 ✅
+- [x] 加入變體切換器（Color / Lite / COLRv1 下拉選單）
+- [x] 各變體切換至對應 `output/fonts-*/` 路徑
+- [x] 加入「emoji 視覺尺寸對比文字」測試 case
+
+#### T4 — 建構健壯性 ✅
+- [x] 平行建構失敗時清理 partial output
+- [x] `detect_font_widths()` fallback 加最低佔比門檻（≥ 1% glyph）
+- [x] 建構耗時紀錄（每個 style 幾秒，總計）
 
 ---
 
