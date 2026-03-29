@@ -79,3 +79,9 @@ colrv1:
   emoji_font: "Noto-COLRv1.ttf"
   output_dir: "output/fonts-colrv1"
   description: "Sarasa Mono TC (更紗黑體繁中等寬) with embedded Noto COLRv1 — color vector emoji for Chrome/Chromium terminals"
+  # Greedy glyph budget: limits total new glyph slots (emoji stubs + geometry deps).
+  # Noto-COLRv1 has ~1,400 single-codepoint emoji; the full set causes browser/OTS
+  # garbling due to oversized glyph tables.  8136 accommodates ~600 emoji (codepoint-sorted).
+  max_new_glyphs: 8136
+  # Path for the generated emoji selection list (committed to repo for reference).
+  emoji_list_path: "docs/colrv1-emoji-list.json"

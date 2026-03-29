@@ -208,6 +208,9 @@ output/
     ├── SarasaMonoTCEmojiCOLRv1-Bold.ttf
     ├── SarasaMonoTCEmojiCOLRv1-BoldItalic.ttf
     └── fonts-manifest.json
+
+docs/
+└── colrv1-emoji-list.json               # COLRv1 greedy 選取清單（含 codepoint、unicode name、glyph cost）
 ```
 
 ---
@@ -273,7 +276,7 @@ uv run pytest tests/test_emoji_merge.py::TestScaleGlyph -v
 |--------|----------|----------|
 | `TestScaleGlyph`、`TestFilterColrToAddedGlyphs`（12 個） | 無 | 本機 / CI |
 | `TestGetEmojiCmap`、`TestCollectGlyphDeps`（8 個） | `fonts/NotoEmoji[wght].ttf` | 本機 / CI（自動下載） |
-| `TestCollectColrv1Deps`（3 個） | `fonts/Noto-COLRv1.ttf` | 僅本機 |
+| `TestCollectColrv1Deps`（5 個） | `fonts/Noto-COLRv1.ttf` | 僅本機 |
 | `TestDetectFontWidths`（2 個） | `fonts/SarasaMonoTC-Regular.ttf` | 僅本機 |
 | `TestColorOutput`、`TestLiteOutput`、`TestCOLRv1Output`（24 個） | 已建構的 `output/` 字體 | 僅本機 |
 
@@ -312,10 +315,13 @@ Set Height 2160
 
 ### COLRv1 變體
 - **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）
-- **技術**：~30 個 geometry helper glyphs（PaintGlyph 節點引用）+ 1358 個空 glyf stub；paint tree 驅動彩色渲染
+- **Emoji 數量**：600 個常用 emoji（依 codepoint 升序 greedy 選取，glyph 預算上限 8,136 slots）
+  - 完整選取清單：[`docs/colrv1-emoji-list.json`](docs/colrv1-emoji-list.json)
+  - 可透過 `config.yaml` 的 `colrv1.max_new_glyphs` 調整預算
+- **技術**：7,536 個 geometry helper glyphs（PaintGlyph 節點引用）+ 600 個空 glyf stub；paint tree 驅動彩色渲染
 - **檔案大小**：~26 MB（比 Color 小 26%；COLRv1 向量資料比 PNG 點陣圖精簡）
 - **支援環境**：Chrome/Chromium 98+、Firefox 107+；macOS 系統級支援需 macOS 13+
-- **名稱衝突處理**：`glyph06742` 與 Sarasa 衝突時自動重命名為 `glyph06742_colrv1`
+- **名稱衝突處理**：Sarasa 已有同名 glyph 時自動加 `_colrv1` 後綴（build log 會列出衝突數量）
 
 ### 共同
 - **Emoji 範圍**：單一 codepoint（ZWJ 序列/旗幟等複雜 emoji 留待 v2）

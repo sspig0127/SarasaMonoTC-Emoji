@@ -21,6 +21,7 @@ import json
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
 
@@ -110,7 +111,8 @@ def build_single_font(
     metadata: dict,
     lite: bool = False,
     colrv1: bool = False,
-) -> str:
+    max_new_glyphs: int | None = None,
+) -> tuple[str, list[dict]]:
     """Build a single font variant with emoji merged in.
 
     Args:
@@ -122,14 +124,18 @@ def build_single_font(
         config: FontConfig object
         metadata: Font metadata dict
         lite: If True, use glyf-based monochrome merge (Lite variant)
+        colrv1: If True, use COLRv1 vector merge
+        max_new_glyphs: COLRv1 only — glyph budget for greedy selection
 
     Returns:
-        Output file path string
+        (output_path, selection_records) where selection_records contains
+        per-emoji metadata when COLRv1 greedy selection is active, else [].
     """
     style_start = time.monotonic()
     print(f"\nBuilding {config.family_name_compact}-{style}...")
 
     # Merge emoji into base font
+    selection_records: list[dict] = []
     if lite:
         merged_font = merge_emoji_lite(
             base_font_path=str(base_font_path),
@@ -137,10 +143,11 @@ def build_single_font(
             config=config,
         )
     elif colrv1:
-        merged_font = merge_emoji_colrv1(
+        merged_font, selection_records = merge_emoji_colrv1(
             base_font_path=str(base_font_path),
             emoji_font_path=str(emoji_font_path),
             config=config,
+            max_new_glyphs=max_new_glyphs,
         )
     else:
         merged_font = merge_emoji(
@@ -194,7 +201,41 @@ def build_single_font(
     merged_font.close()
     elapsed = time.monotonic() - style_start
     print(f"  Saved: {output_path} ({elapsed:.1f}s)")
-    return str(output_path)
+    return str(output_path), selection_records
+
+
+def _write_emoji_list(
+    records: list[dict],
+    output_path: Path,
+    version: str,
+    max_new_glyphs: int,
+) -> None:
+    """Write the COLRv1 greedy-selected emoji list as JSON.
+
+    The file is committed to the repository so the selection can be reviewed
+    without rebuilding.  All four styles share the same emoji font, so one
+    style's selection_records is sufficient.
+
+    Args:
+        records: List of per-emoji dicts from _select_colrv1_emoji_greedy.
+        output_path: Destination JSON file path (parent dir created if needed).
+        version: Font version string for provenance.
+        max_new_glyphs: Budget that was used during selection.
+    """
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    total_cost = sum(r["new_glyph_cost"] for r in records)
+    data = {
+        "generated": datetime.now(timezone.utc).isoformat(),
+        "version": version,
+        "max_new_glyphs": max_new_glyphs,
+        "selected_count": len(records),
+        "total_glyph_cost": total_cost,
+        "emoji": records,
+    }
+    output_path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"\nEmoji list written: {output_path} ({len(records)} emoji, cost: {total_cost})")
 
 
 def main():
@@ -261,6 +302,13 @@ Configuration priority: CLI args > config.yaml > defaults
         )
         variant_emoji_font = get_config_value(yaml_config, "colrv1", "emoji_font") or "Noto-COLRv1.ttf"
         default_output_dir = get_config_value(yaml_config, "colrv1", "output_dir") or "output/fonts-colrv1"
+        colrv1_max_new_glyphs: int | None = get_config_int(
+            yaml_config, "colrv1", "max_new_glyphs", default=8136
+        )
+        colrv1_emoji_list_path = Path(
+            get_config_value(yaml_config, "colrv1", "emoji_list_path")
+            or "docs/colrv1-emoji-list.json"
+        )
     elif is_lite:
         family_name = (
             get_config_value(yaml_config, "lite", "family_name")
@@ -268,10 +316,14 @@ Configuration priority: CLI args > config.yaml > defaults
         )
         variant_emoji_font = get_config_value(yaml_config, "lite", "emoji_font") or "NotoEmoji[wght].ttf"
         default_output_dir = get_config_value(yaml_config, "lite", "output_dir") or "output/fonts-lite"
+        colrv1_max_new_glyphs = None
+        colrv1_emoji_list_path = None
     else:
         family_name = get_config_value(yaml_config, "font", "family_name") or "SarasaMonoTCEmoji"
         variant_emoji_font = None
         default_output_dir = get_config_value(yaml_config, "build", "output_dir") or "output/fonts"
+        colrv1_max_new_glyphs = None
+        colrv1_emoji_list_path = None
 
     output_dir = args.output_dir or Path(default_output_dir)
 
@@ -363,21 +415,27 @@ Configuration priority: CLI args > config.yaml > defaults
     print(f"Source: {fonts_dir}")
     print(f"Output: {output_dir}")
     print(f"Emoji width: {config.emoji_width_multiplier}x half-width")
+    if is_colrv1 and colrv1_max_new_glyphs is not None:
+        print(f"Glyph budget: {colrv1_max_new_glyphs} new slots (greedy selection)")
     print("Font mapping:")
     for style in styles:
         p = font_paths[style]
         print(f"  {style}: {p['base_font_path'].name} + {p['emoji_font_path'].name}")
 
     build_start = time.monotonic()
+    colrv1_selection_records: list[dict] = []
 
     if parallel <= 1:
         for style in styles:
             p = font_paths[style]
-            build_single_font(
+            _, records = build_single_font(
                 style, p["base_font_path"], p["emoji_font_path"],
                 p["display_name"], output_dir, config, metadata,
                 lite=is_lite, colrv1=is_colrv1,
+                max_new_glyphs=colrv1_max_new_glyphs,
             )
+            if records and not colrv1_selection_records:
+                colrv1_selection_records = records
     else:
         try:
             with ProcessPoolExecutor(max_workers=parallel) as executor:
@@ -389,13 +447,16 @@ Configuration priority: CLI args > config.yaml > defaults
                         style, p["base_font_path"], p["emoji_font_path"],
                         p["display_name"], output_dir, config, metadata,
                         is_lite, is_colrv1,
+                        colrv1_max_new_glyphs,
                     )
                     futures[future] = style
 
                 for future in as_completed(futures):
                     style = futures[future]
                     try:
-                        future.result()
+                        _, records = future.result()
+                        if records and not colrv1_selection_records:
+                            colrv1_selection_records = records
                     except Exception as e:
                         print(f"\nError building {style}: {e}")
                         for f in futures:
@@ -407,6 +468,15 @@ Configuration priority: CLI args > config.yaml > defaults
             raise
 
     build_elapsed = time.monotonic() - build_start
+
+    # Write COLRv1 emoji selection list (committed to repo for reference)
+    if is_colrv1 and colrv1_selection_records and colrv1_emoji_list_path is not None:
+        _write_emoji_list(
+            records=colrv1_selection_records,
+            output_path=colrv1_emoji_list_path,
+            version=version,
+            max_new_glyphs=colrv1_max_new_glyphs,
+        )
 
     # Generate manifest for verify-emoji.html
     manifest = {

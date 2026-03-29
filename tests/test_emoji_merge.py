@@ -339,6 +339,50 @@ class TestCollectColrv1Deps:
         # (test passes even if empty — absence of crash is the main check)
         assert isinstance(deps, set)
 
+    def test_paint_colr_layers_deps_collected(self, noto_colrv1_font):
+        """PaintColrLayers (Format=1) emoji must have their geometry deps collected.
+
+        Noto-COLRv1 uses PaintColrLayers for ~92% of emoji (including u1F600).
+        The walk function must traverse into the LayerList to find PaintGlyph
+        references — otherwise geometry helper glyphs are never added and the
+        merged font renders empty/garbled glyphs.
+        """
+        colr = noto_colrv1_font["COLR"].table
+        # Confirm u1F600 uses PaintColrLayers (Format=1), not inline PaintGlyph
+        for rec in colr.BaseGlyphList.BaseGlyphPaintRecord:
+            if rec.BaseGlyph == "u1F600":
+                if rec.Paint.Format != 1:
+                    pytest.skip("u1F600 paint format changed; test assumption no longer valid")
+                break
+        else:
+            pytest.skip("u1F600 not in COLRv1 BaseGlyphList")
+
+        cmap = get_emoji_cmap(noto_colrv1_font)
+        target_names = {name for cp, name in cmap.items() if cp == 0x1F600}
+        deps = _collect_colrv1_paint_glyph_deps(noto_colrv1_font, target_names)
+        assert len(deps) > 0, (
+            "u1F600 uses PaintColrLayers but no geometry deps were collected — "
+            "walk() is not traversing the LayerList"
+        )
+        # All collected deps must exist in the source font's glyph order
+        font_glyphs = set(noto_colrv1_font.getGlyphOrder())
+        for dep in deps:
+            assert dep in font_glyphs, f"Collected dep '{dep}' not in source font"
+
+    def test_all_emoji_deps_collected(self, noto_colrv1_font):
+        """Collecting deps for all emoji should yield significantly more than 100 unique glyphs.
+
+        With only inline PaintGlyph (Format=10) traversal, only ~42 deps are found.
+        With proper PaintColrLayers (Format=1) traversal, thousands are found.
+        """
+        cmap = get_emoji_cmap(noto_colrv1_font)
+        target_names = set(cmap.values())
+        deps = _collect_colrv1_paint_glyph_deps(noto_colrv1_font, target_names)
+        assert len(deps) > 100, (
+            f"Expected >100 geometry deps across all emoji, got {len(deps)}. "
+            "PaintColrLayers traversal may be broken."
+        )
+
     def test_deps_not_in_target_names(self, noto_colrv1_font):
         """Caller should subtract target_names from returned deps to avoid double-adding."""
         cmap = get_emoji_cmap(noto_colrv1_font)

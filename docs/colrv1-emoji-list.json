@@ -1,0 +1,4809 @@
+{
+  "generated": "2026-03-29T03:25:00.618144+00:00",
+  "version": "1.4",
+  "max_new_glyphs": 8136,
+  "selected_count": 600,
+  "total_glyph_cost": 8136,
+  "emoji": [
+    {
+      "codepoint": "U+20E3",
+      "char": "⃣",
+      "glyph_name": "uni20E3",
+      "unicode_name": "COMBINING ENCLOSING KEYCAP",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+2604",
+      "char": "☄",
+      "glyph_name": "uni2604",
+      "unicode_name": "COMET",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+2614",
+      "char": "☔",
+      "glyph_name": "uni2614",
+      "unicode_name": "UMBRELLA WITH RAIN DROPS",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+2615",
+      "char": "☕",
+      "glyph_name": "uni2615",
+      "unicode_name": "HOT BEVERAGE",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+2618",
+      "char": "☘",
+      "glyph_name": "uni2618",
+      "unicode_name": "SHAMROCK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+2620",
+      "char": "☠",
+      "glyph_name": "uni2620",
+      "unicode_name": "SKULL AND CROSSBONES",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+2622",
+      "char": "☢",
+      "glyph_name": "uni2622",
+      "unicode_name": "RADIOACTIVE SIGN",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+2623",
+      "char": "☣",
+      "glyph_name": "uni2623",
+      "unicode_name": "BIOHAZARD SIGN",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+262A",
+      "char": "☪",
+      "glyph_name": "uni262A",
+      "unicode_name": "STAR AND CRESCENT",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+262E",
+      "char": "☮",
+      "glyph_name": "uni262E",
+      "unicode_name": "PEACE SYMBOL",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+2638",
+      "char": "☸",
+      "glyph_name": "uni2638",
+      "unicode_name": "WHEEL OF DHARMA",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+2648",
+      "char": "♈",
+      "glyph_name": "uni2648",
+      "unicode_name": "ARIES",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+2649",
+      "char": "♉",
+      "glyph_name": "uni2649",
+      "unicode_name": "TAURUS",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+264A",
+      "char": "♊",
+      "glyph_name": "uni264A",
+      "unicode_name": "GEMINI",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+264B",
+      "char": "♋",
+      "glyph_name": "uni264B",
+      "unicode_name": "CANCER",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+264C",
+      "char": "♌",
+      "glyph_name": "uni264C",
+      "unicode_name": "LEO",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+264D",
+      "char": "♍",
+      "glyph_name": "uni264D",
+      "unicode_name": "VIRGO",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+264E",
+      "char": "♎",
+      "glyph_name": "uni264E",
+      "unicode_name": "LIBRA",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+264F",
+      "char": "♏",
+      "glyph_name": "uni264F",
+      "unicode_name": "SCORPIUS",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+2650",
+      "char": "♐",
+      "glyph_name": "uni2650",
+      "unicode_name": "SAGITTARIUS",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+2651",
+      "char": "♑",
+      "glyph_name": "uni2651",
+      "unicode_name": "CAPRICORN",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+2652",
+      "char": "♒",
+      "glyph_name": "uni2652",
+      "unicode_name": "AQUARIUS",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+2653",
+      "char": "♓",
+      "glyph_name": "uni2653",
+      "unicode_name": "PISCES",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+265F",
+      "char": "♟",
+      "glyph_name": "uni265F",
+      "unicode_name": "BLACK CHESS PAWN",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+267F",
+      "char": "♿",
+      "glyph_name": "uni267F",
+      "unicode_name": "WHEELCHAIR SYMBOL",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+2692",
+      "char": "⚒",
+      "glyph_name": "uni2692",
+      "unicode_name": "HAMMER AND PICK",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+2693",
+      "char": "⚓",
+      "glyph_name": "uni2693",
+      "unicode_name": "ANCHOR",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+2694",
+      "char": "⚔",
+      "glyph_name": "uni2694",
+      "unicode_name": "CROSSED SWORDS",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+2695",
+      "char": "⚕",
+      "glyph_name": "uni2695",
+      "unicode_name": "STAFF OF AESCULAPIUS",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+2696",
+      "char": "⚖",
+      "glyph_name": "uni2696",
+      "unicode_name": "SCALES",
+      "geometry_deps_count": 24,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+2697",
+      "char": "⚗",
+      "glyph_name": "uni2697",
+      "unicode_name": "ALEMBIC",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+269C",
+      "char": "⚜",
+      "glyph_name": "uni269C",
+      "unicode_name": "FLEUR-DE-LIS",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+26A7",
+      "char": "⚧",
+      "glyph_name": "uni26A7",
+      "unicode_name": "MALE WITH STROKE AND MALE AND FEMALE SIGN",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+26B0",
+      "char": "⚰",
+      "glyph_name": "uni26B0",
+      "unicode_name": "COFFIN",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+26B1",
+      "char": "⚱",
+      "glyph_name": "uni26B1",
+      "unicode_name": "FUNERAL URN",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+26C4",
+      "char": "⛄",
+      "glyph_name": "uni26C4",
+      "unicode_name": "SNOWMAN WITHOUT SNOW",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+26C5",
+      "char": "⛅",
+      "glyph_name": "uni26C5",
+      "unicode_name": "SUN BEHIND CLOUD",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+26C8",
+      "char": "⛈",
+      "glyph_name": "uni26C8",
+      "unicode_name": "THUNDER CLOUD AND RAIN",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+26CE",
+      "char": "⛎",
+      "glyph_name": "uni26CE",
+      "unicode_name": "OPHIUCHUS",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+26CF",
+      "char": "⛏",
+      "glyph_name": "uni26CF",
+      "unicode_name": "PICK",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+26D1",
+      "char": "⛑",
+      "glyph_name": "uni26D1",
+      "unicode_name": "HELMET WITH WHITE CROSS",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+26D3",
+      "char": "⛓",
+      "glyph_name": "uni26D3",
+      "unicode_name": "CHAINS",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+26D4",
+      "char": "⛔",
+      "glyph_name": "uni26D4",
+      "unicode_name": "NO ENTRY",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+26E9",
+      "char": "⛩",
+      "glyph_name": "uni26E9",
+      "unicode_name": "SHINTO SHRINE",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+26EA",
+      "char": "⛪",
+      "glyph_name": "uni26EA",
+      "unicode_name": "CHURCH",
+      "geometry_deps_count": 39,
+      "new_glyph_cost": 40
+    },
+    {
+      "codepoint": "U+26F0",
+      "char": "⛰",
+      "glyph_name": "uni26F0",
+      "unicode_name": "MOUNTAIN",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+26F1",
+      "char": "⛱",
+      "glyph_name": "uni26F1",
+      "unicode_name": "UMBRELLA ON GROUND",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+26F2",
+      "char": "⛲",
+      "glyph_name": "uni26F2",
+      "unicode_name": "FOUNTAIN",
+      "geometry_deps_count": 26,
+      "new_glyph_cost": 27
+    },
+    {
+      "codepoint": "U+26F3",
+      "char": "⛳",
+      "glyph_name": "uni26F3",
+      "unicode_name": "FLAG IN HOLE",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+26F4",
+      "char": "⛴",
+      "glyph_name": "uni26F4",
+      "unicode_name": "FERRY",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 22
+    },
+    {
+      "codepoint": "U+26F5",
+      "char": "⛵",
+      "glyph_name": "uni26F5",
+      "unicode_name": "SAILBOAT",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+26F7",
+      "char": "⛷",
+      "glyph_name": "uni26F7",
+      "unicode_name": "SKIER",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+26F8",
+      "char": "⛸",
+      "glyph_name": "uni26F8",
+      "unicode_name": "ICE SKATE",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+26F9",
+      "char": "⛹",
+      "glyph_name": "uni26F9",
+      "unicode_name": "PERSON WITH BALL",
+      "geometry_deps_count": 29,
+      "new_glyph_cost": 30
+    },
+    {
+      "codepoint": "U+26FA",
+      "char": "⛺",
+      "glyph_name": "uni26FA",
+      "unicode_name": "TENT",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+26FD",
+      "char": "⛽",
+      "glyph_name": "uni26FD",
+      "unicode_name": "FUEL PUMP",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+2705",
+      "char": "✅",
+      "glyph_name": "uni2705",
+      "unicode_name": "WHITE HEAVY CHECK MARK",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+2708",
+      "char": "✈",
+      "glyph_name": "uni2708",
+      "unicode_name": "AIRPLANE",
+      "geometry_deps_count": 30,
+      "new_glyph_cost": 31
+    },
+    {
+      "codepoint": "U+2709",
+      "char": "✉",
+      "glyph_name": "uni2709",
+      "unicode_name": "ENVELOPE",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+270A",
+      "char": "✊",
+      "glyph_name": "uni270A",
+      "unicode_name": "RAISED FIST",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+270B",
+      "char": "✋",
+      "glyph_name": "uni270B",
+      "unicode_name": "RAISED HAND",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+270C",
+      "char": "✌",
+      "glyph_name": "uni270C",
+      "unicode_name": "VICTORY HAND",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+270D",
+      "char": "✍",
+      "glyph_name": "uni270D",
+      "unicode_name": "WRITING HAND",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+270F",
+      "char": "✏",
+      "glyph_name": "uni270F",
+      "unicode_name": "PENCIL",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+2712",
+      "char": "✒",
+      "glyph_name": "uni2712",
+      "unicode_name": "BLACK NIB",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+2728",
+      "char": "✨",
+      "glyph_name": "uni2728",
+      "unicode_name": "SPARKLES",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+274E",
+      "char": "❎",
+      "glyph_name": "uni274E",
+      "unicode_name": "NEGATIVE SQUARED CROSS MARK",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+2753",
+      "char": "❓",
+      "glyph_name": "uni2753",
+      "unicode_name": "BLACK QUESTION MARK ORNAMENT",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+2754",
+      "char": "❔",
+      "glyph_name": "uni2754",
+      "unicode_name": "WHITE QUESTION MARK ORNAMENT",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+2755",
+      "char": "❕",
+      "glyph_name": "uni2755",
+      "unicode_name": "WHITE EXCLAMATION MARK ORNAMENT",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+2757",
+      "char": "❗",
+      "glyph_name": "uni2757",
+      "unicode_name": "HEAVY EXCLAMATION MARK SYMBOL",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+2763",
+      "char": "❣",
+      "glyph_name": "uni2763",
+      "unicode_name": "HEAVY HEART EXCLAMATION MARK ORNAMENT",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+2795",
+      "char": "➕",
+      "glyph_name": "uni2795",
+      "unicode_name": "HEAVY PLUS SIGN",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+2796",
+      "char": "➖",
+      "glyph_name": "uni2796",
+      "unicode_name": "HEAVY MINUS SIGN",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+2797",
+      "char": "➗",
+      "glyph_name": "uni2797",
+      "unicode_name": "HEAVY DIVISION SIGN",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F004",
+      "char": "🀄",
+      "glyph_name": "u1F004",
+      "unicode_name": "MAHJONG TILE RED DRAGON",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F1E6",
+      "char": "🇦",
+      "glyph_name": "u1F1E6",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER A",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1E7",
+      "char": "🇧",
+      "glyph_name": "u1F1E7",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER B",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1E8",
+      "char": "🇨",
+      "glyph_name": "u1F1E8",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER C",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1E9",
+      "char": "🇩",
+      "glyph_name": "u1F1E9",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER D",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1EA",
+      "char": "🇪",
+      "glyph_name": "u1F1EA",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER E",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1EB",
+      "char": "🇫",
+      "glyph_name": "u1F1EB",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER F",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1EC",
+      "char": "🇬",
+      "glyph_name": "u1F1EC",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER G",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1ED",
+      "char": "🇭",
+      "glyph_name": "u1F1ED",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER H",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1EE",
+      "char": "🇮",
+      "glyph_name": "u1F1EE",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER I",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1EF",
+      "char": "🇯",
+      "glyph_name": "u1F1EF",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER J",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1F0",
+      "char": "🇰",
+      "glyph_name": "u1F1F0",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER K",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1F1",
+      "char": "🇱",
+      "glyph_name": "u1F1F1",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER L",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1F2",
+      "char": "🇲",
+      "glyph_name": "u1F1F2",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER M",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1F3",
+      "char": "🇳",
+      "glyph_name": "u1F1F3",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER N",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1F4",
+      "char": "🇴",
+      "glyph_name": "u1F1F4",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER O",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1F5",
+      "char": "🇵",
+      "glyph_name": "u1F1F5",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER P",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1F6",
+      "char": "🇶",
+      "glyph_name": "u1F1F6",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER Q",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1F7",
+      "char": "🇷",
+      "glyph_name": "u1F1F7",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER R",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1F8",
+      "char": "🇸",
+      "glyph_name": "u1F1F8",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER S",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1F9",
+      "char": "🇹",
+      "glyph_name": "u1F1F9",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER T",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1FA",
+      "char": "🇺",
+      "glyph_name": "u1F1FA",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER U",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1FB",
+      "char": "🇻",
+      "glyph_name": "u1F1FB",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER V",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1FC",
+      "char": "🇼",
+      "glyph_name": "u1F1FC",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER W",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1FD",
+      "char": "🇽",
+      "glyph_name": "u1F1FD",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER X",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1FE",
+      "char": "🇾",
+      "glyph_name": "u1F1FE",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER Y",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F1FF",
+      "char": "🇿",
+      "glyph_name": "u1F1FF",
+      "unicode_name": "REGIONAL INDICATOR SYMBOL LETTER Z",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F300",
+      "char": "🌀",
+      "glyph_name": "u1F300",
+      "unicode_name": "CYCLONE",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F301",
+      "char": "🌁",
+      "glyph_name": "u1F301",
+      "unicode_name": "FOGGY",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F302",
+      "char": "🌂",
+      "glyph_name": "u1F302",
+      "unicode_name": "CLOSED UMBRELLA",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F303",
+      "char": "🌃",
+      "glyph_name": "u1F303",
+      "unicode_name": "NIGHT WITH STARS",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F304",
+      "char": "🌄",
+      "glyph_name": "u1F304",
+      "unicode_name": "SUNRISE OVER MOUNTAINS",
+      "geometry_deps_count": 20,
+      "new_glyph_cost": 21
+    },
+    {
+      "codepoint": "U+1F305",
+      "char": "🌅",
+      "glyph_name": "u1F305",
+      "unicode_name": "SUNRISE",
+      "geometry_deps_count": 24,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+1F306",
+      "char": "🌆",
+      "glyph_name": "u1F306",
+      "unicode_name": "CITYSCAPE AT DUSK",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F307",
+      "char": "🌇",
+      "glyph_name": "u1F307",
+      "unicode_name": "SUNSET OVER BUILDINGS",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F308",
+      "char": "🌈",
+      "glyph_name": "u1F308",
+      "unicode_name": "RAINBOW",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F309",
+      "char": "🌉",
+      "glyph_name": "u1F309",
+      "unicode_name": "BRIDGE AT NIGHT",
+      "geometry_deps_count": 27,
+      "new_glyph_cost": 25
+    },
+    {
+      "codepoint": "U+1F30A",
+      "char": "🌊",
+      "glyph_name": "u1F30A",
+      "unicode_name": "WATER WAVE",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F30B",
+      "char": "🌋",
+      "glyph_name": "u1F30B",
+      "unicode_name": "VOLCANO",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F30C",
+      "char": "🌌",
+      "glyph_name": "u1F30C",
+      "unicode_name": "MILKY WAY",
+      "geometry_deps_count": 57,
+      "new_glyph_cost": 57
+    },
+    {
+      "codepoint": "U+1F30D",
+      "char": "🌍",
+      "glyph_name": "u1F30D",
+      "unicode_name": "EARTH GLOBE EUROPE-AFRICA",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F30E",
+      "char": "🌎",
+      "glyph_name": "u1F30E",
+      "unicode_name": "EARTH GLOBE AMERICAS",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F30F",
+      "char": "🌏",
+      "glyph_name": "u1F30F",
+      "unicode_name": "EARTH GLOBE ASIA-AUSTRALIA",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F310",
+      "char": "🌐",
+      "glyph_name": "u1F310",
+      "unicode_name": "GLOBE WITH MERIDIANS",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F311",
+      "char": "🌑",
+      "glyph_name": "u1F311",
+      "unicode_name": "NEW MOON SYMBOL",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F312",
+      "char": "🌒",
+      "glyph_name": "u1F312",
+      "unicode_name": "WAXING CRESCENT MOON SYMBOL",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F313",
+      "char": "🌓",
+      "glyph_name": "u1F313",
+      "unicode_name": "FIRST QUARTER MOON SYMBOL",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F314",
+      "char": "🌔",
+      "glyph_name": "u1F314",
+      "unicode_name": "WAXING GIBBOUS MOON SYMBOL",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F315",
+      "char": "🌕",
+      "glyph_name": "u1F315",
+      "unicode_name": "FULL MOON SYMBOL",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F316",
+      "char": "🌖",
+      "glyph_name": "u1F316",
+      "unicode_name": "WANING GIBBOUS MOON SYMBOL",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F317",
+      "char": "🌗",
+      "glyph_name": "u1F317",
+      "unicode_name": "LAST QUARTER MOON SYMBOL",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F318",
+      "char": "🌘",
+      "glyph_name": "u1F318",
+      "unicode_name": "WANING CRESCENT MOON SYMBOL",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F319",
+      "char": "🌙",
+      "glyph_name": "u1F319",
+      "unicode_name": "CRESCENT MOON",
+      "geometry_deps_count": 2,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F31A",
+      "char": "🌚",
+      "glyph_name": "u1F31A",
+      "unicode_name": "NEW MOON WITH FACE",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F31B",
+      "char": "🌛",
+      "glyph_name": "u1F31B",
+      "unicode_name": "FIRST QUARTER MOON WITH FACE",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F31C",
+      "char": "🌜",
+      "glyph_name": "u1F31C",
+      "unicode_name": "LAST QUARTER MOON WITH FACE",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F31D",
+      "char": "🌝",
+      "glyph_name": "u1F31D",
+      "unicode_name": "FULL MOON WITH FACE",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F31E",
+      "char": "🌞",
+      "glyph_name": "u1F31E",
+      "unicode_name": "SUN WITH FACE",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F31F",
+      "char": "🌟",
+      "glyph_name": "u1F31F",
+      "unicode_name": "GLOWING STAR",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F320",
+      "char": "🌠",
+      "glyph_name": "u1F320",
+      "unicode_name": "SHOOTING STAR",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F321",
+      "char": "🌡",
+      "glyph_name": "u1F321",
+      "unicode_name": "THERMOMETER",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F324",
+      "char": "🌤",
+      "glyph_name": "u1F324",
+      "unicode_name": "WHITE SUN WITH SMALL CLOUD",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F325",
+      "char": "🌥",
+      "glyph_name": "u1F325",
+      "unicode_name": "WHITE SUN BEHIND CLOUD",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F326",
+      "char": "🌦",
+      "glyph_name": "u1F326",
+      "unicode_name": "WHITE SUN BEHIND CLOUD WITH RAIN",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F327",
+      "char": "🌧",
+      "glyph_name": "u1F327",
+      "unicode_name": "CLOUD WITH RAIN",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F328",
+      "char": "🌨",
+      "glyph_name": "u1F328",
+      "unicode_name": "CLOUD WITH SNOW",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F329",
+      "char": "🌩",
+      "glyph_name": "u1F329",
+      "unicode_name": "CLOUD WITH LIGHTNING",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F32A",
+      "char": "🌪",
+      "glyph_name": "u1F32A",
+      "unicode_name": "CLOUD WITH TORNADO",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F32B",
+      "char": "🌫",
+      "glyph_name": "u1F32B",
+      "unicode_name": "FOG",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F32C",
+      "char": "🌬",
+      "glyph_name": "u1F32C",
+      "unicode_name": "WIND BLOWING FACE",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F32D",
+      "char": "🌭",
+      "glyph_name": "u1F32D",
+      "unicode_name": "HOT DOG",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F32E",
+      "char": "🌮",
+      "glyph_name": "u1F32E",
+      "unicode_name": "TACO",
+      "geometry_deps_count": 33,
+      "new_glyph_cost": 34
+    },
+    {
+      "codepoint": "U+1F32F",
+      "char": "🌯",
+      "glyph_name": "u1F32F",
+      "unicode_name": "BURRITO",
+      "geometry_deps_count": 42,
+      "new_glyph_cost": 43
+    },
+    {
+      "codepoint": "U+1F330",
+      "char": "🌰",
+      "glyph_name": "u1F330",
+      "unicode_name": "CHESTNUT",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F331",
+      "char": "🌱",
+      "glyph_name": "u1F331",
+      "unicode_name": "SEEDLING",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F332",
+      "char": "🌲",
+      "glyph_name": "u1F332",
+      "unicode_name": "EVERGREEN TREE",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 20
+    },
+    {
+      "codepoint": "U+1F333",
+      "char": "🌳",
+      "glyph_name": "u1F333",
+      "unicode_name": "DECIDUOUS TREE",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F334",
+      "char": "🌴",
+      "glyph_name": "u1F334",
+      "unicode_name": "PALM TREE",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F335",
+      "char": "🌵",
+      "glyph_name": "u1F335",
+      "unicode_name": "CACTUS",
+      "geometry_deps_count": 33,
+      "new_glyph_cost": 34
+    },
+    {
+      "codepoint": "U+1F336",
+      "char": "🌶",
+      "glyph_name": "u1F336",
+      "unicode_name": "HOT PEPPER",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F337",
+      "char": "🌷",
+      "glyph_name": "u1F337",
+      "unicode_name": "TULIP",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F338",
+      "char": "🌸",
+      "glyph_name": "u1F338",
+      "unicode_name": "CHERRY BLOSSOM",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F339",
+      "char": "🌹",
+      "glyph_name": "u1F339",
+      "unicode_name": "ROSE",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F33A",
+      "char": "🌺",
+      "glyph_name": "u1F33A",
+      "unicode_name": "HIBISCUS",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F33B",
+      "char": "🌻",
+      "glyph_name": "u1F33B",
+      "unicode_name": "SUNFLOWER",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F33C",
+      "char": "🌼",
+      "glyph_name": "u1F33C",
+      "unicode_name": "BLOSSOM",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F33D",
+      "char": "🌽",
+      "glyph_name": "u1F33D",
+      "unicode_name": "EAR OF MAIZE",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+1F33E",
+      "char": "🌾",
+      "glyph_name": "u1F33E",
+      "unicode_name": "EAR OF RICE",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 20
+    },
+    {
+      "codepoint": "U+1F33F",
+      "char": "🌿",
+      "glyph_name": "u1F33F",
+      "unicode_name": "HERB",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F340",
+      "char": "🍀",
+      "glyph_name": "u1F340",
+      "unicode_name": "FOUR LEAF CLOVER",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F341",
+      "char": "🍁",
+      "glyph_name": "u1F341",
+      "unicode_name": "MAPLE LEAF",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F342",
+      "char": "🍂",
+      "glyph_name": "u1F342",
+      "unicode_name": "FALLEN LEAF",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F343",
+      "char": "🍃",
+      "glyph_name": "u1F343",
+      "unicode_name": "LEAF FLUTTERING IN WIND",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F344",
+      "char": "🍄",
+      "glyph_name": "u1F344",
+      "unicode_name": "MUSHROOM",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F345",
+      "char": "🍅",
+      "glyph_name": "u1F345",
+      "unicode_name": "TOMATO",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F346",
+      "char": "🍆",
+      "glyph_name": "u1F346",
+      "unicode_name": "AUBERGINE",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F347",
+      "char": "🍇",
+      "glyph_name": "u1F347",
+      "unicode_name": "GRAPES",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+1F348",
+      "char": "🍈",
+      "glyph_name": "u1F348",
+      "unicode_name": "MELON",
+      "geometry_deps_count": 86,
+      "new_glyph_cost": 87
+    },
+    {
+      "codepoint": "U+1F349",
+      "char": "🍉",
+      "glyph_name": "u1F349",
+      "unicode_name": "WATERMELON",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F34A",
+      "char": "🍊",
+      "glyph_name": "u1F34A",
+      "unicode_name": "TANGERINE",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F34B",
+      "char": "🍋",
+      "glyph_name": "u1F34B",
+      "unicode_name": "LEMON",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F34C",
+      "char": "🍌",
+      "glyph_name": "u1F34C",
+      "unicode_name": "BANANA",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F34D",
+      "char": "🍍",
+      "glyph_name": "u1F34D",
+      "unicode_name": "PINEAPPLE",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F34E",
+      "char": "🍎",
+      "glyph_name": "u1F34E",
+      "unicode_name": "RED APPLE",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F34F",
+      "char": "🍏",
+      "glyph_name": "u1F34F",
+      "unicode_name": "GREEN APPLE",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F350",
+      "char": "🍐",
+      "glyph_name": "u1F350",
+      "unicode_name": "PEAR",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F351",
+      "char": "🍑",
+      "glyph_name": "u1F351",
+      "unicode_name": "PEACH",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F352",
+      "char": "🍒",
+      "glyph_name": "u1F352",
+      "unicode_name": "CHERRIES",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F353",
+      "char": "🍓",
+      "glyph_name": "u1F353",
+      "unicode_name": "STRAWBERRY",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F354",
+      "char": "🍔",
+      "glyph_name": "u1F354",
+      "unicode_name": "HAMBURGER",
+      "geometry_deps_count": 24,
+      "new_glyph_cost": 25
+    },
+    {
+      "codepoint": "U+1F355",
+      "char": "🍕",
+      "glyph_name": "u1F355",
+      "unicode_name": "SLICE OF PIZZA",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 22
+    },
+    {
+      "codepoint": "U+1F356",
+      "char": "🍖",
+      "glyph_name": "u1F356",
+      "unicode_name": "MEAT ON BONE",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F357",
+      "char": "🍗",
+      "glyph_name": "u1F357",
+      "unicode_name": "POULTRY LEG",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F358",
+      "char": "🍘",
+      "glyph_name": "u1F358",
+      "unicode_name": "RICE CRACKER",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F359",
+      "char": "🍙",
+      "glyph_name": "u1F359",
+      "unicode_name": "RICE BALL",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F35A",
+      "char": "🍚",
+      "glyph_name": "u1F35A",
+      "unicode_name": "COOKED RICE",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F35B",
+      "char": "🍛",
+      "glyph_name": "u1F35B",
+      "unicode_name": "CURRY AND RICE",
+      "geometry_deps_count": 27,
+      "new_glyph_cost": 28
+    },
+    {
+      "codepoint": "U+1F35C",
+      "char": "🍜",
+      "glyph_name": "u1F35C",
+      "unicode_name": "STEAMING BOWL",
+      "geometry_deps_count": 46,
+      "new_glyph_cost": 47
+    },
+    {
+      "codepoint": "U+1F35D",
+      "char": "🍝",
+      "glyph_name": "u1F35D",
+      "unicode_name": "SPAGHETTI",
+      "geometry_deps_count": 28,
+      "new_glyph_cost": 29
+    },
+    {
+      "codepoint": "U+1F35E",
+      "char": "🍞",
+      "glyph_name": "u1F35E",
+      "unicode_name": "BREAD",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F35F",
+      "char": "🍟",
+      "glyph_name": "u1F35F",
+      "unicode_name": "FRENCH FRIES",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F360",
+      "char": "🍠",
+      "glyph_name": "u1F360",
+      "unicode_name": "ROASTED SWEET POTATO",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F361",
+      "char": "🍡",
+      "glyph_name": "u1F361",
+      "unicode_name": "DANGO",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F362",
+      "char": "🍢",
+      "glyph_name": "u1F362",
+      "unicode_name": "ODEN",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 22
+    },
+    {
+      "codepoint": "U+1F363",
+      "char": "🍣",
+      "glyph_name": "u1F363",
+      "unicode_name": "SUSHI",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 22
+    },
+    {
+      "codepoint": "U+1F364",
+      "char": "🍤",
+      "glyph_name": "u1F364",
+      "unicode_name": "FRIED SHRIMP",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F365",
+      "char": "🍥",
+      "glyph_name": "u1F365",
+      "unicode_name": "FISH CAKE WITH SWIRL DESIGN",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F366",
+      "char": "🍦",
+      "glyph_name": "u1F366",
+      "unicode_name": "SOFT ICE CREAM",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F367",
+      "char": "🍧",
+      "glyph_name": "u1F367",
+      "unicode_name": "SHAVED ICE",
+      "geometry_deps_count": 26,
+      "new_glyph_cost": 27
+    },
+    {
+      "codepoint": "U+1F368",
+      "char": "🍨",
+      "glyph_name": "u1F368",
+      "unicode_name": "ICE CREAM",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 22
+    },
+    {
+      "codepoint": "U+1F369",
+      "char": "🍩",
+      "glyph_name": "u1F369",
+      "unicode_name": "DOUGHNUT",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+1F36A",
+      "char": "🍪",
+      "glyph_name": "u1F36A",
+      "unicode_name": "COOKIE",
+      "geometry_deps_count": 30,
+      "new_glyph_cost": 31
+    },
+    {
+      "codepoint": "U+1F36B",
+      "char": "🍫",
+      "glyph_name": "u1F36B",
+      "unicode_name": "CHOCOLATE BAR",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F36C",
+      "char": "🍬",
+      "glyph_name": "u1F36C",
+      "unicode_name": "CANDY",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F36D",
+      "char": "🍭",
+      "glyph_name": "u1F36D",
+      "unicode_name": "LOLLIPOP",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F36E",
+      "char": "🍮",
+      "glyph_name": "u1F36E",
+      "unicode_name": "CUSTARD",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F36F",
+      "char": "🍯",
+      "glyph_name": "u1F36F",
+      "unicode_name": "HONEY POT",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F370",
+      "char": "🍰",
+      "glyph_name": "u1F370",
+      "unicode_name": "SHORTCAKE",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F371",
+      "char": "🍱",
+      "glyph_name": "u1F371",
+      "unicode_name": "BENTO BOX",
+      "geometry_deps_count": 36,
+      "new_glyph_cost": 36
+    },
+    {
+      "codepoint": "U+1F372",
+      "char": "🍲",
+      "glyph_name": "u1F372",
+      "unicode_name": "POT OF FOOD",
+      "geometry_deps_count": 31,
+      "new_glyph_cost": 32
+    },
+    {
+      "codepoint": "U+1F373",
+      "char": "🍳",
+      "glyph_name": "u1F373",
+      "unicode_name": "COOKING",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F374",
+      "char": "🍴",
+      "glyph_name": "u1F374",
+      "unicode_name": "FORK AND KNIFE",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F375",
+      "char": "🍵",
+      "glyph_name": "u1F375",
+      "unicode_name": "TEACUP WITHOUT HANDLE",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F376",
+      "char": "🍶",
+      "glyph_name": "u1F376",
+      "unicode_name": "SAKE BOTTLE AND CUP",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F377",
+      "char": "🍷",
+      "glyph_name": "u1F377",
+      "unicode_name": "WINE GLASS",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F378",
+      "char": "🍸",
+      "glyph_name": "u1F378",
+      "unicode_name": "COCKTAIL GLASS",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 20
+    },
+    {
+      "codepoint": "U+1F379",
+      "char": "🍹",
+      "glyph_name": "u1F379",
+      "unicode_name": "TROPICAL DRINK",
+      "geometry_deps_count": 27,
+      "new_glyph_cost": 28
+    },
+    {
+      "codepoint": "U+1F37A",
+      "char": "🍺",
+      "glyph_name": "u1F37A",
+      "unicode_name": "BEER MUG",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 20
+    },
+    {
+      "codepoint": "U+1F37B",
+      "char": "🍻",
+      "glyph_name": "u1F37B",
+      "unicode_name": "CLINKING BEER MUGS",
+      "geometry_deps_count": 34,
+      "new_glyph_cost": 35
+    },
+    {
+      "codepoint": "U+1F37C",
+      "char": "🍼",
+      "glyph_name": "u1F37C",
+      "unicode_name": "BABY BOTTLE",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F37D",
+      "char": "🍽",
+      "glyph_name": "u1F37D",
+      "unicode_name": "FORK AND KNIFE WITH PLATE",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F37E",
+      "char": "🍾",
+      "glyph_name": "u1F37E",
+      "unicode_name": "BOTTLE WITH POPPING CORK",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F37F",
+      "char": "🍿",
+      "glyph_name": "u1F37F",
+      "unicode_name": "POPCORN",
+      "geometry_deps_count": 34,
+      "new_glyph_cost": 35
+    },
+    {
+      "codepoint": "U+1F380",
+      "char": "🎀",
+      "glyph_name": "u1F380",
+      "unicode_name": "RIBBON",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F381",
+      "char": "🎁",
+      "glyph_name": "u1F381",
+      "unicode_name": "WRAPPED PRESENT",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F382",
+      "char": "🎂",
+      "glyph_name": "u1F382",
+      "unicode_name": "BIRTHDAY CAKE",
+      "geometry_deps_count": 31,
+      "new_glyph_cost": 32
+    },
+    {
+      "codepoint": "U+1F383",
+      "char": "🎃",
+      "glyph_name": "u1F383",
+      "unicode_name": "JACK-O-LANTERN",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F384",
+      "char": "🎄",
+      "glyph_name": "u1F384",
+      "unicode_name": "CHRISTMAS TREE",
+      "geometry_deps_count": 45,
+      "new_glyph_cost": 46
+    },
+    {
+      "codepoint": "U+1F385",
+      "char": "🎅",
+      "glyph_name": "u1F385",
+      "unicode_name": "FATHER CHRISTMAS",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F386",
+      "char": "🎆",
+      "glyph_name": "u1F386",
+      "unicode_name": "FIREWORKS",
+      "geometry_deps_count": 66,
+      "new_glyph_cost": 66
+    },
+    {
+      "codepoint": "U+1F387",
+      "char": "🎇",
+      "glyph_name": "u1F387",
+      "unicode_name": "FIREWORK SPARKLER",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F388",
+      "char": "🎈",
+      "glyph_name": "u1F388",
+      "unicode_name": "BALLOON",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F389",
+      "char": "🎉",
+      "glyph_name": "u1F389",
+      "unicode_name": "PARTY POPPER",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F38A",
+      "char": "🎊",
+      "glyph_name": "u1F38A",
+      "unicode_name": "CONFETTI BALL",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+1F38B",
+      "char": "🎋",
+      "glyph_name": "u1F38B",
+      "unicode_name": "TANABATA TREE",
+      "geometry_deps_count": 25,
+      "new_glyph_cost": 26
+    },
+    {
+      "codepoint": "U+1F38C",
+      "char": "🎌",
+      "glyph_name": "u1F38C",
+      "unicode_name": "CROSSED FLAGS",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F38D",
+      "char": "🎍",
+      "glyph_name": "u1F38D",
+      "unicode_name": "PINE DECORATION",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+1F38E",
+      "char": "🎎",
+      "glyph_name": "u1F38E",
+      "unicode_name": "JAPANESE DOLLS",
+      "geometry_deps_count": 44,
+      "new_glyph_cost": 44
+    },
+    {
+      "codepoint": "U+1F38F",
+      "char": "🎏",
+      "glyph_name": "u1F38F",
+      "unicode_name": "CARP STREAMER",
+      "geometry_deps_count": 40,
+      "new_glyph_cost": 41
+    },
+    {
+      "codepoint": "U+1F390",
+      "char": "🎐",
+      "glyph_name": "u1F390",
+      "unicode_name": "WIND CHIME",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F391",
+      "char": "🎑",
+      "glyph_name": "u1F391",
+      "unicode_name": "MOON VIEWING CEREMONY",
+      "geometry_deps_count": 26,
+      "new_glyph_cost": 25
+    },
+    {
+      "codepoint": "U+1F392",
+      "char": "🎒",
+      "glyph_name": "u1F392",
+      "unicode_name": "SCHOOL SATCHEL",
+      "geometry_deps_count": 25,
+      "new_glyph_cost": 26
+    },
+    {
+      "codepoint": "U+1F393",
+      "char": "🎓",
+      "glyph_name": "u1F393",
+      "unicode_name": "GRADUATION CAP",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F396",
+      "char": "🎖",
+      "glyph_name": "u1F396",
+      "unicode_name": "MILITARY MEDAL",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F397",
+      "char": "🎗",
+      "glyph_name": "u1F397",
+      "unicode_name": "REMINDER RIBBON",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F399",
+      "char": "🎙",
+      "glyph_name": "u1F399",
+      "unicode_name": "STUDIO MICROPHONE",
+      "geometry_deps_count": 38,
+      "new_glyph_cost": 39
+    },
+    {
+      "codepoint": "U+1F39A",
+      "char": "🎚",
+      "glyph_name": "u1F39A",
+      "unicode_name": "LEVEL SLIDER",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F39B",
+      "char": "🎛",
+      "glyph_name": "u1F39B",
+      "unicode_name": "CONTROL KNOBS",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F39E",
+      "char": "🎞",
+      "glyph_name": "u1F39E",
+      "unicode_name": "FILM FRAMES",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F39F",
+      "char": "🎟",
+      "glyph_name": "u1F39F",
+      "unicode_name": "ADMISSION TICKETS",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F3A0",
+      "char": "🎠",
+      "glyph_name": "u1F3A0",
+      "unicode_name": "CAROUSEL HORSE",
+      "geometry_deps_count": 31,
+      "new_glyph_cost": 32
+    },
+    {
+      "codepoint": "U+1F3A1",
+      "char": "🎡",
+      "glyph_name": "u1F3A1",
+      "unicode_name": "FERRIS WHEEL",
+      "geometry_deps_count": 31,
+      "new_glyph_cost": 30
+    },
+    {
+      "codepoint": "U+1F3A2",
+      "char": "🎢",
+      "glyph_name": "u1F3A2",
+      "unicode_name": "ROLLER COASTER",
+      "geometry_deps_count": 33,
+      "new_glyph_cost": 33
+    },
+    {
+      "codepoint": "U+1F3A3",
+      "char": "🎣",
+      "glyph_name": "u1F3A3",
+      "unicode_name": "FISHING POLE AND FISH",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F3A4",
+      "char": "🎤",
+      "glyph_name": "u1F3A4",
+      "unicode_name": "MICROPHONE",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F3A5",
+      "char": "🎥",
+      "glyph_name": "u1F3A5",
+      "unicode_name": "MOVIE CAMERA",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F3A6",
+      "char": "🎦",
+      "glyph_name": "u1F3A6",
+      "unicode_name": "CINEMA",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F3A7",
+      "char": "🎧",
+      "glyph_name": "u1F3A7",
+      "unicode_name": "HEADPHONE",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F3A8",
+      "char": "🎨",
+      "glyph_name": "u1F3A8",
+      "unicode_name": "ARTIST PALETTE",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F3A9",
+      "char": "🎩",
+      "glyph_name": "u1F3A9",
+      "unicode_name": "TOP HAT",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F3AA",
+      "char": "🎪",
+      "glyph_name": "u1F3AA",
+      "unicode_name": "CIRCUS TENT",
+      "geometry_deps_count": 24,
+      "new_glyph_cost": 25
+    },
+    {
+      "codepoint": "U+1F3AB",
+      "char": "🎫",
+      "glyph_name": "u1F3AB",
+      "unicode_name": "TICKET",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F3AC",
+      "char": "🎬",
+      "glyph_name": "u1F3AC",
+      "unicode_name": "CLAPPER BOARD",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F3AD",
+      "char": "🎭",
+      "glyph_name": "u1F3AD",
+      "unicode_name": "PERFORMING ARTS",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F3AE",
+      "char": "🎮",
+      "glyph_name": "u1F3AE",
+      "unicode_name": "VIDEO GAME",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F3AF",
+      "char": "🎯",
+      "glyph_name": "u1F3AF",
+      "unicode_name": "DIRECT HIT",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F3B0",
+      "char": "🎰",
+      "glyph_name": "u1F3B0",
+      "unicode_name": "SLOT MACHINE",
+      "geometry_deps_count": 30,
+      "new_glyph_cost": 31
+    },
+    {
+      "codepoint": "U+1F3B1",
+      "char": "🎱",
+      "glyph_name": "u1F3B1",
+      "unicode_name": "BILLIARDS",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F3B2",
+      "char": "🎲",
+      "glyph_name": "u1F3B2",
+      "unicode_name": "GAME DIE",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F3B3",
+      "char": "🎳",
+      "glyph_name": "u1F3B3",
+      "unicode_name": "BOWLING",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+1F3B4",
+      "char": "🎴",
+      "glyph_name": "u1F3B4",
+      "unicode_name": "FLOWER PLAYING CARDS",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F3B5",
+      "char": "🎵",
+      "glyph_name": "u1F3B5",
+      "unicode_name": "MUSICAL NOTE",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F3B6",
+      "char": "🎶",
+      "glyph_name": "u1F3B6",
+      "unicode_name": "MULTIPLE MUSICAL NOTES",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F3B7",
+      "char": "🎷",
+      "glyph_name": "u1F3B7",
+      "unicode_name": "SAXOPHONE",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F3B8",
+      "char": "🎸",
+      "glyph_name": "u1F3B8",
+      "unicode_name": "GUITAR",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+1F3B9",
+      "char": "🎹",
+      "glyph_name": "u1F3B9",
+      "unicode_name": "MUSICAL KEYBOARD",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F3BA",
+      "char": "🎺",
+      "glyph_name": "u1F3BA",
+      "unicode_name": "TRUMPET",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F3BB",
+      "char": "🎻",
+      "glyph_name": "u1F3BB",
+      "unicode_name": "VIOLIN",
+      "geometry_deps_count": 25,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+1F3BC",
+      "char": "🎼",
+      "glyph_name": "u1F3BC",
+      "unicode_name": "MUSICAL SCORE",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F3BD",
+      "char": "🎽",
+      "glyph_name": "u1F3BD",
+      "unicode_name": "RUNNING SHIRT WITH SASH",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F3BE",
+      "char": "🎾",
+      "glyph_name": "u1F3BE",
+      "unicode_name": "TENNIS RACQUET AND BALL",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+1F3BF",
+      "char": "🎿",
+      "glyph_name": "u1F3BF",
+      "unicode_name": "SKI AND SKI BOOT",
+      "geometry_deps_count": 26,
+      "new_glyph_cost": 25
+    },
+    {
+      "codepoint": "U+1F3C0",
+      "char": "🏀",
+      "glyph_name": "u1F3C0",
+      "unicode_name": "BASKETBALL AND HOOP",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F3C1",
+      "char": "🏁",
+      "glyph_name": "u1F3C1",
+      "unicode_name": "CHEQUERED FLAG",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+1F3C2",
+      "char": "🏂",
+      "glyph_name": "u1F3C2",
+      "unicode_name": "SNOWBOARDER",
+      "geometry_deps_count": 24,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+1F3C3",
+      "char": "🏃",
+      "glyph_name": "u1F3C3",
+      "unicode_name": "RUNNER",
+      "geometry_deps_count": 26,
+      "new_glyph_cost": 27
+    },
+    {
+      "codepoint": "U+1F3C4",
+      "char": "🏄",
+      "glyph_name": "u1F3C4",
+      "unicode_name": "SURFER",
+      "geometry_deps_count": 44,
+      "new_glyph_cost": 45
+    },
+    {
+      "codepoint": "U+1F3C5",
+      "char": "🏅",
+      "glyph_name": "u1F3C5",
+      "unicode_name": "SPORTS MEDAL",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F3C6",
+      "char": "🏆",
+      "glyph_name": "u1F3C6",
+      "unicode_name": "TROPHY",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F3C7",
+      "char": "🏇",
+      "glyph_name": "u1F3C7",
+      "unicode_name": "HORSE RACING",
+      "geometry_deps_count": 32,
+      "new_glyph_cost": 33
+    },
+    {
+      "codepoint": "U+1F3C8",
+      "char": "🏈",
+      "glyph_name": "u1F3C8",
+      "unicode_name": "AMERICAN FOOTBALL",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F3C9",
+      "char": "🏉",
+      "glyph_name": "u1F3C9",
+      "unicode_name": "RUGBY FOOTBALL",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F3CA",
+      "char": "🏊",
+      "glyph_name": "u1F3CA",
+      "unicode_name": "SWIMMER",
+      "geometry_deps_count": 29,
+      "new_glyph_cost": 30
+    },
+    {
+      "codepoint": "U+1F3CB",
+      "char": "🏋",
+      "glyph_name": "u1F3CB",
+      "unicode_name": "WEIGHT LIFTER",
+      "geometry_deps_count": 44,
+      "new_glyph_cost": 44
+    },
+    {
+      "codepoint": "U+1F3CC",
+      "char": "🏌",
+      "glyph_name": "u1F3CC",
+      "unicode_name": "GOLFER",
+      "geometry_deps_count": 28,
+      "new_glyph_cost": 29
+    },
+    {
+      "codepoint": "U+1F3CD",
+      "char": "🏍",
+      "glyph_name": "u1F3CD",
+      "unicode_name": "RACING MOTORCYCLE",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+1F3CE",
+      "char": "🏎",
+      "glyph_name": "u1F3CE",
+      "unicode_name": "RACING CAR",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F3CF",
+      "char": "🏏",
+      "glyph_name": "u1F3CF",
+      "unicode_name": "CRICKET BAT AND BALL",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F3D0",
+      "char": "🏐",
+      "glyph_name": "u1F3D0",
+      "unicode_name": "VOLLEYBALL",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F3D1",
+      "char": "🏑",
+      "glyph_name": "u1F3D1",
+      "unicode_name": "FIELD HOCKEY STICK AND BALL",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F3D2",
+      "char": "🏒",
+      "glyph_name": "u1F3D2",
+      "unicode_name": "ICE HOCKEY STICK AND PUCK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F3D3",
+      "char": "🏓",
+      "glyph_name": "u1F3D3",
+      "unicode_name": "TABLE TENNIS PADDLE AND BALL",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F3D4",
+      "char": "🏔",
+      "glyph_name": "u1F3D4",
+      "unicode_name": "SNOW CAPPED MOUNTAIN",
+      "geometry_deps_count": 32,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F3D5",
+      "char": "🏕",
+      "glyph_name": "u1F3D5",
+      "unicode_name": "CAMPING",
+      "geometry_deps_count": 24,
+      "new_glyph_cost": 25
+    },
+    {
+      "codepoint": "U+1F3D6",
+      "char": "🏖",
+      "glyph_name": "u1F3D6",
+      "unicode_name": "BEACH WITH UMBRELLA",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F3D7",
+      "char": "🏗",
+      "glyph_name": "u1F3D7",
+      "unicode_name": "BUILDING CONSTRUCTION",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F3D8",
+      "char": "🏘",
+      "glyph_name": "u1F3D8",
+      "unicode_name": "HOUSE BUILDINGS",
+      "geometry_deps_count": 30,
+      "new_glyph_cost": 31
+    },
+    {
+      "codepoint": "U+1F3D9",
+      "char": "🏙",
+      "glyph_name": "u1F3D9",
+      "unicode_name": "CITYSCAPE",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F3DA",
+      "char": "🏚",
+      "glyph_name": "u1F3DA",
+      "unicode_name": "DERELICT HOUSE BUILDING",
+      "geometry_deps_count": 35,
+      "new_glyph_cost": 36
+    },
+    {
+      "codepoint": "U+1F3DB",
+      "char": "🏛",
+      "glyph_name": "u1F3DB",
+      "unicode_name": "CLASSICAL BUILDING",
+      "geometry_deps_count": 20,
+      "new_glyph_cost": 21
+    },
+    {
+      "codepoint": "U+1F3DC",
+      "char": "🏜",
+      "glyph_name": "u1F3DC",
+      "unicode_name": "DESERT",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F3DD",
+      "char": "🏝",
+      "glyph_name": "u1F3DD",
+      "unicode_name": "DESERT ISLAND",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F3DE",
+      "char": "🏞",
+      "glyph_name": "u1F3DE",
+      "unicode_name": "NATIONAL PARK",
+      "geometry_deps_count": 32,
+      "new_glyph_cost": 32
+    },
+    {
+      "codepoint": "U+1F3DF",
+      "char": "🏟",
+      "glyph_name": "u1F3DF",
+      "unicode_name": "STADIUM",
+      "geometry_deps_count": 34,
+      "new_glyph_cost": 34
+    },
+    {
+      "codepoint": "U+1F3E0",
+      "char": "🏠",
+      "glyph_name": "u1F3E0",
+      "unicode_name": "HOUSE BUILDING",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F3E1",
+      "char": "🏡",
+      "glyph_name": "u1F3E1",
+      "unicode_name": "HOUSE WITH GARDEN",
+      "geometry_deps_count": 32,
+      "new_glyph_cost": 27
+    },
+    {
+      "codepoint": "U+1F3E2",
+      "char": "🏢",
+      "glyph_name": "u1F3E2",
+      "unicode_name": "OFFICE BUILDING",
+      "geometry_deps_count": 24,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+1F3E3",
+      "char": "🏣",
+      "glyph_name": "u1F3E3",
+      "unicode_name": "JAPANESE POST OFFICE",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F3E4",
+      "char": "🏤",
+      "glyph_name": "u1F3E4",
+      "unicode_name": "EUROPEAN POST OFFICE",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 22
+    },
+    {
+      "codepoint": "U+1F3E5",
+      "char": "🏥",
+      "glyph_name": "u1F3E5",
+      "unicode_name": "HOSPITAL",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 21
+    },
+    {
+      "codepoint": "U+1F3E6",
+      "char": "🏦",
+      "glyph_name": "u1F3E6",
+      "unicode_name": "BANK",
+      "geometry_deps_count": 20,
+      "new_glyph_cost": 21
+    },
+    {
+      "codepoint": "U+1F3E7",
+      "char": "🏧",
+      "glyph_name": "u1F3E7",
+      "unicode_name": "AUTOMATED TELLER MACHINE",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F3E8",
+      "char": "🏨",
+      "glyph_name": "u1F3E8",
+      "unicode_name": "HOTEL",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F3E9",
+      "char": "🏩",
+      "glyph_name": "u1F3E9",
+      "unicode_name": "LOVE HOTEL",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F3EA",
+      "char": "🏪",
+      "glyph_name": "u1F3EA",
+      "unicode_name": "CONVENIENCE STORE",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F3EB",
+      "char": "🏫",
+      "glyph_name": "u1F3EB",
+      "unicode_name": "SCHOOL",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 21
+    },
+    {
+      "codepoint": "U+1F3EC",
+      "char": "🏬",
+      "glyph_name": "u1F3EC",
+      "unicode_name": "DEPARTMENT STORE",
+      "geometry_deps_count": 20,
+      "new_glyph_cost": 20
+    },
+    {
+      "codepoint": "U+1F3ED",
+      "char": "🏭",
+      "glyph_name": "u1F3ED",
+      "unicode_name": "FACTORY",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+1F3EE",
+      "char": "🏮",
+      "glyph_name": "u1F3EE",
+      "unicode_name": "IZAKAYA LANTERN",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F3EF",
+      "char": "🏯",
+      "glyph_name": "u1F3EF",
+      "unicode_name": "JAPANESE CASTLE",
+      "geometry_deps_count": 87,
+      "new_glyph_cost": 86
+    },
+    {
+      "codepoint": "U+1F3F0",
+      "char": "🏰",
+      "glyph_name": "u1F3F0",
+      "unicode_name": "EUROPEAN CASTLE",
+      "geometry_deps_count": 32,
+      "new_glyph_cost": 32
+    },
+    {
+      "codepoint": "U+1F3F3",
+      "char": "🏳",
+      "glyph_name": "u1F3F3",
+      "unicode_name": "WAVING WHITE FLAG",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F3F4",
+      "char": "🏴",
+      "glyph_name": "u1F3F4",
+      "unicode_name": "WAVING BLACK FLAG",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F3F5",
+      "char": "🏵",
+      "glyph_name": "u1F3F5",
+      "unicode_name": "ROSETTE",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+1F3F7",
+      "char": "🏷",
+      "glyph_name": "u1F3F7",
+      "unicode_name": "LABEL",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F3F8",
+      "char": "🏸",
+      "glyph_name": "u1F3F8",
+      "unicode_name": "BADMINTON RACQUET AND SHUTTLECOCK",
+      "geometry_deps_count": 24,
+      "new_glyph_cost": 25
+    },
+    {
+      "codepoint": "U+1F3F9",
+      "char": "🏹",
+      "glyph_name": "u1F3F9",
+      "unicode_name": "BOW AND ARROW",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F3FA",
+      "char": "🏺",
+      "glyph_name": "u1F3FA",
+      "unicode_name": "AMPHORA",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+1F3FB",
+      "char": "🏻",
+      "glyph_name": "u1F3FB",
+      "unicode_name": "EMOJI MODIFIER FITZPATRICK TYPE-1-2",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F3FC",
+      "char": "🏼",
+      "glyph_name": "u1F3FC",
+      "unicode_name": "EMOJI MODIFIER FITZPATRICK TYPE-3",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F3FD",
+      "char": "🏽",
+      "glyph_name": "u1F3FD",
+      "unicode_name": "EMOJI MODIFIER FITZPATRICK TYPE-4",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F3FE",
+      "char": "🏾",
+      "glyph_name": "u1F3FE",
+      "unicode_name": "EMOJI MODIFIER FITZPATRICK TYPE-5",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F3FF",
+      "char": "🏿",
+      "glyph_name": "u1F3FF",
+      "unicode_name": "EMOJI MODIFIER FITZPATRICK TYPE-6",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F400",
+      "char": "🐀",
+      "glyph_name": "u1F400",
+      "unicode_name": "RAT",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F401",
+      "char": "🐁",
+      "glyph_name": "u1F401",
+      "unicode_name": "MOUSE",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+1F402",
+      "char": "🐂",
+      "glyph_name": "u1F402",
+      "unicode_name": "OX",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F403",
+      "char": "🐃",
+      "glyph_name": "u1F403",
+      "unicode_name": "WATER BUFFALO",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F404",
+      "char": "🐄",
+      "glyph_name": "u1F404",
+      "unicode_name": "COW",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F405",
+      "char": "🐅",
+      "glyph_name": "u1F405",
+      "unicode_name": "TIGER",
+      "geometry_deps_count": 37,
+      "new_glyph_cost": 38
+    },
+    {
+      "codepoint": "U+1F406",
+      "char": "🐆",
+      "glyph_name": "u1F406",
+      "unicode_name": "LEOPARD",
+      "geometry_deps_count": 56,
+      "new_glyph_cost": 56
+    },
+    {
+      "codepoint": "U+1F407",
+      "char": "🐇",
+      "glyph_name": "u1F407",
+      "unicode_name": "RABBIT",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F408",
+      "char": "🐈",
+      "glyph_name": "u1F408",
+      "unicode_name": "CAT",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F409",
+      "char": "🐉",
+      "glyph_name": "u1F409",
+      "unicode_name": "DRAGON",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+1F40A",
+      "char": "🐊",
+      "glyph_name": "u1F40A",
+      "unicode_name": "CROCODILE",
+      "geometry_deps_count": 37,
+      "new_glyph_cost": 38
+    },
+    {
+      "codepoint": "U+1F40B",
+      "char": "🐋",
+      "glyph_name": "u1F40B",
+      "unicode_name": "WHALE",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F40C",
+      "char": "🐌",
+      "glyph_name": "u1F40C",
+      "unicode_name": "SNAIL",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F40D",
+      "char": "🐍",
+      "glyph_name": "u1F40D",
+      "unicode_name": "SNAKE",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F40E",
+      "char": "🐎",
+      "glyph_name": "u1F40E",
+      "unicode_name": "HORSE",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F40F",
+      "char": "🐏",
+      "glyph_name": "u1F40F",
+      "unicode_name": "RAM",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F410",
+      "char": "🐐",
+      "glyph_name": "u1F410",
+      "unicode_name": "GOAT",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F411",
+      "char": "🐑",
+      "glyph_name": "u1F411",
+      "unicode_name": "SHEEP",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F412",
+      "char": "🐒",
+      "glyph_name": "u1F412",
+      "unicode_name": "MONKEY",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F413",
+      "char": "🐓",
+      "glyph_name": "u1F413",
+      "unicode_name": "ROOSTER",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F414",
+      "char": "🐔",
+      "glyph_name": "u1F414",
+      "unicode_name": "CHICKEN",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F415",
+      "char": "🐕",
+      "glyph_name": "u1F415",
+      "unicode_name": "DOG",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F416",
+      "char": "🐖",
+      "glyph_name": "u1F416",
+      "unicode_name": "PIG",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F417",
+      "char": "🐗",
+      "glyph_name": "u1F417",
+      "unicode_name": "BOAR",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 20
+    },
+    {
+      "codepoint": "U+1F418",
+      "char": "🐘",
+      "glyph_name": "u1F418",
+      "unicode_name": "ELEPHANT",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F419",
+      "char": "🐙",
+      "glyph_name": "u1F419",
+      "unicode_name": "OCTOPUS",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F41A",
+      "char": "🐚",
+      "glyph_name": "u1F41A",
+      "unicode_name": "SPIRAL SHELL",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F41B",
+      "char": "🐛",
+      "glyph_name": "u1F41B",
+      "unicode_name": "BUG",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F41C",
+      "char": "🐜",
+      "glyph_name": "u1F41C",
+      "unicode_name": "ANT",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F41D",
+      "char": "🐝",
+      "glyph_name": "u1F41D",
+      "unicode_name": "HONEYBEE",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+1F41E",
+      "char": "🐞",
+      "glyph_name": "u1F41E",
+      "unicode_name": "LADY BEETLE",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+1F41F",
+      "char": "🐟",
+      "glyph_name": "u1F41F",
+      "unicode_name": "FISH",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F420",
+      "char": "🐠",
+      "glyph_name": "u1F420",
+      "unicode_name": "TROPICAL FISH",
+      "geometry_deps_count": 20,
+      "new_glyph_cost": 21
+    },
+    {
+      "codepoint": "U+1F421",
+      "char": "🐡",
+      "glyph_name": "u1F421",
+      "unicode_name": "BLOWFISH",
+      "geometry_deps_count": 30,
+      "new_glyph_cost": 31
+    },
+    {
+      "codepoint": "U+1F422",
+      "char": "🐢",
+      "glyph_name": "u1F422",
+      "unicode_name": "TURTLE",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F423",
+      "char": "🐣",
+      "glyph_name": "u1F423",
+      "unicode_name": "HATCHING CHICK",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F424",
+      "char": "🐤",
+      "glyph_name": "u1F424",
+      "unicode_name": "BABY CHICK",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F425",
+      "char": "🐥",
+      "glyph_name": "u1F425",
+      "unicode_name": "FRONT-FACING BABY CHICK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F426",
+      "char": "🐦",
+      "glyph_name": "u1F426",
+      "unicode_name": "BIRD",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F427",
+      "char": "🐧",
+      "glyph_name": "u1F427",
+      "unicode_name": "PENGUIN",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F428",
+      "char": "🐨",
+      "glyph_name": "u1F428",
+      "unicode_name": "KOALA",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F429",
+      "char": "🐩",
+      "glyph_name": "u1F429",
+      "unicode_name": "POODLE",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 21
+    },
+    {
+      "codepoint": "U+1F42A",
+      "char": "🐪",
+      "glyph_name": "u1F42A",
+      "unicode_name": "DROMEDARY CAMEL",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F42B",
+      "char": "🐫",
+      "glyph_name": "u1F42B",
+      "unicode_name": "BACTRIAN CAMEL",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F42C",
+      "char": "🐬",
+      "glyph_name": "u1F42C",
+      "unicode_name": "DOLPHIN",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F42D",
+      "char": "🐭",
+      "glyph_name": "u1F42D",
+      "unicode_name": "MOUSE FACE",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F42E",
+      "char": "🐮",
+      "glyph_name": "u1F42E",
+      "unicode_name": "COW FACE",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F42F",
+      "char": "🐯",
+      "glyph_name": "u1F42F",
+      "unicode_name": "TIGER FACE",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 20
+    },
+    {
+      "codepoint": "U+1F430",
+      "char": "🐰",
+      "glyph_name": "u1F430",
+      "unicode_name": "RABBIT FACE",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F431",
+      "char": "🐱",
+      "glyph_name": "u1F431",
+      "unicode_name": "CAT FACE",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F432",
+      "char": "🐲",
+      "glyph_name": "u1F432",
+      "unicode_name": "DRAGON FACE",
+      "geometry_deps_count": 27,
+      "new_glyph_cost": 28
+    },
+    {
+      "codepoint": "U+1F433",
+      "char": "🐳",
+      "glyph_name": "u1F433",
+      "unicode_name": "SPOUTING WHALE",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F434",
+      "char": "🐴",
+      "glyph_name": "u1F434",
+      "unicode_name": "HORSE FACE",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F435",
+      "char": "🐵",
+      "glyph_name": "u1F435",
+      "unicode_name": "MONKEY FACE",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F436",
+      "char": "🐶",
+      "glyph_name": "u1F436",
+      "unicode_name": "DOG FACE",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F437",
+      "char": "🐷",
+      "glyph_name": "u1F437",
+      "unicode_name": "PIG FACE",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F438",
+      "char": "🐸",
+      "glyph_name": "u1F438",
+      "unicode_name": "FROG FACE",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F439",
+      "char": "🐹",
+      "glyph_name": "u1F439",
+      "unicode_name": "HAMSTER FACE",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F43A",
+      "char": "🐺",
+      "glyph_name": "u1F43A",
+      "unicode_name": "WOLF FACE",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F43B",
+      "char": "🐻",
+      "glyph_name": "u1F43B",
+      "unicode_name": "BEAR FACE",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F43C",
+      "char": "🐼",
+      "glyph_name": "u1F43C",
+      "unicode_name": "PANDA FACE",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F43D",
+      "char": "🐽",
+      "glyph_name": "u1F43D",
+      "unicode_name": "PIG NOSE",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F43E",
+      "char": "🐾",
+      "glyph_name": "u1F43E",
+      "unicode_name": "PAW PRINTS",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F43F",
+      "char": "🐿",
+      "glyph_name": "u1F43F",
+      "unicode_name": "CHIPMUNK",
+      "geometry_deps_count": 25,
+      "new_glyph_cost": 26
+    },
+    {
+      "codepoint": "U+1F440",
+      "char": "👀",
+      "glyph_name": "u1F440",
+      "unicode_name": "EYES",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F441",
+      "char": "👁",
+      "glyph_name": "u1F441",
+      "unicode_name": "EYE",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F442",
+      "char": "👂",
+      "glyph_name": "u1F442",
+      "unicode_name": "EAR",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F443",
+      "char": "👃",
+      "glyph_name": "u1F443",
+      "unicode_name": "NOSE",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F444",
+      "char": "👄",
+      "glyph_name": "u1F444",
+      "unicode_name": "MOUTH",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F445",
+      "char": "👅",
+      "glyph_name": "u1F445",
+      "unicode_name": "TONGUE",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F446",
+      "char": "👆",
+      "glyph_name": "u1F446",
+      "unicode_name": "WHITE UP POINTING BACKHAND INDEX",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F447",
+      "char": "👇",
+      "glyph_name": "u1F447",
+      "unicode_name": "WHITE DOWN POINTING BACKHAND INDEX",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F448",
+      "char": "👈",
+      "glyph_name": "u1F448",
+      "unicode_name": "WHITE LEFT POINTING BACKHAND INDEX",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F449",
+      "char": "👉",
+      "glyph_name": "u1F449",
+      "unicode_name": "WHITE RIGHT POINTING BACKHAND INDEX",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F44A",
+      "char": "👊",
+      "glyph_name": "u1F44A",
+      "unicode_name": "FISTED HAND SIGN",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F44B",
+      "char": "👋",
+      "glyph_name": "u1F44B",
+      "unicode_name": "WAVING HAND SIGN",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F44C",
+      "char": "👌",
+      "glyph_name": "u1F44C",
+      "unicode_name": "OK HAND SIGN",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F44D",
+      "char": "👍",
+      "glyph_name": "u1F44D",
+      "unicode_name": "THUMBS UP SIGN",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F44E",
+      "char": "👎",
+      "glyph_name": "u1F44E",
+      "unicode_name": "THUMBS DOWN SIGN",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F44F",
+      "char": "👏",
+      "glyph_name": "u1F44F",
+      "unicode_name": "CLAPPING HANDS SIGN",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F450",
+      "char": "👐",
+      "glyph_name": "u1F450",
+      "unicode_name": "OPEN HANDS SIGN",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 22
+    },
+    {
+      "codepoint": "U+1F451",
+      "char": "👑",
+      "glyph_name": "u1F451",
+      "unicode_name": "CROWN",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+1F452",
+      "char": "👒",
+      "glyph_name": "u1F452",
+      "unicode_name": "WOMANS HAT",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+1F453",
+      "char": "👓",
+      "glyph_name": "u1F453",
+      "unicode_name": "EYEGLASSES",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F454",
+      "char": "👔",
+      "glyph_name": "u1F454",
+      "unicode_name": "NECKTIE",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F455",
+      "char": "👕",
+      "glyph_name": "u1F455",
+      "unicode_name": "T-SHIRT",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F456",
+      "char": "👖",
+      "glyph_name": "u1F456",
+      "unicode_name": "JEANS",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F457",
+      "char": "👗",
+      "glyph_name": "u1F457",
+      "unicode_name": "DRESS",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F458",
+      "char": "👘",
+      "glyph_name": "u1F458",
+      "unicode_name": "KIMONO",
+      "geometry_deps_count": 49,
+      "new_glyph_cost": 48
+    },
+    {
+      "codepoint": "U+1F459",
+      "char": "👙",
+      "glyph_name": "u1F459",
+      "unicode_name": "BIKINI",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F45A",
+      "char": "👚",
+      "glyph_name": "u1F45A",
+      "unicode_name": "WOMANS CLOTHES",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F45B",
+      "char": "👛",
+      "glyph_name": "u1F45B",
+      "unicode_name": "PURSE",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F45C",
+      "char": "👜",
+      "glyph_name": "u1F45C",
+      "unicode_name": "HANDBAG",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F45D",
+      "char": "👝",
+      "glyph_name": "u1F45D",
+      "unicode_name": "POUCH",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F45E",
+      "char": "👞",
+      "glyph_name": "u1F45E",
+      "unicode_name": "MANS SHOE",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F45F",
+      "char": "👟",
+      "glyph_name": "u1F45F",
+      "unicode_name": "ATHLETIC SHOE",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F460",
+      "char": "👠",
+      "glyph_name": "u1F460",
+      "unicode_name": "HIGH-HEELED SHOE",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F461",
+      "char": "👡",
+      "glyph_name": "u1F461",
+      "unicode_name": "WOMANS SANDAL",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F462",
+      "char": "👢",
+      "glyph_name": "u1F462",
+      "unicode_name": "WOMANS BOOTS",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F463",
+      "char": "👣",
+      "glyph_name": "u1F463",
+      "unicode_name": "FOOTPRINTS",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F464",
+      "char": "👤",
+      "glyph_name": "u1F464",
+      "unicode_name": "BUST IN SILHOUETTE",
+      "geometry_deps_count": 1,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F465",
+      "char": "👥",
+      "glyph_name": "u1F465",
+      "unicode_name": "BUSTS IN SILHOUETTE",
+      "geometry_deps_count": 2,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F466",
+      "char": "👦",
+      "glyph_name": "u1F466",
+      "unicode_name": "BOY",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F467",
+      "char": "👧",
+      "glyph_name": "u1F467",
+      "unicode_name": "GIRL",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F468",
+      "char": "👨",
+      "glyph_name": "u1F468",
+      "unicode_name": "MAN",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F469",
+      "char": "👩",
+      "glyph_name": "u1F469",
+      "unicode_name": "WOMAN",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F46A",
+      "char": "👪",
+      "glyph_name": "u1F46A",
+      "unicode_name": "FAMILY",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F46B",
+      "char": "👫",
+      "glyph_name": "u1F46B",
+      "unicode_name": "MAN AND WOMAN HOLDING HANDS",
+      "geometry_deps_count": 26,
+      "new_glyph_cost": 26
+    },
+    {
+      "codepoint": "U+1F46C",
+      "char": "👬",
+      "glyph_name": "u1F46C",
+      "unicode_name": "TWO MEN HOLDING HANDS",
+      "geometry_deps_count": 25,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F46D",
+      "char": "👭",
+      "glyph_name": "u1F46D",
+      "unicode_name": "TWO WOMEN HOLDING HANDS",
+      "geometry_deps_count": 21,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F46E",
+      "char": "👮",
+      "glyph_name": "u1F46E",
+      "unicode_name": "POLICE OFFICER",
+      "geometry_deps_count": 35,
+      "new_glyph_cost": 35
+    },
+    {
+      "codepoint": "U+1F46F",
+      "char": "👯",
+      "glyph_name": "u1F46F",
+      "unicode_name": "WOMAN WITH BUNNY EARS",
+      "geometry_deps_count": 45,
+      "new_glyph_cost": 44
+    },
+    {
+      "codepoint": "U+1F470",
+      "char": "👰",
+      "glyph_name": "u1F470",
+      "unicode_name": "BRIDE WITH VEIL",
+      "geometry_deps_count": 34,
+      "new_glyph_cost": 30
+    },
+    {
+      "codepoint": "U+1F471",
+      "char": "👱",
+      "glyph_name": "u1F471",
+      "unicode_name": "PERSON WITH BLOND HAIR",
+      "geometry_deps_count": 20,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F472",
+      "char": "👲",
+      "glyph_name": "u1F472",
+      "unicode_name": "MAN WITH GUA PI MAO",
+      "geometry_deps_count": 25,
+      "new_glyph_cost": 25
+    },
+    {
+      "codepoint": "U+1F473",
+      "char": "👳",
+      "glyph_name": "u1F473",
+      "unicode_name": "MAN WITH TURBAN",
+      "geometry_deps_count": 25,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F474",
+      "char": "👴",
+      "glyph_name": "u1F474",
+      "unicode_name": "OLDER MAN",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F475",
+      "char": "👵",
+      "glyph_name": "u1F475",
+      "unicode_name": "OLDER WOMAN",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F476",
+      "char": "👶",
+      "glyph_name": "u1F476",
+      "unicode_name": "BABY",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F477",
+      "char": "👷",
+      "glyph_name": "u1F477",
+      "unicode_name": "CONSTRUCTION WORKER",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+1F478",
+      "char": "👸",
+      "glyph_name": "u1F478",
+      "unicode_name": "PRINCESS",
+      "geometry_deps_count": 30,
+      "new_glyph_cost": 29
+    },
+    {
+      "codepoint": "U+1F479",
+      "char": "👹",
+      "glyph_name": "u1F479",
+      "unicode_name": "JAPANESE OGRE",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 22
+    },
+    {
+      "codepoint": "U+1F47A",
+      "char": "👺",
+      "glyph_name": "u1F47A",
+      "unicode_name": "JAPANESE GOBLIN",
+      "geometry_deps_count": 20,
+      "new_glyph_cost": 21
+    },
+    {
+      "codepoint": "U+1F47B",
+      "char": "👻",
+      "glyph_name": "u1F47B",
+      "unicode_name": "GHOST",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F47C",
+      "char": "👼",
+      "glyph_name": "u1F47C",
+      "unicode_name": "BABY ANGEL",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F47D",
+      "char": "👽",
+      "glyph_name": "u1F47D",
+      "unicode_name": "EXTRATERRESTRIAL ALIEN",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F47E",
+      "char": "👾",
+      "glyph_name": "u1F47E",
+      "unicode_name": "ALIEN MONSTER",
+      "geometry_deps_count": 2,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F47F",
+      "char": "👿",
+      "glyph_name": "u1F47F",
+      "unicode_name": "IMP",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F480",
+      "char": "💀",
+      "glyph_name": "u1F480",
+      "unicode_name": "SKULL",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F481",
+      "char": "💁",
+      "glyph_name": "u1F481",
+      "unicode_name": "INFORMATION DESK PERSON",
+      "geometry_deps_count": 24,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F482",
+      "char": "💂",
+      "glyph_name": "u1F482",
+      "unicode_name": "GUARDSMAN",
+      "geometry_deps_count": 28,
+      "new_glyph_cost": 29
+    },
+    {
+      "codepoint": "U+1F483",
+      "char": "💃",
+      "glyph_name": "u1F483",
+      "unicode_name": "DANCER",
+      "geometry_deps_count": 27,
+      "new_glyph_cost": 27
+    },
+    {
+      "codepoint": "U+1F484",
+      "char": "💄",
+      "glyph_name": "u1F484",
+      "unicode_name": "LIPSTICK",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F485",
+      "char": "💅",
+      "glyph_name": "u1F485",
+      "unicode_name": "NAIL POLISH",
+      "geometry_deps_count": 27,
+      "new_glyph_cost": 28
+    },
+    {
+      "codepoint": "U+1F486",
+      "char": "💆",
+      "glyph_name": "u1F486",
+      "unicode_name": "FACE MASSAGE",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F487",
+      "char": "💇",
+      "glyph_name": "u1F487",
+      "unicode_name": "HAIRCUT",
+      "geometry_deps_count": 30,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F488",
+      "char": "💈",
+      "glyph_name": "u1F488",
+      "unicode_name": "BARBER POLE",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F489",
+      "char": "💉",
+      "glyph_name": "u1F489",
+      "unicode_name": "SYRINGE",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F48A",
+      "char": "💊",
+      "glyph_name": "u1F48A",
+      "unicode_name": "PILL",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F48B",
+      "char": "💋",
+      "glyph_name": "u1F48B",
+      "unicode_name": "KISS MARK",
+      "geometry_deps_count": 2,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F48C",
+      "char": "💌",
+      "glyph_name": "u1F48C",
+      "unicode_name": "LOVE LETTER",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F48D",
+      "char": "💍",
+      "glyph_name": "u1F48D",
+      "unicode_name": "RING",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F48E",
+      "char": "💎",
+      "glyph_name": "u1F48E",
+      "unicode_name": "GEM STONE",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F48F",
+      "char": "💏",
+      "glyph_name": "u1F48F",
+      "unicode_name": "KISS",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 23
+    },
+    {
+      "codepoint": "U+1F490",
+      "char": "💐",
+      "glyph_name": "u1F490",
+      "unicode_name": "BOUQUET",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F491",
+      "char": "💑",
+      "glyph_name": "u1F491",
+      "unicode_name": "COUPLE WITH HEART",
+      "geometry_deps_count": 48,
+      "new_glyph_cost": 42
+    },
+    {
+      "codepoint": "U+1F492",
+      "char": "💒",
+      "glyph_name": "u1F492",
+      "unicode_name": "WEDDING",
+      "geometry_deps_count": 44,
+      "new_glyph_cost": 45
+    },
+    {
+      "codepoint": "U+1F493",
+      "char": "💓",
+      "glyph_name": "u1F493",
+      "unicode_name": "BEATING HEART",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F494",
+      "char": "💔",
+      "glyph_name": "u1F494",
+      "unicode_name": "BROKEN HEART",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F495",
+      "char": "💕",
+      "glyph_name": "u1F495",
+      "unicode_name": "TWO HEARTS",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F496",
+      "char": "💖",
+      "glyph_name": "u1F496",
+      "unicode_name": "SPARKLING HEART",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F497",
+      "char": "💗",
+      "glyph_name": "u1F497",
+      "unicode_name": "GROWING HEART",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F498",
+      "char": "💘",
+      "glyph_name": "u1F498",
+      "unicode_name": "HEART WITH ARROW",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F499",
+      "char": "💙",
+      "glyph_name": "u1F499",
+      "unicode_name": "BLUE HEART",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F49A",
+      "char": "💚",
+      "glyph_name": "u1F49A",
+      "unicode_name": "GREEN HEART",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F49B",
+      "char": "💛",
+      "glyph_name": "u1F49B",
+      "unicode_name": "YELLOW HEART",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F49C",
+      "char": "💜",
+      "glyph_name": "u1F49C",
+      "unicode_name": "PURPLE HEART",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F49D",
+      "char": "💝",
+      "glyph_name": "u1F49D",
+      "unicode_name": "HEART WITH RIBBON",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+1F49E",
+      "char": "💞",
+      "glyph_name": "u1F49E",
+      "unicode_name": "REVOLVING HEARTS",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F49F",
+      "char": "💟",
+      "glyph_name": "u1F49F",
+      "unicode_name": "HEART DECORATION",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F4A0",
+      "char": "💠",
+      "glyph_name": "u1F4A0",
+      "unicode_name": "DIAMOND SHAPE WITH A DOT INSIDE",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F4A1",
+      "char": "💡",
+      "glyph_name": "u1F4A1",
+      "unicode_name": "ELECTRIC LIGHT BULB",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+1F4A2",
+      "char": "💢",
+      "glyph_name": "u1F4A2",
+      "unicode_name": "ANGER SYMBOL",
+      "geometry_deps_count": 2,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4A3",
+      "char": "💣",
+      "glyph_name": "u1F4A3",
+      "unicode_name": "BOMB",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F4A4",
+      "char": "💤",
+      "glyph_name": "u1F4A4",
+      "unicode_name": "SLEEPING SYMBOL",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F4A5",
+      "char": "💥",
+      "glyph_name": "u1F4A5",
+      "unicode_name": "COLLISION SYMBOL",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F4A6",
+      "char": "💦",
+      "glyph_name": "u1F4A6",
+      "unicode_name": "SPLASHING SWEAT SYMBOL",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F4A7",
+      "char": "💧",
+      "glyph_name": "u1F4A7",
+      "unicode_name": "DROPLET",
+      "geometry_deps_count": 2,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4A8",
+      "char": "💨",
+      "glyph_name": "u1F4A8",
+      "unicode_name": "DASH SYMBOL",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F4A9",
+      "char": "💩",
+      "glyph_name": "u1F4A9",
+      "unicode_name": "PILE OF POO",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F4AA",
+      "char": "💪",
+      "glyph_name": "u1F4AA",
+      "unicode_name": "FLEXED BICEPS",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F4AB",
+      "char": "💫",
+      "glyph_name": "u1F4AB",
+      "unicode_name": "DIZZY SYMBOL",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F4AC",
+      "char": "💬",
+      "glyph_name": "u1F4AC",
+      "unicode_name": "SPEECH BALLOON",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4AD",
+      "char": "💭",
+      "glyph_name": "u1F4AD",
+      "unicode_name": "THOUGHT BALLOON",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F4AE",
+      "char": "💮",
+      "glyph_name": "u1F4AE",
+      "unicode_name": "WHITE FLOWER",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F4AF",
+      "char": "💯",
+      "glyph_name": "u1F4AF",
+      "unicode_name": "HUNDRED POINTS SYMBOL",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F4B0",
+      "char": "💰",
+      "glyph_name": "u1F4B0",
+      "unicode_name": "MONEY BAG",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F4B1",
+      "char": "💱",
+      "glyph_name": "u1F4B1",
+      "unicode_name": "CURRENCY EXCHANGE",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F4B2",
+      "char": "💲",
+      "glyph_name": "u1F4B2",
+      "unicode_name": "HEAVY DOLLAR SIGN",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F4B3",
+      "char": "💳",
+      "glyph_name": "u1F4B3",
+      "unicode_name": "CREDIT CARD",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F4B4",
+      "char": "💴",
+      "glyph_name": "u1F4B4",
+      "unicode_name": "BANKNOTE WITH YEN SIGN",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F4B5",
+      "char": "💵",
+      "glyph_name": "u1F4B5",
+      "unicode_name": "BANKNOTE WITH DOLLAR SIGN",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4B6",
+      "char": "💶",
+      "glyph_name": "u1F4B6",
+      "unicode_name": "BANKNOTE WITH EURO SIGN",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F4B7",
+      "char": "💷",
+      "glyph_name": "u1F4B7",
+      "unicode_name": "BANKNOTE WITH POUND SIGN",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F4B8",
+      "char": "💸",
+      "glyph_name": "u1F4B8",
+      "unicode_name": "MONEY WITH WINGS",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 16
+    },
+    {
+      "codepoint": "U+1F4B9",
+      "char": "💹",
+      "glyph_name": "u1F4B9",
+      "unicode_name": "CHART WITH UPWARDS TREND AND YEN SIGN",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4BA",
+      "char": "💺",
+      "glyph_name": "u1F4BA",
+      "unicode_name": "SEAT",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 18
+    },
+    {
+      "codepoint": "U+1F4BB",
+      "char": "💻",
+      "glyph_name": "u1F4BB",
+      "unicode_name": "PERSONAL COMPUTER",
+      "geometry_deps_count": 51,
+      "new_glyph_cost": 52
+    },
+    {
+      "codepoint": "U+1F4BC",
+      "char": "💼",
+      "glyph_name": "u1F4BC",
+      "unicode_name": "BRIEFCASE",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F4BD",
+      "char": "💽",
+      "glyph_name": "u1F4BD",
+      "unicode_name": "MINIDISC",
+      "geometry_deps_count": 23,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+1F4BE",
+      "char": "💾",
+      "glyph_name": "u1F4BE",
+      "unicode_name": "FLOPPY DISK",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F4BF",
+      "char": "💿",
+      "glyph_name": "u1F4BF",
+      "unicode_name": "OPTICAL DISC",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4C0",
+      "char": "📀",
+      "glyph_name": "u1F4C0",
+      "unicode_name": "DVD",
+      "geometry_deps_count": 19,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4C1",
+      "char": "📁",
+      "glyph_name": "u1F4C1",
+      "unicode_name": "FILE FOLDER",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F4C2",
+      "char": "📂",
+      "glyph_name": "u1F4C2",
+      "unicode_name": "OPEN FILE FOLDER",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F4C3",
+      "char": "📃",
+      "glyph_name": "u1F4C3",
+      "unicode_name": "PAGE WITH CURL",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F4C4",
+      "char": "📄",
+      "glyph_name": "u1F4C4",
+      "unicode_name": "PAGE FACING UP",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4C5",
+      "char": "📅",
+      "glyph_name": "u1F4C5",
+      "unicode_name": "CALENDAR",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F4C6",
+      "char": "📆",
+      "glyph_name": "u1F4C6",
+      "unicode_name": "TEAR-OFF CALENDAR",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F4C7",
+      "char": "📇",
+      "glyph_name": "u1F4C7",
+      "unicode_name": "CARD INDEX",
+      "geometry_deps_count": 26,
+      "new_glyph_cost": 27
+    },
+    {
+      "codepoint": "U+1F4C8",
+      "char": "📈",
+      "glyph_name": "u1F4C8",
+      "unicode_name": "CHART WITH UPWARDS TREND",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4C9",
+      "char": "📉",
+      "glyph_name": "u1F4C9",
+      "unicode_name": "CHART WITH DOWNWARDS TREND",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F4CA",
+      "char": "📊",
+      "glyph_name": "u1F4CA",
+      "unicode_name": "BAR CHART",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F4CB",
+      "char": "📋",
+      "glyph_name": "u1F4CB",
+      "unicode_name": "CLIPBOARD",
+      "geometry_deps_count": 10,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F4CC",
+      "char": "📌",
+      "glyph_name": "u1F4CC",
+      "unicode_name": "PUSHPIN",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 10
+    },
+    {
+      "codepoint": "U+1F4CD",
+      "char": "📍",
+      "glyph_name": "u1F4CD",
+      "unicode_name": "ROUND PUSHPIN",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F4CE",
+      "char": "📎",
+      "glyph_name": "u1F4CE",
+      "unicode_name": "PAPERCLIP",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F4CF",
+      "char": "📏",
+      "glyph_name": "u1F4CF",
+      "unicode_name": "STRAIGHT RULER",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F4D0",
+      "char": "📐",
+      "glyph_name": "u1F4D0",
+      "unicode_name": "TRIANGULAR RULER",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F4D1",
+      "char": "📑",
+      "glyph_name": "u1F4D1",
+      "unicode_name": "BOOKMARK TABS",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F4D2",
+      "char": "📒",
+      "glyph_name": "u1F4D2",
+      "unicode_name": "LEDGER",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F4D3",
+      "char": "📓",
+      "glyph_name": "u1F4D3",
+      "unicode_name": "NOTEBOOK",
+      "geometry_deps_count": 111,
+      "new_glyph_cost": 109
+    },
+    {
+      "codepoint": "U+1F4D4",
+      "char": "📔",
+      "glyph_name": "u1F4D4",
+      "unicode_name": "NOTEBOOK WITH DECORATIVE COVER",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F4D5",
+      "char": "📕",
+      "glyph_name": "u1F4D5",
+      "unicode_name": "CLOSED BOOK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F4D6",
+      "char": "📖",
+      "glyph_name": "u1F4D6",
+      "unicode_name": "OPEN BOOK",
+      "geometry_deps_count": 49,
+      "new_glyph_cost": 49
+    },
+    {
+      "codepoint": "U+1F4D7",
+      "char": "📗",
+      "glyph_name": "u1F4D7",
+      "unicode_name": "GREEN BOOK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F4D8",
+      "char": "📘",
+      "glyph_name": "u1F4D8",
+      "unicode_name": "BLUE BOOK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F4D9",
+      "char": "📙",
+      "glyph_name": "u1F4D9",
+      "unicode_name": "ORANGE BOOK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 1
+    },
+    {
+      "codepoint": "U+1F4DA",
+      "char": "📚",
+      "glyph_name": "u1F4DA",
+      "unicode_name": "BOOKS",
+      "geometry_deps_count": 25,
+      "new_glyph_cost": 25
+    },
+    {
+      "codepoint": "U+1F4DB",
+      "char": "📛",
+      "glyph_name": "u1F4DB",
+      "unicode_name": "NAME BADGE",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F4DC",
+      "char": "📜",
+      "glyph_name": "u1F4DC",
+      "unicode_name": "SCROLL",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 22
+    },
+    {
+      "codepoint": "U+1F4DD",
+      "char": "📝",
+      "glyph_name": "u1F4DD",
+      "unicode_name": "MEMO",
+      "geometry_deps_count": 25,
+      "new_glyph_cost": 24
+    },
+    {
+      "codepoint": "U+1F4DE",
+      "char": "📞",
+      "glyph_name": "u1F4DE",
+      "unicode_name": "TELEPHONE RECEIVER",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 8
+    },
+    {
+      "codepoint": "U+1F4DF",
+      "char": "📟",
+      "glyph_name": "u1F4DF",
+      "unicode_name": "PAGER",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F4E0",
+      "char": "📠",
+      "glyph_name": "u1F4E0",
+      "unicode_name": "FAX MACHINE",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 22
+    },
+    {
+      "codepoint": "U+1F4E1",
+      "char": "📡",
+      "glyph_name": "u1F4E1",
+      "unicode_name": "SATELLITE ANTENNA",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 17
+    },
+    {
+      "codepoint": "U+1F4E2",
+      "char": "📢",
+      "glyph_name": "u1F4E2",
+      "unicode_name": "PUBLIC ADDRESS LOUDSPEAKER",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F4E3",
+      "char": "📣",
+      "glyph_name": "u1F4E3",
+      "unicode_name": "CHEERING MEGAPHONE",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F4E4",
+      "char": "📤",
+      "glyph_name": "u1F4E4",
+      "unicode_name": "OUTBOX TRAY",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F4E5",
+      "char": "📥",
+      "glyph_name": "u1F4E5",
+      "unicode_name": "INBOX TRAY",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 4
+    },
+    {
+      "codepoint": "U+1F4E6",
+      "char": "📦",
+      "glyph_name": "u1F4E6",
+      "unicode_name": "PACKAGE",
+      "geometry_deps_count": 14,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F4E7",
+      "char": "📧",
+      "glyph_name": "u1F4E7",
+      "unicode_name": "E-MAIL SYMBOL",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 7
+    },
+    {
+      "codepoint": "U+1F4E8",
+      "char": "📨",
+      "glyph_name": "u1F4E8",
+      "unicode_name": "INCOMING ENVELOPE",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F4E9",
+      "char": "📩",
+      "glyph_name": "u1F4E9",
+      "unicode_name": "ENVELOPE WITH DOWNWARDS ARROW ABOVE",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F4EA",
+      "char": "📪",
+      "glyph_name": "u1F4EA",
+      "unicode_name": "CLOSED MAILBOX WITH LOWERED FLAG",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 14
+    },
+    {
+      "codepoint": "U+1F4EB",
+      "char": "📫",
+      "glyph_name": "u1F4EB",
+      "unicode_name": "CLOSED MAILBOX WITH RAISED FLAG",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F4EC",
+      "char": "📬",
+      "glyph_name": "u1F4EC",
+      "unicode_name": "OPEN MAILBOX WITH RAISED FLAG",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 12
+    },
+    {
+      "codepoint": "U+1F4ED",
+      "char": "📭",
+      "glyph_name": "u1F4ED",
+      "unicode_name": "OPEN MAILBOX WITH LOWERED FLAG",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4EE",
+      "char": "📮",
+      "glyph_name": "u1F4EE",
+      "unicode_name": "POSTBOX",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F4EF",
+      "char": "📯",
+      "glyph_name": "u1F4EF",
+      "unicode_name": "POSTAL HORN",
+      "geometry_deps_count": 15,
+      "new_glyph_cost": 15
+    },
+    {
+      "codepoint": "U+1F4F0",
+      "char": "📰",
+      "glyph_name": "u1F4F0",
+      "unicode_name": "NEWSPAPER",
+      "geometry_deps_count": 30,
+      "new_glyph_cost": 27
+    },
+    {
+      "codepoint": "U+1F4F1",
+      "char": "📱",
+      "glyph_name": "u1F4F1",
+      "unicode_name": "MOBILE PHONE",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6
+    },
+    {
+      "codepoint": "U+1F4F2",
+      "char": "📲",
+      "glyph_name": "u1F4F2",
+      "unicode_name": "MOBILE PHONE WITH RIGHTWARDS ARROW AT LEFT",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F4F3",
+      "char": "📳",
+      "glyph_name": "u1F4F3",
+      "unicode_name": "VIBRATION MODE",
+      "geometry_deps_count": 6,
+      "new_glyph_cost": 2
+    },
+    {
+      "codepoint": "U+1F4F4",
+      "char": "📴",
+      "glyph_name": "u1F4F4",
+      "unicode_name": "MOBILE PHONE OFF",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F4F5",
+      "char": "📵",
+      "glyph_name": "u1F4F5",
+      "unicode_name": "NO MOBILE PHONES",
+      "geometry_deps_count": 9,
+      "new_glyph_cost": 9
+    },
+    {
+      "codepoint": "U+1F4F6",
+      "char": "📶",
+      "glyph_name": "u1F4F6",
+      "unicode_name": "ANTENNA WITH BARS",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 5
+    },
+    {
+      "codepoint": "U+1F4F7",
+      "char": "📷",
+      "glyph_name": "u1F4F7",
+      "unicode_name": "CAMERA",
+      "geometry_deps_count": 20,
+      "new_glyph_cost": 19
+    },
+    {
+      "codepoint": "U+1F4F8",
+      "char": "📸",
+      "glyph_name": "u1F4F8",
+      "unicode_name": "CAMERA WITH FLASH",
+      "geometry_deps_count": 17,
+      "new_glyph_cost": 3
+    },
+    {
+      "codepoint": "U+1F4F9",
+      "char": "📹",
+      "glyph_name": "u1F4F9",
+      "unicode_name": "VIDEO CAMERA",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 11
+    },
+    {
+      "codepoint": "U+1F4FA",
+      "char": "📺",
+      "glyph_name": "u1F4FA",
+      "unicode_name": "TELEVISION",
+      "geometry_deps_count": 13,
+      "new_glyph_cost": 13
+    },
+    {
+      "codepoint": "U+1F4FB",
+      "char": "📻",
+      "glyph_name": "u1F4FB",
+      "unicode_name": "RADIO",
+      "geometry_deps_count": 12,
+      "new_glyph_cost": 10
+    }
+  ]
+}

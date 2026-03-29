@@ -717,6 +717,83 @@ def merge_emoji(
 # COLRv1 variant
 # ---------------------------------------------------------------------------
 
+def _select_colrv1_emoji_greedy(
+    emoji_cmap: dict[int, str],
+    emoji_font: TTFont,
+    max_new_glyphs: int,
+) -> tuple[dict[int, str], list[dict]]:
+    """Greedy selection of COLRv1 emoji within a glyph slot budget.
+
+    Iterates through emoji sorted by codepoint (ascending), selecting each
+    emoji and its geometry deps until the cumulative new-glyph count would
+    exceed *max_new_glyphs*.  Stops at the first emoji that would push the
+    total over budget (no backtracking / skip-and-continue).
+
+    Geometry deps are shared across emoji: a dep already paid for by a
+    previously selected emoji does not count again toward the budget.
+
+    Args:
+        emoji_cmap: Full codepoint→glyph_name mapping (after existing-cp filter).
+        emoji_font: Source COLRv1 font (must have COLR table).
+        max_new_glyphs: Maximum total new glyphs (emoji stubs + geometry deps).
+
+    Returns:
+        (filtered_cmap, selection_records) where selection_records is a list
+        of dicts, one per selected emoji:
+          - codepoint: "U+1F600"
+          - char: "😀"
+          - glyph_name: "u1F600"
+          - unicode_name: "GRINNING FACE"
+          - geometry_deps_count: total deps referenced by this emoji's paint tree
+          - new_glyph_cost: actual new glyph slots consumed (1 + unseen deps)
+    """
+    import unicodedata
+
+    selected_cmap: dict[int, str] = {}
+    selection_records: list[dict] = []
+    accumulated_deps: set[str] = set()  # geometry deps already counted
+    total_cost = 0
+
+    for cp in sorted(emoji_cmap):
+        glyph_name = emoji_cmap[cp]
+        # Collect all geometry deps for this single emoji
+        deps = _collect_colrv1_paint_glyph_deps(emoji_font, {glyph_name})
+        deps.discard(glyph_name)  # exclude self-reference
+
+        # Marginal cost: emoji stub (1) + deps not yet paid for
+        new_deps = deps - accumulated_deps
+        cost = 1 + len(new_deps)
+
+        if total_cost + cost > max_new_glyphs:
+            break  # greedy: stop at first over-budget emoji
+
+        selected_cmap[cp] = glyph_name
+        accumulated_deps |= deps
+        total_cost += cost
+
+        try:
+            char = chr(cp)
+            unicode_name = unicodedata.name(char, "UNKNOWN")
+        except (ValueError, TypeError):
+            char = f"U+{cp:04X}"
+            unicode_name = "UNKNOWN"
+
+        selection_records.append({
+            "codepoint": f"U+{cp:04X}",
+            "char": char,
+            "glyph_name": glyph_name,
+            "unicode_name": unicode_name,
+            "geometry_deps_count": len(deps),
+            "new_glyph_cost": cost,
+        })
+
+    print(
+        f"  Greedy selection: {len(selected_cmap)}/{len(emoji_cmap)} emoji selected, "
+        f"total glyph cost: {total_cost}/{max_new_glyphs}"
+    )
+    return selected_cmap, selection_records
+
+
 def _collect_colrv1_paint_glyph_deps(
     emoji_font: TTFont,
     target_names: set[str],
@@ -742,6 +819,7 @@ def _collect_colrv1_paint_glyph_deps(
     if not hasattr(colr, "BaseGlyphList") or colr.BaseGlyphList is None:
         return set()
 
+    layer_list = getattr(colr, "LayerList", None)
     deps: set[str] = set()
 
     def walk(paint) -> None:
@@ -751,6 +829,11 @@ def _collect_colrv1_paint_glyph_deps(
         if fmt == 10:  # PaintGlyph — references a geometry helper
             deps.add(paint.Glyph)
             walk(paint.Paint)
+        elif fmt == 1:  # PaintColrLayers — indirect refs via LayerList
+            if layer_list is not None:
+                first = paint.FirstLayerIndex
+                for layer in layer_list.Paint[first : first + paint.NumLayers]:
+                    walk(layer)
         else:
             for attr in ("Paint", "SourcePaint", "BackdropPaint"):
                 child = getattr(paint, attr, None)
@@ -827,7 +910,8 @@ def merge_emoji_colrv1(
     base_font_path: str,
     emoji_font_path: str,
     config: FontConfig,
-) -> TTFont:
+    max_new_glyphs: int | None = None,
+) -> tuple[TTFont, list[dict]]:
     """Merge Noto COLRv1 color vector emoji into SarasaMonoTC.
 
     COLRv1 (OpenType Color Font Format Version 1) stores emoji as paint trees
@@ -845,9 +929,14 @@ def merge_emoji_colrv1(
         base_font_path: Path to SarasaMonoTC-{Style}.ttf
         emoji_font_path: Path to Noto-COLRv1.ttf
         config: FontConfig object
+        max_new_glyphs: If set, apply greedy codepoint-ordered selection to
+            keep total new glyph slots (emoji stubs + geometry deps) within
+            this limit.  Fixes browser garbling caused by oversized glyph tables.
 
     Returns:
-        Merged TTFont object (caller must call .save() and .close())
+        (merged_font, selection_records) where merged_font is the TTFont object
+        (caller must call .save() and .close()) and selection_records is a list
+        of dicts describing each selected emoji (empty when max_new_glyphs is None).
     """
     print(f"  Loading base font: {base_font_path}")
     base_font = TTFont(base_font_path, lazy=True, recalcBBoxes=False)
@@ -879,7 +968,26 @@ def merge_emoji_colrv1(
     if not emoji_cmap:
         print("  No new emoji to add.")
         emoji_font.close()
-        return base_font
+        return base_font, []
+
+    # Step 3.5: greedy codepoint-ordered selection (COLRv1 glyph budget control)
+    # Must happen after existing-codepoint filter but before dep collection,
+    # because _select_colrv1_emoji_greedy also calls _collect_colrv1_paint_glyph_deps
+    # internally to calculate per-emoji costs.
+    selection_records: list[dict] = []
+    if max_new_glyphs is not None:
+        # Trigger COLR decompilation once before greedy scan so that repeated
+        # internal calls to _collect_colrv1_paint_glyph_deps are cache-warm.
+        colr_table_pre = emoji_font["COLR"].table
+        if hasattr(colr_table_pre, "BaseGlyphList") and colr_table_pre.BaseGlyphList:
+            _ = colr_table_pre.BaseGlyphList.BaseGlyphPaintRecord
+        emoji_cmap, selection_records = _select_colrv1_emoji_greedy(
+            emoji_cmap, emoji_font, max_new_glyphs
+        )
+        if not emoji_cmap:
+            print("  No emoji selected within glyph budget.")
+            emoji_font.close()
+            return base_font, []
 
     # Calculate UPM scale: Noto-COLRv1.ttf uses UPM 1024, Sarasa uses UPM 1000.
     base_upm = base_font["head"].unitsPerEm
@@ -928,12 +1036,18 @@ def merge_emoji_colrv1(
     colr_copy = copy.deepcopy(emoji_font["COLR"])
     cpal_copy = copy.deepcopy(emoji_font["CPAL"]) if "CPAL" in emoji_font else None
 
-    # Apply rename_map so PaintGlyph refs point to the renamed geometry dep names
+    # Apply rename_map so PaintGlyph refs point to the renamed geometry dep names.
+    # Must cover both BaseGlyphList paint trees AND LayerList entries, because
+    # PaintColrLayers (Format=1) — the dominant format in Noto-COLRv1 — stores
+    # its paint operations in the shared LayerList, not inline in the record.
     if rename_map:
         colr_table_copy = colr_copy.table
         if hasattr(colr_table_copy, "BaseGlyphList") and colr_table_copy.BaseGlyphList:
             for record in colr_table_copy.BaseGlyphList.BaseGlyphPaintRecord:
                 _apply_colrv1_rename(record.Paint, rename_map)
+        if hasattr(colr_table_copy, "LayerList") and colr_table_copy.LayerList:
+            for layer_paint in colr_table_copy.LayerList.Paint:
+                _apply_colrv1_rename(layer_paint, rename_map)
 
     # Step 8: access base_glyf BEFORE setGlyphOrder (OTS ordering constraint —
     # prevents flag-encoding change that OTS rejects; see merge_emoji() comment)
@@ -1017,4 +1131,4 @@ def merge_emoji_colrv1(
 
     emoji_font.close()
     print(f"  Total glyphs after merge: {len(base_font.getGlyphOrder())}")
-    return base_font
+    return base_font, selection_records
