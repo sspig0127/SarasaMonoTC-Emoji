@@ -40,38 +40,16 @@ jobs:
         run: |
           mkdir -p fonts
 
-          # Sarasa Gothic TTF（TC Mono 四個樣式）
-          curl -L -o sarasa.7z \
-            "https://github.com/be5invis/Sarasa-Gothic/releases/download/v${SARASA_VERSION}/sarasa-gothic-ttf-${SARASA_VERSION}.7z"
+          # Sarasa Mono TC 專用壓縮包（僅含 TC Mono 四個樣式，~30 MB，比全量包小很多）
+          curl -fL -o sarasa-tc.7z \
+            "https://github.com/be5invis/Sarasa-Gothic/releases/download/v${SARASA_VERSION}/SarasaMonoTC-TTF-${SARASA_VERSION}.7z"
 
-          # 確認 7z 中的 TC Mono 實際檔名（debug 用途）
-          echo "=== TC Mono files in archive ==="
-          7za l sarasa.7z | grep -i "mono.tc" || true
+          # 解壓縮全部檔案（TC 包內只有 TC Mono TTF，不需要篩選）
+          7za e sarasa-tc.7z -o fonts/ -y
+          rm -f sarasa-tc.7z
 
-          # 解壓縮（嘗試 CamelCase 格式）
-          7za e sarasa.7z -o fonts/ \
-            "SarasaMonoTC-Regular.ttf" \
-            "SarasaMonoTC-Italic.ttf" \
-            "SarasaMonoTC-Bold.ttf" \
-            "SarasaMonoTC-BoldItalic.ttf" \
-            -y || true
-
-          # 若 CamelCase 格式不存在，嘗試 kebab-case 並重命名
-          if [ ! -f "fonts/SarasaMonoTC-Regular.ttf" ]; then
-            echo "CamelCase not found, trying kebab-case..."
-            7za e sarasa.7z -o fonts/ \
-              "sarasa-mono-tc-regular.ttf" \
-              "sarasa-mono-tc-italic.ttf" \
-              "sarasa-mono-tc-bold.ttf" \
-              "sarasa-mono-tc-bolditalic.ttf" \
-              -y
-            mv fonts/sarasa-mono-tc-regular.ttf   fonts/SarasaMonoTC-Regular.ttf
-            mv fonts/sarasa-mono-tc-italic.ttf     fonts/SarasaMonoTC-Italic.ttf
-            mv fonts/sarasa-mono-tc-bold.ttf       fonts/SarasaMonoTC-Bold.ttf
-            mv fonts/sarasa-mono-tc-bolditalic.ttf fonts/SarasaMonoTC-BoldItalic.ttf
-          fi
-
-          rm -f sarasa.7z
+          echo "=== Extracted Sarasa fonts ==="
+          ls fonts/SarasaMonoTC-*.ttf
 
           # Noto Color Emoji（Color 變體）
           curl -L -o fonts/NotoColorEmoji.ttf \
