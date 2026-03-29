@@ -96,6 +96,12 @@ open http://localhost:8765/verify-emoji.html
   導致自訂後綴（如 `uni2764_color`）被替換回 `uni2764`。
   `merge_emoji` Step 9.5 在偵測到 `color_forced_rename` 時自動升級至 format 2.0，
   以持久化儲存自訂字形名稱。**修改 `merge_emoji` 重命名邏輯時請確保此升級仍被觸發。**
+- **BMP 強制清單同步**：`emoji.force_color_codepoints`（Color 變體）與
+  `colrv1.force_colrv1_codepoints`（COLRv1 變體）預設值相同（5 個 BMP codepoint）。
+  **修改其中一個時，請同步修改另一個。**
+- **CBLC 衝突 debug log**：`_filter_cblc_to_added_glyphs` 現在在 build log 列出被移除的
+  glyph 名稱（最多 10 個範例）。若 log 顯示非工具字形（.notdef / space 以外）被移除，
+  可考慮將對應 codepoint 加入 `force_color_codepoints`。
 
 ### COLRv1 特有
 
@@ -137,7 +143,7 @@ COLRv1 必須限制選取數量（由 `_select_colrv1_emoji_greedy` 控制）。
 | v1.4 | COLRv1 第三變體 |
 | v1.4.1 | 修復 COLRv1 網頁亂碼（PaintColrLayers LayerList walk）+ greedy emoji 選取 |
 | v1.4.2 | COLRv1 priority allowlist（27 個 dev emoji 保證彩色，不受 greedy 截止限制） |
-| v1.5 | BMP 符號彩色覆蓋（COLRv1: force_colrv1_codepoints；Color: force_color_codepoints）；glyph_forced_rename / color_forced_rename 機制；_update_cmap BMP guard 修正；post 3.0→2.0 升級（_color 後綴持久化） |
+| v1.5 | BMP 符號彩色覆蓋（COLRv1: force_colrv1_codepoints；Color: force_color_codepoints）；glyph_forced_rename / color_forced_rename 機制；_update_cmap BMP guard 修正；post 3.0→2.0 升級（_color 後綴持久化）；75 tests |
 | v2.0 | ZWJ 序列 / 旗幟 / 膚色變體（🔮 規劃中） |
 
 ---

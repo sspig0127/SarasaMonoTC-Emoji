@@ -95,7 +95,11 @@ rename 後的字形在原始位置插入，不附加至末尾。
 
 ### 測試
 
-73 tests（70 原有 + 3 新增 `TestUpdateCmapForceOverrideColor`）
+75 tests（70 原有 + 3 新增 `TestUpdateCmapForceOverrideColor` + 2 新增 post format 升級驗證）
+
+新增測試（`tests/test_font_output.py`）：
+- `test_post_format_2_when_force_codepoints`：確認 force_color_codepoints 啟用時，post table 必須為 format 2.0
+- `test_forced_bmp_codepoints_use_color_glyph`：確認 5 個強制 BMP codepoint 在 reload 後仍指向 `_color` 後綴字形
 
 ---
 
@@ -217,7 +221,7 @@ rename 後的字形在原始位置插入，不附加至末尾。
 
 | 項目 | 位置 | 說明 |
 |------|------|------|
-| CBLC filtering 可能移除有效 emoji | `emoji_merge.py:181-237` | 名稱衝突時捨棄 color bitmap，以 Sarasa outline 代替 |
+| CBLC filtering 可能移除有效 emoji | `emoji_merge.py:_filter_cblc_to_added_glyphs` | 名稱衝突時捨棄 color bitmap，以 Sarasa outline 代替。Build log 現會列出被移除的 glyph 名稱（最多 10 個），可評估是否需加入 `force_color_codepoints` |
 | ~~BMP 符號（☺️ ⭐ ⚠️ 等）在 COLRv1 呈現黑白~~ | `emoji_merge.py` | ✅ 已修正（v1.5）：`force_colrv1_codepoints` 白名單；`_update_cmap` BMP guard 修正；`glyph_forced_rename`（`uni2764 → uni2764_colrv1`）機制 |
 | ~~Mac platform name 移除時機~~ | `build.py` | ✅ 已修正（v1.3）：在 `update_font_names()` 之後再次呼叫 `_strip_mac_name_records` |
 | ~~config 型別未驗證~~ | `build.py` | ✅ 已修正：新增 `get_config_int()` helper，`parallel` 與 `emoji_width_multiplier` 讀取時驗證型別與範圍 |

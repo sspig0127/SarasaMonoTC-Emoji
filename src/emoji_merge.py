@@ -227,6 +227,7 @@ def _filter_cblc_to_added_glyphs(
     valid_names = set(emoji_glyphs_to_add)
     cblc = base_font["CBLC"]
     removed_total = 0
+    removed_names: set[str] = set()
 
     for strike in cblc.strikes:
         for sub in strike.indexSubTables:
@@ -236,6 +237,9 @@ def _filter_cblc_to_added_glyphs(
             if len(valid_idx) == original_len:
                 continue
 
+            removed_names.update(
+                sub.names[i] for i in range(original_len) if i not in set(valid_idx)
+            )
             sub.names = [sub.names[i] for i in valid_idx]
 
             # locations is a parallel list (verified by fonttools toXML source):
@@ -258,7 +262,16 @@ def _filter_cblc_to_added_glyphs(
         cblc.numSizes = len(cblc.strikes)
 
     if removed_total:
-        print(f"  Filtered {removed_total} conflicting entries from CBLC IndexSubTables")
+        # Sort and show up to 10 sample names so the log is scannable.
+        # These are NotoColorEmoji glyph names that conflict with existing Sarasa
+        # glyph names; they retain Sarasa's monochrome outline instead of getting
+        # the color bitmap.  Use force_color_codepoints to override specific ones.
+        samples = sorted(removed_names)[:10]
+        suffix = f" … (+{len(removed_names) - 10} more)" if len(removed_names) > 10 else ""
+        print(
+            f"  Filtered {removed_total} conflicting entries from CBLC IndexSubTables "
+            f"({len(removed_names)} unique names: {', '.join(samples)}{suffix})"
+        )
 
 
 def _force_decompile_cbdt(emoji_font: TTFont) -> None:

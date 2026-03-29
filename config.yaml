@@ -60,6 +60,10 @@ emoji:
   # Listed here, their cmap entry is redirected to a CBDT/CBLC color stub
   # (e.g. uni2764 → uni2764_color), overriding skip_existing for these codepoints.
   # Verified present in both Sarasa and NotoColorEmoji (2026-03-29).
+  #
+  # NOTE: 預設清單與 colrv1.force_colrv1_codepoints 相同。
+  # 修改此清單時，請同步修改 colrv1.force_colrv1_codepoints，
+  # 以確保三種變體（Color / COLRv1）的 BMP 強制彩色清單一致。
   force_color_codepoints:
     - "U+2764"  # ❤ heart
     - "U+2B50"  # ⭐ star
