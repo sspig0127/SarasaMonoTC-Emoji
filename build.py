@@ -112,6 +112,7 @@ def build_single_font(
     lite: bool = False,
     colrv1: bool = False,
     max_new_glyphs: int | None = None,
+    priority_codepoints: set[int] | None = None,
 ) -> tuple[str, list[dict]]:
     """Build a single font variant with emoji merged in.
 
@@ -126,6 +127,7 @@ def build_single_font(
         lite: If True, use glyf-based monochrome merge (Lite variant)
         colrv1: If True, use COLRv1 vector merge
         max_new_glyphs: COLRv1 only — glyph budget for greedy selection
+        priority_codepoints: COLRv1 only — codepoints always included before greedy fill
 
     Returns:
         (output_path, selection_records) where selection_records contains
@@ -148,6 +150,7 @@ def build_single_font(
             emoji_font_path=str(emoji_font_path),
             config=config,
             max_new_glyphs=max_new_glyphs,
+            priority_codepoints=priority_codepoints,
         )
     else:
         merged_font = merge_emoji(
@@ -309,6 +312,12 @@ Configuration priority: CLI args > config.yaml > defaults
             get_config_value(yaml_config, "colrv1", "emoji_list_path")
             or "docs/colrv1-emoji-list.json"
         )
+        # Parse priority codepoints from config (e.g. ["U+1F527", "U+1F680"])
+        _raw_priority = get_config_value(yaml_config, "colrv1", "priority_codepoints") or []
+        colrv1_priority_codepoints: set[int] | None = (
+            {int(s.replace("U+", "").replace("u+", ""), 16) for s in _raw_priority}
+            if _raw_priority else None
+        )
     elif is_lite:
         family_name = (
             get_config_value(yaml_config, "lite", "family_name")
@@ -318,12 +327,14 @@ Configuration priority: CLI args > config.yaml > defaults
         default_output_dir = get_config_value(yaml_config, "lite", "output_dir") or "output/fonts-lite"
         colrv1_max_new_glyphs = None
         colrv1_emoji_list_path = None
+        colrv1_priority_codepoints = None
     else:
         family_name = get_config_value(yaml_config, "font", "family_name") or "SarasaMonoTCEmoji"
         variant_emoji_font = None
         default_output_dir = get_config_value(yaml_config, "build", "output_dir") or "output/fonts"
         colrv1_max_new_glyphs = None
         colrv1_emoji_list_path = None
+        colrv1_priority_codepoints = None
 
     output_dir = args.output_dir or Path(default_output_dir)
 
@@ -433,6 +444,7 @@ Configuration priority: CLI args > config.yaml > defaults
                 p["display_name"], output_dir, config, metadata,
                 lite=is_lite, colrv1=is_colrv1,
                 max_new_glyphs=colrv1_max_new_glyphs,
+                priority_codepoints=colrv1_priority_codepoints,
             )
             if records and not colrv1_selection_records:
                 colrv1_selection_records = records
@@ -448,6 +460,7 @@ Configuration priority: CLI args > config.yaml > defaults
                         p["display_name"], output_dir, config, metadata,
                         is_lite, is_colrv1,
                         colrv1_max_new_glyphs,
+                        colrv1_priority_codepoints,
                     )
                     futures[future] = style
 

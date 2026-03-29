@@ -721,21 +721,32 @@ def _select_colrv1_emoji_greedy(
     emoji_cmap: dict[int, str],
     emoji_font: TTFont,
     max_new_glyphs: int,
+    priority_codepoints: set[int] | None = None,
 ) -> tuple[dict[int, str], list[dict]]:
     """Greedy selection of COLRv1 emoji within a glyph slot budget.
 
-    Iterates through emoji sorted by codepoint (ascending), selecting each
-    emoji and its geometry deps until the cumulative new-glyph count would
-    exceed *max_new_glyphs*.  Stops at the first emoji that would push the
-    total over budget (no backtracking / skip-and-continue).
+    Selection runs in two phases:
 
-    Geometry deps are shared across emoji: a dep already paid for by a
+    **Phase 1 — Priority emoji**: Codepoints listed in *priority_codepoints*
+    are selected first (in codepoint order), regardless of their position in
+    the overall sorted sequence.  This guarantees that important dev/tooling
+    emoji (e.g. 🔧🔗🚀🔒) are always included even though they have higher
+    codepoints than the phase-2 cutoff.  Priority emoji still consume budget.
+
+    **Phase 2 — Greedy fill**: Remaining emoji are iterated in codepoint
+    ascending order.  Each emoji (and its new geometry deps) is added while
+    cumulative cost stays within *max_new_glyphs*.  Stops at the first
+    over-budget emoji (no skip-and-continue).
+
+    Geometry deps are shared across both phases: a dep already paid for by a
     previously selected emoji does not count again toward the budget.
 
     Args:
         emoji_cmap: Full codepoint→glyph_name mapping (after existing-cp filter).
         emoji_font: Source COLRv1 font (must have COLR table).
         max_new_glyphs: Maximum total new glyphs (emoji stubs + geometry deps).
+        priority_codepoints: Codepoints that must be selected before the greedy
+            phase.  Ignored if None or empty.
 
     Returns:
         (filtered_cmap, selection_records) where selection_records is a list
@@ -746,38 +757,36 @@ def _select_colrv1_emoji_greedy(
           - unicode_name: "GRINNING FACE"
           - geometry_deps_count: total deps referenced by this emoji's paint tree
           - new_glyph_cost: actual new glyph slots consumed (1 + unseen deps)
+          - priority: True if selected via priority list
     """
     import unicodedata
 
     selected_cmap: dict[int, str] = {}
     selection_records: list[dict] = []
-    accumulated_deps: set[str] = set()  # geometry deps already counted
+    accumulated_deps: set[str] = set()
     total_cost = 0
 
-    for cp in sorted(emoji_cmap):
+    def _select_one(cp: int, is_priority: bool) -> bool:
+        """Try to select one emoji; return True if selected."""
+        nonlocal total_cost
+        if cp not in emoji_cmap or cp in selected_cmap:
+            return False
         glyph_name = emoji_cmap[cp]
-        # Collect all geometry deps for this single emoji
         deps = _collect_colrv1_paint_glyph_deps(emoji_font, {glyph_name})
-        deps.discard(glyph_name)  # exclude self-reference
-
-        # Marginal cost: emoji stub (1) + deps not yet paid for
+        deps.discard(glyph_name)
         new_deps = deps - accumulated_deps
         cost = 1 + len(new_deps)
-
         if total_cost + cost > max_new_glyphs:
-            break  # greedy: stop at first over-budget emoji
-
+            return False
         selected_cmap[cp] = glyph_name
-        accumulated_deps |= deps
+        accumulated_deps.update(new_deps)
         total_cost += cost
-
         try:
             char = chr(cp)
             unicode_name = unicodedata.name(char, "UNKNOWN")
         except (ValueError, TypeError):
             char = f"U+{cp:04X}"
             unicode_name = "UNKNOWN"
-
         selection_records.append({
             "codepoint": f"U+{cp:04X}",
             "char": char,
@@ -785,11 +794,27 @@ def _select_colrv1_emoji_greedy(
             "unicode_name": unicode_name,
             "geometry_deps_count": len(deps),
             "new_glyph_cost": cost,
+            "priority": is_priority,
         })
+        return True
+
+    # Phase 1: priority emoji (sorted for deterministic output)
+    priority_set = priority_codepoints or set()
+    priority_selected = 0
+    for cp in sorted(priority_set):
+        if _select_one(cp, is_priority=True):
+            priority_selected += 1
+
+    # Phase 2: greedy fill — codepoint ascending, stop at first over-budget
+    for cp in sorted(emoji_cmap):
+        if cp in selected_cmap:
+            continue  # already selected in phase 1
+        if not _select_one(cp, is_priority=False):
+            break  # greedy: stop at first over-budget emoji
 
     print(
-        f"  Greedy selection: {len(selected_cmap)}/{len(emoji_cmap)} emoji selected, "
-        f"total glyph cost: {total_cost}/{max_new_glyphs}"
+        f"  Greedy selection: {len(selected_cmap)}/{len(emoji_cmap)} emoji selected "
+        f"({priority_selected} priority), total glyph cost: {total_cost}/{max_new_glyphs}"
     )
     return selected_cmap, selection_records
 
@@ -911,6 +936,7 @@ def merge_emoji_colrv1(
     emoji_font_path: str,
     config: FontConfig,
     max_new_glyphs: int | None = None,
+    priority_codepoints: set[int] | None = None,
 ) -> tuple[TTFont, list[dict]]:
     """Merge Noto COLRv1 color vector emoji into SarasaMonoTC.
 
@@ -932,6 +958,8 @@ def merge_emoji_colrv1(
         max_new_glyphs: If set, apply greedy codepoint-ordered selection to
             keep total new glyph slots (emoji stubs + geometry deps) within
             this limit.  Fixes browser garbling caused by oversized glyph tables.
+        priority_codepoints: Codepoints always included before the greedy fill
+            phase (e.g. commonly used dev/tooling emoji at higher codepoints).
 
     Returns:
         (merged_font, selection_records) where merged_font is the TTFont object
@@ -982,7 +1010,7 @@ def merge_emoji_colrv1(
         if hasattr(colr_table_pre, "BaseGlyphList") and colr_table_pre.BaseGlyphList:
             _ = colr_table_pre.BaseGlyphList.BaseGlyphPaintRecord
         emoji_cmap, selection_records = _select_colrv1_emoji_greedy(
-            emoji_cmap, emoji_font, max_new_glyphs
+            emoji_cmap, emoji_font, max_new_glyphs, priority_codepoints
         )
         if not emoji_cmap:
             print("  No emoji selected within glyph budget.")

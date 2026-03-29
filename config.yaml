@@ -85,3 +85,36 @@ colrv1:
   max_new_glyphs: 8136
   # Path for the generated emoji selection list (committed to repo for reference).
   emoji_list_path: "docs/colrv1-emoji-list.json"
+  # Priority codepoints: always selected before the greedy fill phase,
+  # regardless of their codepoint value.  Use this for high-codepoint emoji
+  # that are commonly used in GitHub/programming documentation.
+  # Each entry costs at least 1 glyph slot (more if it has unique geometry deps).
+  priority_codepoints:
+    - "U+1F50D"  # 🔍 magnifying glass left
+    - "U+1F50E"  # 🔎 magnifying glass right
+    - "U+1F511"  # 🔑 key
+    - "U+1F512"  # 🔒 locked
+    - "U+1F513"  # 🔓 unlocked
+    - "U+1F514"  # 🔔 bell
+    - "U+1F516"  # 🔖 bookmark
+    - "U+1F517"  # 🔗 link
+    - "U+1F519"  # 🔙 BACK arrow
+    - "U+1F527"  # 🔧 wrench
+    - "U+1F528"  # 🔨 hammer
+    - "U+1F534"  # 🔴 red circle
+    - "U+1F535"  # 🔵 blue circle
+    - "U+1F550"  # 🕐 one o'clock
+    - "U+1F5A5"  # 🖥️ desktop computer
+    - "U+1F5B1"  # 🖱️ computer mouse
+    - "U+1F5C2"  # 🗂️ card index dividers
+    - "U+1F5C3"  # 🗃️ card file box
+    - "U+1F64C"  # 🙌 raising hands
+    - "U+1F680"  # 🚀 rocket
+    - "U+1F6E0"  # 🛠️ hammer and wrench
+    - "U+1F6E1"  # 🛡️ shield
+    - "U+1F7E1"  # 🟡 yellow circle
+    - "U+1F7E2"  # 🟢 green circle
+    - "U+1F91D"  # 🤝 handshake
+    # 常用通用 emoji
+    - "U+1F525"  # 🔥 fire
+    - "U+1F600"  # 😀 grinning face
