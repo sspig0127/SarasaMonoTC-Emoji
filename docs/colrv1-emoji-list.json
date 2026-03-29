@@ -1,10 +1,55 @@
 {
-  "generated": "2026-03-29T05:18:50.851073+00:00",
-  "version": "1.4.2",
+  "generated": "2026-03-29T07:35:12.595992+00:00",
+  "version": "1.5.0",
   "max_new_glyphs": 8136,
-  "selected_count": 600,
-  "total_glyph_cost": 8132,
+  "selected_count": 604,
+  "total_glyph_cost": 8134,
   "emoji": [
+    {
+      "codepoint": "U+263A",
+      "char": "☺",
+      "glyph_name": "smileface_colrv1",
+      "unicode_name": "WHITE SMILING FACE",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 9,
+      "priority": true
+    },
+    {
+      "codepoint": "U+26A0",
+      "char": "⚠",
+      "glyph_name": "uni26A0_colrv1",
+      "unicode_name": "WARNING SIGN",
+      "geometry_deps_count": 7,
+      "new_glyph_cost": 7,
+      "priority": true
+    },
+    {
+      "codepoint": "U+26A1",
+      "char": "⚡",
+      "glyph_name": "uni26A1_colrv1",
+      "unicode_name": "HIGH VOLTAGE SIGN",
+      "geometry_deps_count": 4,
+      "new_glyph_cost": 5,
+      "priority": true
+    },
+    {
+      "codepoint": "U+2764",
+      "char": "❤",
+      "glyph_name": "uni2764_colrv1",
+      "unicode_name": "HEAVY BLACK HEART",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 6,
+      "priority": true
+    },
+    {
+      "codepoint": "U+2B50",
+      "char": "⭐",
+      "glyph_name": "uni2B50_colrv1",
+      "unicode_name": "WHITE MEDIUM STAR",
+      "geometry_deps_count": 3,
+      "new_glyph_cost": 4,
+      "priority": true
+    },
     {
       "codepoint": "U+1F50D",
       "char": "🔍",
@@ -263,7 +308,7 @@
       "glyph_name": "uni2604",
       "unicode_name": "COMET",
       "geometry_deps_count": 5,
-      "new_glyph_cost": 6,
+      "new_glyph_cost": 5,
       "priority": false
     },
     {
@@ -893,7 +938,7 @@
       "glyph_name": "uni2763",
       "unicode_name": "HEAVY HEART EXCLAMATION MARK ORNAMENT",
       "geometry_deps_count": 7,
-      "new_glyph_cost": 7,
+      "new_glyph_cost": 6,
       "priority": false
     },
     {
@@ -1451,7 +1496,7 @@
       "glyph_name": "u1F31F",
       "unicode_name": "GLOWING STAR",
       "geometry_deps_count": 6,
-      "new_glyph_cost": 7,
+      "new_glyph_cost": 4,
       "priority": false
     },
     {
@@ -4763,7 +4808,7 @@
       "glyph_name": "u1F499",
       "unicode_name": "BLUE HEART",
       "geometry_deps_count": 5,
-      "new_glyph_cost": 4,
+      "new_glyph_cost": 2,
       "priority": false
     },
     {
@@ -5394,15 +5439,6 @@
       "unicode_name": "PAGER",
       "geometry_deps_count": 13,
       "new_glyph_cost": 13,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4E0",
-      "char": "📠",
-      "glyph_name": "u1F4E0",
-      "unicode_name": "FAX MACHINE",
-      "geometry_deps_count": 22,
-      "new_glyph_cost": 22,
       "priority": false
     }
   ]

@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 改善路線圖
 
-> 最後更新：2026-03-29（v1.4.2 priority allowlist + BMP 符號彩色覆蓋評估）
+> 最後更新：2026-03-29（v1.5 Color 變體 BMP 彩色覆蓋 + 73 tests）
 
 ---
 
@@ -15,7 +15,8 @@
 | **v1.4** | COLRv1 第三變體（彩色向量） | ✅ 已發佈 |
 | **v1.4.1** | COLRv1 greedy 選取（修復網頁亂碼） | ✅ 完成 |
 | **v1.4.2** | COLRv1 priority allowlist（dev emoji 保證彩色） | ✅ 已發佈 |
-| **v2.0** | ZWJ 序列 / 旗幟 / 膚色變體 / BMP 彩色覆蓋 | 🔮 未來 |
+| **v1.5** | BMP 符號彩色覆蓋（force_colrv1_codepoints）| ✅ 完成 |
+| **v2.0** | ZWJ 序列 / 旗幟 / 膚色變體 | 🔮 未來 |
 
 ---
 
@@ -56,6 +57,48 @@
 
 ---
 
+## v1.5 — BMP 符號彩色覆蓋 ✅ 完成
+
+**問題**：❤（U+2764）、⭐（U+2B50）、⚠（U+26A0）等 BMP 符號在所有變體中呈現黑白，
+因 `skip_existing: true` 讓 Sarasa 的單色字形優先。
+
+**解決方案**：config.yaml 白名單，各變體各自強制彩色覆蓋。
+
+### COLRv1 變體（`colrv1.force_colrv1_codepoints`）
+
+**技術實作**（三個修改位置）：
+
+| 位置 | 修改內容 |
+|------|----------|
+| `merge_emoji_colrv1` Step 2.5 | 建立 `glyph_forced_rename`（如 `uni2764 → uni2764_colrv1`），僅限與 Sarasa 字形名稱衝突的強制 codepoint |
+| `merge_emoji_colrv1` Step 3 | `skip_existing` 過濾時保留強制 codepoint |
+| `_update_cmap` | 新增 `force_codepoints` 參數，對強制清單允許覆蓋 BMP cmap 已有項目（原有 `if cp not in cmap` guard） |
+
+**Greedy 選取**：強制 codepoint 與 `priority_codepoints` 合併為 Phase 0/1，保證優先選入。
+**Dep 收集**：dep lookup 使用原始名稱（`uni2764`）以查到 COLR 記錄，rename 在 greedy 結束後才套用。
+**COLR 更新**：deep copy 後將 `BaseGlyphPaintRecord.BaseGlyph` 從 `uni2764` 改為 `uni2764_colrv1`。
+
+### Color 變體（`emoji.force_color_codepoints`）
+
+**技術實作**（三個修改位置）：
+
+| 位置 | 修改內容 |
+|------|----------|
+| `merge_emoji` Step 3 | `skip_existing` 過濾時保留強制 codepoint |
+| `merge_emoji` Step 3.5 | 建立 `color_forced_rename`（如 `uni2764 → uni2764_color`）；更新 `emoji_cmap` |
+| `merge_emoji` Step 4.5 | CBLC deep copy 後將 IndexSubTable 內的原始名稱重新命名（在 `_filter_cblc_to_added_glyphs` 之前） |
+
+**CBLC 順序限制**：`emoji_glyphs_to_add` 保持 NotoColorEmoji glyph order（嚴格遞增 ID 要求），
+rename 後的字形在原始位置插入，不附加至末尾。
+
+**預設清單**（5 個，config.yaml）：❤ U+2764、⭐ U+2B50、⚠ U+26A0、☺ U+263A、⚡ U+26A1（兩變體相同）
+
+### 測試
+
+73 tests（70 原有 + 3 新增 `TestUpdateCmapForceOverrideColor`）
+
+---
+
 ## v2.0 — 完整 Emoji 支援（長期）
 
 目前約 40% 現代 emoji 因需要 ZWJ 序列而缺席。v2.0 目標是補齊這個缺口，
@@ -76,40 +119,6 @@
 - 建立 ZWJ sequence → glyph name 的對應表
 - 將 sequence 加入 GSUB ligature rules，cmap 指向分解後的 input sequence
 - 旗幟：Regional Indicator 需特殊處理（兩個字元組合）
-
-### BMP 符號彩色覆蓋（新增議題）
-
-**問題**：☺️（U+263A）、⭐（U+2B50）、⚠️（U+26A0）等 BMP 符號，
-Sarasa 原生已有單色字形，`skip_existing: true` 正確跳過 → 呈現黑白為**設計行為**。
-
-**v1.x 不修改的原因**：
-- `skip_existing` 是全域旗標；關掉會影響 **95 個** BMP codepoint，
-  包含 ZWJ（U+200D）等功能性符號 → 可能損壞字體結構
-- 無法選擇性覆蓋，風險過高
-
-**v2.0 可行方案**：新增 `force_colrv1_codepoints` 白名單（config.yaml）
-
-```yaml
-colrv1:
-  # 強制用 Noto-COLRv1 彩色字形覆蓋 Sarasa 原生字形（逐一指定，避免影響 ZWJ 等功能符號）
-  force_colrv1_codepoints:
-    - "U+263A"  # ☺ smiling face
-    - "U+2B50"  # ⭐ star
-    - "U+26A0"  # ⚠ warning
-    - "U+274C"  # ❌ cross mark
-    - "U+2764"  # ❤ heart
-```
-
-**技術評估**（已分析）：
-- Sarasa + Noto-COLRv1 共有 **95 個 BMP codepoint**，累計 564 glyph slots
-- 若只選取 ~30 個常見 emoji 符號（排除箭頭、功能符號），約需 150–200 slots
-- 需修改以下兩個位置（缺一不可）：
-  1. `_select_colrv1_emoji_greedy()`：新增 Phase 0，對 force 清單 bypass `skip_existing`
-  2. **`_update_cmap()`**：現行有 `if cp not in fmt4_win.cmap: skip` 保護，BMP codepoint 不會被覆蓋；
-     需新增 `force_set` 參數，對強制清單直接賦值覆蓋原有 cmap 指向
-- 字形名稱衝突（如 `uni2764`）由現有 `_apply_colrv1_rename` 自動處理（重命名為 `uni2764_colrv1`）
-- 強制清單消耗 greedy Phase 2 預算，需計入 slots 計算
-- 實作複雜度：**中等偏高**（涉及 2 個函式的 BMP 保護機制調整）
 
 ### 參考資源
 - [Unicode Emoji ZWJ Sequences](https://unicode.org/emoji/charts/emoji-zwj-sequences.html)
@@ -209,7 +218,7 @@ colrv1:
 | 項目 | 位置 | 說明 |
 |------|------|------|
 | CBLC filtering 可能移除有效 emoji | `emoji_merge.py:181-237` | 名稱衝突時捨棄 color bitmap，以 Sarasa outline 代替 |
-| BMP 符號（☺️ ⭐ ⚠️ 等）在 COLRv1 呈現黑白 | `emoji_merge.py` | `skip_existing: true` 設計行為；95 個 BMP codepoint 含 ZWJ，全域關閉風險高；v2.0 規劃 `force_colrv1_codepoints` 逐項覆蓋；需同時修改 `_update_cmap`（現有 BMP guard）與 `_select_colrv1_emoji_greedy`（Phase 0） |
+| ~~BMP 符號（☺️ ⭐ ⚠️ 等）在 COLRv1 呈現黑白~~ | `emoji_merge.py` | ✅ 已修正（v1.5）：`force_colrv1_codepoints` 白名單；`_update_cmap` BMP guard 修正；`glyph_forced_rename`（`uni2764 → uni2764_colrv1`）機制 |
 | ~~Mac platform name 移除時機~~ | `build.py` | ✅ 已修正（v1.3）：在 `update_font_names()` 之後再次呼叫 `_strip_mac_name_records` |
 | ~~config 型別未驗證~~ | `build.py` | ✅ 已修正：新增 `get_config_int()` helper，`parallel` 與 `emoji_width_multiplier` 讀取時驗證型別與範圍 |
 | ~~`emoji_width_multiplier` 無範圍檢查~~ | `src/config.py` | ✅ 已修正：`FontConfig.__post_init__` 驗證型別為 int 且範圍在 [1, 4] |

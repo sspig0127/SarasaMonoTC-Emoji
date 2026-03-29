@@ -133,11 +133,18 @@ def _update_cmap(
     base_font: TTFont,
     emoji_cmap: dict[int, str],
     added_set: set[str],
+    force_codepoints: set[int] | None = None,
 ) -> int:
     """Add emoji codepoints to font's cmap tables.
 
     Creates a Windows Unicode format=12 table if not present (required for
     supplementary codepoints > U+FFFF). Also updates format=4 for BMP emoji.
+
+    Args:
+        force_codepoints: Codepoints whose cmap entries are overwritten even
+            when the entry already exists (used by force_colrv1_codepoints to
+            redirect BMP symbols from Sarasa's monochrome glyph to the COLRv1
+            stub).
 
     Returns:
         Number of new codepoint entries added
@@ -174,17 +181,23 @@ def _update_cmap(
         if name not in added_set:
             continue
 
-        # format=12 handles all Unicode planes (BMP + supplementary)
-        if cp not in fmt12_win.cmap:
+        is_forced = force_codepoints is not None and cp in force_codepoints
+
+        # format=12 handles all Unicode planes (BMP + supplementary).
+        # For forced codepoints, overwrite even if the entry already exists —
+        # this redirects BMP symbols (e.g. U+2764 ❤) from Sarasa's monochrome
+        # glyph to our new COLRv1 stub (e.g. uni2764_colrv1).
+        if cp not in fmt12_win.cmap or is_forced:
+            if cp not in fmt12_win.cmap:
+                added += 1
             fmt12_win.cmap[cp] = name
-            added += 1
 
         # Also add BMP emoji to format=4 table for legacy compatibility
-        if fmt4_win and cp <= 0xFFFF and cp not in fmt4_win.cmap:
+        if fmt4_win and cp <= 0xFFFF and (cp not in fmt4_win.cmap or is_forced):
             fmt4_win.cmap[cp] = name
 
         # Mirror to Unicode platform format=12 if present
-        if fmt12_uni and cp not in fmt12_uni.cmap:
+        if fmt12_uni and (cp not in fmt12_uni.cmap or is_forced):
             fmt12_uni.cmap[cp] = name
 
     return added
@@ -550,25 +563,32 @@ def merge_emoji(
     base_font_path: str,
     emoji_font_path: str,
     config: FontConfig,
+    force_codepoints: set[int] | None = None,
 ) -> TTFont:
     """Merge NotoColorEmoji CBDT/CBLC color emoji into SarasaMonoTC.
 
     Steps:
     1. Load fonts, detect Sarasa's half/full width at runtime
     2. Extract emoji cmap (single codepoints only)
-    3. Filter out codepoints already in Sarasa (preserve existing glyphs)
+    3. Filter out codepoints already in Sarasa (keep forced ones)
+    3.5. Build color_forced_rename for BMP name conflicts; apply to emoji_cmap
     4. Deep-copy CBDT/CBLC tables into Sarasa
        (fonttools recompiles with correct glyph IDs on save)
+    4.5. Rename forced glyphs in CBLC IndexSubTables
     5. Append emoji glyph names to glyph order (contiguous block at end)
     6. Add empty glyph placeholders in glyf table
     7. Set emoji advance width in hmtx (= full_width, i.e. 2x half-width)
-    8. Update cmap with emoji codepoints
+    8. Update cmap with emoji codepoints (overwrite BMP for forced ones)
     9. Update maxp, hhea, OS/2
 
     Args:
         base_font_path: Path to SarasaMonoTC-{Style}.ttf
         emoji_font_path: Path to NotoColorEmoji.ttf
         config: FontConfig object
+        force_codepoints: BMP codepoints to force color even when skip_existing=True.
+            For each codepoint whose emoji glyph name conflicts with Sarasa, a renamed
+            glyph (e.g. uni2764 → uni2764_color) is inserted so both the Sarasa outline
+            and the color bitmap can coexist; the cmap is redirected to the color version.
 
     Returns:
         Merged TTFont object (caller must call .save() and .close())
@@ -591,11 +611,14 @@ def merge_emoji(
     emoji_cmap = get_emoji_cmap(emoji_font)
     print(f"  Emoji cmap entries: {len(emoji_cmap)}")
 
-    # Step 3: filter existing codepoints
+    # Step 3: filter existing codepoints (keep forced ones)
     if config.skip_existing:
         base_cmap = base_font["cmap"].getBestCmap() or {}
         before = len(emoji_cmap)
-        emoji_cmap = {cp: name for cp, name in emoji_cmap.items() if cp not in base_cmap}
+        emoji_cmap = {
+            cp: name for cp, name in emoji_cmap.items()
+            if cp not in base_cmap or (force_codepoints is not None and cp in force_codepoints)
+        }
         print(f"  Filtered existing codepoints: {before} → {len(emoji_cmap)}")
 
     if not emoji_cmap:
@@ -617,9 +640,35 @@ def merge_emoji(
     base_existing_names = set(base_font.getGlyphOrder())
     emoji_all_glyph_order = emoji_font.getGlyphOrder()
 
+    # Step 3.5: build rename map for forced BMP codepoints.
+    # For each forced codepoint whose emoji glyph name conflicts with Sarasa,
+    # we use a renamed glyph (e.g. uni2764 → uni2764_color) so both the Sarasa
+    # monochrome outline and the new color bitmap glyph can coexist.
+    color_forced_rename: dict[str, str] = {}
+    if force_codepoints:
+        for cp in force_codepoints:
+            if cp in emoji_cmap:
+                orig_name = emoji_cmap[cp]
+                if orig_name in base_existing_names:
+                    color_forced_rename[orig_name] = f"{orig_name}_color"
+        if color_forced_rename:
+            print(f"  Forced BMP renames: {len(color_forced_rename)} "
+                  f"(e.g. {next(iter(color_forced_rename))} → "
+                  f"{next(iter(color_forced_rename.values()))})")
+        # Apply renames to emoji_cmap so _update_cmap uses the new names
+        emoji_cmap = {
+            cp: color_forced_rename.get(name, name)
+            for cp, name in emoji_cmap.items()
+        }
+
+    # Build emoji_glyphs_to_add preserving NotoColorEmoji's glyph ID order.
+    # For forced-renamed glyphs: include them under the new name even though the
+    # original name conflicts with Sarasa (CBLC strictly-increasing ID requirement
+    # means we must keep the relative order from NotoColorEmoji's glyph list).
     emoji_glyphs_to_add = [
-        name for name in emoji_all_glyph_order
-        if name not in base_existing_names
+        color_forced_rename.get(name, name)
+        for name in emoji_all_glyph_order
+        if name not in base_existing_names or name in color_forced_rename
     ]
 
     name_conflicts = len(emoji_all_glyph_order) - len(emoji_glyphs_to_add)
@@ -636,6 +685,22 @@ def merge_emoji(
         base_font["CBLC"] = copy.deepcopy(emoji_font["CBLC"])
     else:
         print("  Warning: emoji font has no CBDT/CBLC tables — only outline glyphs will be added")
+
+    # Step 4.5: rename forced glyphs in CBLC IndexSubTables AND CBDT strikeData.
+    # Both tables are keyed by glyph name and must stay in sync:
+    # - CBLC IndexSubTable.names: maps glyph name → offset (used by _filter_cblc)
+    # - CBDT.strikeData[i]: dict mapping glyph name → bitmap object (keyed by name)
+    # If only CBLC is renamed and CBDT is not, compile raises KeyError on the new name.
+    if color_forced_rename and has_cbdt:
+        if "CBLC" in base_font:
+            for strike in base_font["CBLC"].strikes:
+                for sub in strike.indexSubTables:
+                    sub.names = [color_forced_rename.get(n, n) for n in sub.names]
+        if "CBDT" in base_font:
+            for strike_dict in base_font["CBDT"].strikeData:
+                for old_name, new_name in color_forced_rename.items():
+                    if old_name in strike_dict:
+                        strike_dict[new_name] = strike_dict.pop(old_name)
 
     # Step 5: append emoji glyph names to glyph order (contiguous at end)
     # NOTE: do NOT update maxp.numGlyphs here — wait until glyf is populated
@@ -685,8 +750,10 @@ def merge_emoji(
     base_font["maxp"].numGlyphs = len(new_order)
 
     # Step 8: update cmap (robust: ensures format=12 table exists for > U+FFFF)
+    # For forced BMP codepoints, overwrite existing cmap entries so the renamed
+    # color glyph (e.g. uni2764_color) takes precedence over Sarasa's monochrome one.
     added_set = set(emoji_glyphs_to_add)
-    updated = _update_cmap(base_font, emoji_cmap, added_set)
+    updated = _update_cmap(base_font, emoji_cmap, added_set, force_codepoints)
     print(f"  cmap entries added: {updated}")
 
     # Step 9: update hhea and OS/2
@@ -698,6 +765,24 @@ def merge_emoji(
 
     from .utils import merge_os2_ranges
     merge_os2_ranges(base_font, emoji_font)
+
+    # Step 9.5: if forced BMP renames are active, upgrade post table to format 2.0.
+    # Sarasa uses post format 3.0 (no stored glyph names). On reload, fonttools
+    # derives glyph names from the cmap reverse-lookup:
+    #   cmap[U+2764] → glyph ID X → _makeGlyphName(0x2764) → "uni2764"
+    # This silently discards the "_color" suffix we assigned.
+    # Format 2.0 writes an explicit name string for every glyph in the font,
+    # so "uni2764_color" survives the save/reload cycle unchanged.
+    if color_forced_rename and "post" in base_font:
+        post = base_font["post"]
+        _ = post.formatType  # trigger lazy decompile
+        if post.formatType == 3.0:
+            print("  Upgrading post table 3.0→2.0 to persist forced-rename glyph names")
+            post.formatType = 2.0
+            if not hasattr(post, "extraNames"):
+                post.extraNames = []
+            if not hasattr(post, "mapping"):
+                post.mapping = {}
 
     # Strip Mac platform name records BEFORE returning
     # Sarasa's original records contain CJK chars that can't be encoded as mac_roman
@@ -937,6 +1022,7 @@ def merge_emoji_colrv1(
     config: FontConfig,
     max_new_glyphs: int | None = None,
     priority_codepoints: set[int] | None = None,
+    force_codepoints: set[int] | None = None,
 ) -> tuple[TTFont, list[dict]]:
     """Merge Noto COLRv1 color vector emoji into SarasaMonoTC.
 
@@ -960,6 +1046,11 @@ def merge_emoji_colrv1(
             this limit.  Fixes browser garbling caused by oversized glyph tables.
         priority_codepoints: Codepoints always included before the greedy fill
             phase (e.g. commonly used dev/tooling emoji at higher codepoints).
+        force_codepoints: BMP codepoints (≤ U+FFFF) that Sarasa already renders
+            as monochrome glyphs.  These bypass skip_existing and get a renamed
+            COLRv1 stub (e.g. uni2764 → uni2764_colrv1) so the cmap entry is
+            redirected from Sarasa's monochrome glyph to the color vector version.
+            Treated as Phase 0 in greedy selection (guaranteed priority).
 
     Returns:
         (merged_font, selection_records) where merged_font is the TTFont object
@@ -986,11 +1077,33 @@ def merge_emoji_colrv1(
     emoji_cmap = get_emoji_cmap(emoji_font)
     print(f"  Emoji cmap entries: {len(emoji_cmap)}")
 
-    # Step 3: filter existing codepoints
+    # Step 2.5: build rename map for forced BMP codepoints that conflict with Sarasa.
+    # Must happen BEFORE skip_existing filter so emoji_cmap still contains them.
+    # A forced codepoint like U+2764 (❤) has glyph name "uni2764" in BOTH Sarasa
+    # and Noto-COLRv1.  We rename the COLRv1 copy to "uni2764_colrv1" so it can
+    # coexist, and later redirect the cmap entry to the renamed stub.
+    glyph_forced_rename: dict[str, str] = {}  # orig_name → colrv1_name
+    if force_codepoints:
+        base_glyph_names_early = set(base_font.getGlyphOrder())
+        for cp in force_codepoints:
+            if cp in emoji_cmap:
+                orig_name = emoji_cmap[cp]
+                if orig_name in base_glyph_names_early:
+                    glyph_forced_rename[orig_name] = f"{orig_name}_colrv1"
+        if glyph_forced_rename:
+            print(
+                f"  Forced BMP emoji with name conflicts: {len(glyph_forced_rename)} "
+                f"(will be renamed: {sorted(glyph_forced_rename)[:5]})"
+            )
+
+    # Step 3: filter existing codepoints (skip_existing), but keep forced codepoints
     if config.skip_existing:
         base_cmap = base_font["cmap"].getBestCmap() or {}
         before = len(emoji_cmap)
-        emoji_cmap = {cp: name for cp, name in emoji_cmap.items() if cp not in base_cmap}
+        emoji_cmap = {
+            cp: name for cp, name in emoji_cmap.items()
+            if cp not in base_cmap or (force_codepoints is not None and cp in force_codepoints)
+        }
         print(f"  Filtered existing codepoints: {before} → {len(emoji_cmap)}")
 
     if not emoji_cmap:
@@ -1009,13 +1122,30 @@ def merge_emoji_colrv1(
         colr_table_pre = emoji_font["COLR"].table
         if hasattr(colr_table_pre, "BaseGlyphList") and colr_table_pre.BaseGlyphList:
             _ = colr_table_pre.BaseGlyphList.BaseGlyphPaintRecord
+        # Combine priority + forced codepoints for Phase 0/1 guaranteed selection.
+        # Forced codepoints use original names at this point (renames applied after),
+        # so _collect_colrv1_paint_glyph_deps inside greedy can look them up in COLR.
+        combined_priority = (priority_codepoints or set()) | (force_codepoints or set())
         emoji_cmap, selection_records = _select_colrv1_emoji_greedy(
-            emoji_cmap, emoji_font, max_new_glyphs, priority_codepoints
+            emoji_cmap, emoji_font, max_new_glyphs,
+            combined_priority if combined_priority else None,
         )
         if not emoji_cmap:
             print("  No emoji selected within glyph budget.")
             emoji_font.close()
             return base_font, []
+
+    # Post-greedy: apply forced renames to emoji_cmap.
+    # Now that greedy is done (which needed original names for COLR lookup),
+    # rename BMP conflict glyphs: e.g. emoji_cmap[0x2764] = "uni2764_colrv1".
+    if glyph_forced_rename:
+        for cp in (force_codepoints or set()):
+            if cp in emoji_cmap and emoji_cmap[cp] in glyph_forced_rename:
+                emoji_cmap[cp] = glyph_forced_rename[emoji_cmap[cp]]
+        # Sync glyph_name in selection_records for JSON output
+        for rec in selection_records:
+            if rec["glyph_name"] in glyph_forced_rename:
+                rec["glyph_name"] = glyph_forced_rename[rec["glyph_name"]]
 
     # Calculate UPM scale: Noto-COLRv1.ttf uses UPM 1024, Sarasa uses UPM 1000.
     base_upm = base_font["head"].unitsPerEm
@@ -1035,8 +1165,16 @@ def merge_emoji_colrv1(
     if hasattr(colr_table, "BaseGlyphList") and colr_table.BaseGlyphList:
         _ = colr_table.BaseGlyphList.BaseGlyphPaintRecord  # trigger lazy load
 
-    geometry_deps = _collect_colrv1_paint_glyph_deps(emoji_font, target_names)
-    geometry_deps -= target_names  # avoid double-counting emoji used as deps
+    # Dep collection uses original glyph names (COLR records are keyed by original
+    # name).  For forced-renamed emoji (e.g. uni2764_colrv1), map back to original
+    # before the lookup so PaintGlyph trees for those emoji are also walked.
+    if glyph_forced_rename:
+        colrv1_to_orig = {v: k for k, v in glyph_forced_rename.items()}
+        lookup_names = {colrv1_to_orig.get(n, n) for n in target_names}
+    else:
+        lookup_names = target_names
+    geometry_deps = _collect_colrv1_paint_glyph_deps(emoji_font, lookup_names)
+    geometry_deps -= lookup_names  # avoid double-counting emoji used as deps
     print(
         f"  Target emoji: {len(target_names)}, geometry deps: {len(geometry_deps)}, "
         f"name conflicts (skipped): {name_conflicts}"
@@ -1076,6 +1214,16 @@ def merge_emoji_colrv1(
         if hasattr(colr_table_copy, "LayerList") and colr_table_copy.LayerList:
             for layer_paint in colr_table_copy.LayerList.Paint:
                 _apply_colrv1_rename(layer_paint, rename_map)
+
+    # For forced BMP emoji, also rename the BaseGlyph field itself in COLR records.
+    # e.g. BaseGlyph "uni2764" → "uni2764_colrv1" so the renderer maps the cmap
+    # entry (which _update_cmap will redirect to "uni2764_colrv1") to this record.
+    if glyph_forced_rename:
+        colr_table_copy = colr_copy.table
+        if hasattr(colr_table_copy, "BaseGlyphList") and colr_table_copy.BaseGlyphList:
+            for record in colr_table_copy.BaseGlyphList.BaseGlyphPaintRecord:
+                if record.BaseGlyph in glyph_forced_rename:
+                    record.BaseGlyph = glyph_forced_rename[record.BaseGlyph]
 
     # Step 8: access base_glyf BEFORE setGlyphOrder (OTS ordering constraint —
     # prevents flag-encoding change that OTS rejects; see merge_emoji() comment)
@@ -1141,8 +1289,10 @@ def merge_emoji_colrv1(
     added_emoji_set = set(emoji_glyphs_list)
     _filter_colr_to_added_glyphs(base_font, added_emoji_set)
 
-    # Step 13: update cmap
-    updated = _update_cmap(base_font, emoji_cmap, added_emoji_set)
+    # Step 13: update cmap.
+    # force_codepoints allows overwriting existing BMP entries so that e.g.
+    # U+2764 → uni2764_colrv1 instead of Sarasa's original monochrome uni2764.
+    updated = _update_cmap(base_font, emoji_cmap, added_emoji_set, force_codepoints)
     print(f"  cmap entries added: {updated}")
 
     # Step 14: update hhea and OS/2

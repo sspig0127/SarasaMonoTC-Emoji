@@ -113,6 +113,7 @@ def build_single_font(
     colrv1: bool = False,
     max_new_glyphs: int | None = None,
     priority_codepoints: set[int] | None = None,
+    force_codepoints: set[int] | None = None,
 ) -> tuple[str, list[dict]]:
     """Build a single font variant with emoji merged in.
 
@@ -128,6 +129,9 @@ def build_single_font(
         colrv1: If True, use COLRv1 vector merge
         max_new_glyphs: COLRv1 only — glyph budget for greedy selection
         priority_codepoints: COLRv1 only — codepoints always included before greedy fill
+        force_codepoints: BMP codepoints forced to color even when skip_existing would
+            otherwise preserve Sarasa's monochrome glyph (COLRv1: via stub rename;
+            Color CBDT: via color bitmap rename)
 
     Returns:
         (output_path, selection_records) where selection_records contains
@@ -151,12 +155,14 @@ def build_single_font(
             config=config,
             max_new_glyphs=max_new_glyphs,
             priority_codepoints=priority_codepoints,
+            force_codepoints=force_codepoints,
         )
     else:
         merged_font = merge_emoji(
             base_font_path=str(base_font_path),
             emoji_font_path=str(emoji_font_path),
             config=config,
+            force_codepoints=force_codepoints,
         )
 
     # Update font metadata
@@ -318,6 +324,13 @@ Configuration priority: CLI args > config.yaml > defaults
             {int(s.replace("U+", "").replace("u+", ""), 16) for s in _raw_priority}
             if _raw_priority else None
         )
+        # Parse force codepoints — BMP symbols to colorize despite skip_existing
+        _raw_force = get_config_value(yaml_config, "colrv1", "force_colrv1_codepoints") or []
+        colrv1_force_codepoints: set[int] | None = (
+            {int(s.replace("U+", "").replace("u+", ""), 16) for s in _raw_force}
+            if _raw_force else None
+        )
+        color_force_codepoints = None
     elif is_lite:
         family_name = (
             get_config_value(yaml_config, "lite", "family_name")
@@ -328,6 +341,8 @@ Configuration priority: CLI args > config.yaml > defaults
         colrv1_max_new_glyphs = None
         colrv1_emoji_list_path = None
         colrv1_priority_codepoints = None
+        colrv1_force_codepoints = None
+        color_force_codepoints = None
     else:
         family_name = get_config_value(yaml_config, "font", "family_name") or "SarasaMonoTCEmoji"
         variant_emoji_font = None
@@ -335,6 +350,13 @@ Configuration priority: CLI args > config.yaml > defaults
         colrv1_max_new_glyphs = None
         colrv1_emoji_list_path = None
         colrv1_priority_codepoints = None
+        colrv1_force_codepoints = None
+        # Parse Color variant forced BMP codepoints
+        _raw_color_force = get_config_value(yaml_config, "emoji", "force_color_codepoints") or []
+        color_force_codepoints: set[int] | None = (
+            {int(s.replace("U+", "").replace("u+", ""), 16) for s in _raw_color_force}
+            if _raw_color_force else None
+        )
 
     output_dir = args.output_dir or Path(default_output_dir)
 
@@ -436,6 +458,13 @@ Configuration priority: CLI args > config.yaml > defaults
     build_start = time.monotonic()
     colrv1_selection_records: list[dict] = []
 
+    # Determine effective force_codepoints for this variant
+    effective_force_codepoints: set[int] | None = (
+        colrv1_force_codepoints if is_colrv1
+        else color_force_codepoints if not is_lite
+        else None
+    )
+
     if parallel <= 1:
         for style in styles:
             p = font_paths[style]
@@ -445,6 +474,7 @@ Configuration priority: CLI args > config.yaml > defaults
                 lite=is_lite, colrv1=is_colrv1,
                 max_new_glyphs=colrv1_max_new_glyphs,
                 priority_codepoints=colrv1_priority_codepoints,
+                force_codepoints=effective_force_codepoints,
             )
             if records and not colrv1_selection_records:
                 colrv1_selection_records = records
@@ -461,6 +491,7 @@ Configuration priority: CLI args > config.yaml > defaults
                         is_lite, is_colrv1,
                         colrv1_max_new_glyphs,
                         colrv1_priority_codepoints,
+                        effective_force_codepoints,
                     )
                     futures[future] = style
 

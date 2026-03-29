@@ -5,7 +5,7 @@
 # Font metadata
 font:
   family_name: "SarasaMonoTCEmoji"
-  version: "1.4.2"
+  version: "1.5.0"
   author: "sspig0127"
   # Full copyright notice — updated after running:
   #   uv run python -c "
@@ -56,6 +56,16 @@ emoji:
   emoji_width_multiplier: 2
   # Skip codepoints already in base font to preserve Sarasa's existing glyphs
   skip_existing: true
+  # force_color_codepoints — BMP symbols that Sarasa renders monochrome.
+  # Listed here, their cmap entry is redirected to a CBDT/CBLC color stub
+  # (e.g. uni2764 → uni2764_color), overriding skip_existing for these codepoints.
+  # Verified present in both Sarasa and NotoColorEmoji (2026-03-29).
+  force_color_codepoints:
+    - "U+2764"  # ❤ heart
+    - "U+2B50"  # ⭐ star
+    - "U+26A0"  # ⚠ warning sign
+    - "U+263A"  # ☺ smiling face
+    - "U+26A1"  # ⚡ high voltage / lightning
 
 # Lite variant — monochrome glyf emoji
 # Emoji source: Noto Emoji variable font (google/fonts repo, SIL OFL)
@@ -104,6 +114,19 @@ colrv1:
   #
   # To customise: add or remove "U+XXXX" entries.  Run `uv run python build.py --colrv1`
   # to rebuild; the updated selection is written to docs/colrv1-emoji-list.json.
+  #
+  # force_colrv1_codepoints — BMP symbols that Sarasa already renders monochrome.
+  # Listed here, their cmap entry is redirected to a COLRv1 stub (e.g. uni2764 →
+  # uni2764_colrv1), overriding skip_existing for these specific codepoints.
+  # Verified present in both Sarasa and Noto-COLRv1 (2026-03-29).
+  # Each entry consumes greedy budget; keep list small.
+  force_colrv1_codepoints:
+    - "U+2764"  # ❤ heart
+    - "U+2B50"  # ⭐ star
+    - "U+26A0"  # ⚠ warning sign
+    - "U+263A"  # ☺ smiling face
+    - "U+26A1"  # ⚡ high voltage / lightning
+
   priority_codepoints:
     - "U+1F50D"  # 🔍 magnifying glass left
     - "U+1F50E"  # 🔎 magnifying glass right

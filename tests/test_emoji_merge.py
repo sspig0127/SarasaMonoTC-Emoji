@@ -16,6 +16,7 @@ from src.emoji_merge import (
     _collect_glyph_deps,
     _collect_colrv1_paint_glyph_deps,
     _filter_colr_to_added_glyphs,
+    _update_cmap,
     _scale_glyph,
     detect_font_widths,
     get_emoji_cmap,
@@ -459,3 +460,129 @@ class TestFilterColrToAddedGlyphs:
         font = _TTFont()
         font.setGlyphOrder([".notdef"])
         _filter_colr_to_added_glyphs(font, {"some_glyph"})  # must not raise
+
+
+# ---------------------------------------------------------------------------
+# _update_cmap — force_codepoints BMP override
+# ---------------------------------------------------------------------------
+
+def _make_mock_font_with_cmap(existing_bmp: dict[int, str]) -> "TTFont":
+    """Build a minimal TTFont with a format=4 BMP cmap pre-populated."""
+    from fontTools.ttLib import TTFont as _TTFont
+    from fontTools.ttLib.tables import _c_m_a_p as cmap_module
+
+    font = _TTFont()
+    glyph_order = [".notdef"] + list(existing_bmp.values())
+    font.setGlyphOrder(glyph_order)
+
+    fmt4 = cmap_module.cmap_format_4(4)
+    fmt4.platformID = 3
+    fmt4.platEncID = 1
+    fmt4.language = 0
+    fmt4.cmap = dict(existing_bmp)
+
+    cmap_table = cmap_module.table__c_m_a_p()
+    cmap_table.tableVersion = 0
+    cmap_table.tables = [fmt4]
+    font["cmap"] = cmap_table
+    return font
+
+
+class TestUpdateCmapForceOverride:
+    """_update_cmap: force_codepoints must overwrite existing BMP entries."""
+
+    def test_normal_codepoint_not_overwritten(self):
+        """Without force, an existing BMP entry must NOT be replaced."""
+        font = _make_mock_font_with_cmap({0x2764: "uni2764"})  # ❤ already in Sarasa
+        emoji_cmap = {0x2764: "uni2764_colrv1"}
+        added_set = {"uni2764_colrv1"}
+
+        _update_cmap(font, emoji_cmap, added_set, force_codepoints=None)
+
+        fmt4 = next(t for t in font["cmap"].tables if t.format == 4)
+        # Should still point to original monochrome glyph
+        assert fmt4.cmap[0x2764] == "uni2764"
+
+    def test_forced_codepoint_overwrites_existing_bmp(self):
+        """With force_codepoints, the BMP entry must be redirected to new stub."""
+        font = _make_mock_font_with_cmap({0x2764: "uni2764"})
+        emoji_cmap = {0x2764: "uni2764_colrv1"}
+        added_set = {"uni2764_colrv1"}
+
+        _update_cmap(font, emoji_cmap, added_set, force_codepoints={0x2764})
+
+        fmt4 = next(t for t in font["cmap"].tables if t.format == 4)
+        assert fmt4.cmap[0x2764] == "uni2764_colrv1", (
+            "Forced codepoint should redirect cmap to COLRv1 stub"
+        )
+
+    def test_force_only_affects_listed_codepoints(self):
+        """force_codepoints must not affect other BMP entries."""
+        font = _make_mock_font_with_cmap({0x2764: "uni2764", 0x2B50: "uni2B50"})
+        emoji_cmap = {0x2764: "uni2764_colrv1", 0x2B50: "uni2B50_colrv1"}
+        added_set = {"uni2764_colrv1", "uni2B50_colrv1"}
+
+        # Only force U+2764
+        _update_cmap(font, emoji_cmap, added_set, force_codepoints={0x2764})
+
+        fmt4 = next(t for t in font["cmap"].tables if t.format == 4)
+        assert fmt4.cmap[0x2764] == "uni2764_colrv1"   # forced → overwritten
+        assert fmt4.cmap[0x2B50] == "uni2B50"          # not forced → unchanged
+
+    def test_added_count_unchanged_for_forced_overwrite(self):
+        """Overwriting an existing entry must not inflate the added counter."""
+        font = _make_mock_font_with_cmap({0x2764: "uni2764"})
+        emoji_cmap = {0x2764: "uni2764_colrv1"}
+        added_set = {"uni2764_colrv1"}
+
+        count = _update_cmap(font, emoji_cmap, added_set, force_codepoints={0x2764})
+
+        # Overwrite of existing entry: added count should be 0 (not a new entry)
+        assert count == 0
+
+
+# ---------------------------------------------------------------------------
+# _update_cmap — Color (_color suffix) variant BMP override
+# ---------------------------------------------------------------------------
+
+class TestUpdateCmapForceOverrideColor:
+    """_update_cmap: Color variant uses '_color' suffix; same override semantics."""
+
+    def test_color_suffix_overwrites_existing_bmp(self):
+        """_color-suffixed rename must redirect cmap for forced BMP codepoints."""
+        font = _make_mock_font_with_cmap({0x2764: "uni2764"})
+        emoji_cmap = {0x2764: "uni2764_color"}  # Color variant uses _color suffix
+        added_set = {"uni2764_color"}
+
+        _update_cmap(font, emoji_cmap, added_set, force_codepoints={0x2764})
+
+        fmt4 = next(t for t in font["cmap"].tables if t.format == 4)
+        assert fmt4.cmap[0x2764] == "uni2764_color"
+
+    def test_color_suffix_no_force_leaves_original(self):
+        """Without force_codepoints, existing BMP entry is preserved even with _color glyph."""
+        font = _make_mock_font_with_cmap({0x2764: "uni2764"})
+        emoji_cmap = {0x2764: "uni2764_color"}
+        added_set = {"uni2764_color"}
+
+        _update_cmap(font, emoji_cmap, added_set, force_codepoints=None)
+
+        fmt4 = next(t for t in font["cmap"].tables if t.format == 4)
+        assert fmt4.cmap[0x2764] == "uni2764"  # unchanged
+
+    def test_color_multiple_forced_codepoints(self):
+        """Multiple forced BMP codepoints must all be redirected."""
+        font = _make_mock_font_with_cmap({0x2764: "uni2764", 0x2B50: "uni2B50", 0x26A0: "uni26A0"})
+        emoji_cmap = {
+            0x2764: "uni2764_color",
+            0x2B50: "uni2B50_color",
+            0x26A0: "uni26A0_color",
+        }
+        added_set = set(emoji_cmap.values())
+
+        _update_cmap(font, emoji_cmap, added_set, force_codepoints={0x2764, 0x2B50})
+
+        fmt4 = next(t for t in font["cmap"].tables if t.format == 4)
+        assert fmt4.cmap[0x2764] == "uni2764_color"   # forced
+        assert fmt4.cmap[0x2B50] == "uni2B50_color"   # forced
+        assert fmt4.cmap[0x26A0] == "uni26A0"          # not forced → unchanged
