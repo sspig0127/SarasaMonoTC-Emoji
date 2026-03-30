@@ -360,3 +360,86 @@ class TestCOLRv1Output:
         assert out_metrics == expected, (
             f"Helper glyph {out_helper} metrics mismatch: expected {expected}, got {out_metrics}"
         )
+
+    def test_all_transformed_helper_glyph_metrics_preserved(
+        self, output_colrv1_regular, noto_colrv1_font
+    ):
+        """All PaintTransform helper glyphs must retain scaled source metrics.
+
+        This broad regression test scans every COLRv1 BaseGlyphPaintRecord in the
+        built output. Any helper glyph reached via Format=12 PaintTransform must
+        keep the source font's scaled hmtx metrics, rather than collapsing to
+        (0, 0). This guards against future regressions beyond the original 🟡/🟢
+        reproducer pair.
+        """
+        out_cmap = output_colrv1_regular["cmap"].getBestCmap() or {}
+        src_cmap = noto_colrv1_font["cmap"].getBestCmap() or {}
+        out_colr = output_colrv1_regular["COLR"].table
+        src_colr = noto_colrv1_font["COLR"].table
+
+        out_records = {r.BaseGlyph: r for r in out_colr.BaseGlyphList.BaseGlyphPaintRecord}
+        src_records = {r.BaseGlyph: r for r in src_colr.BaseGlyphList.BaseGlyphPaintRecord}
+        out_layers = out_colr.LayerList.Paint
+        src_layers = src_colr.LayerList.Paint
+
+        upm_scale = (
+            output_colrv1_regular["head"].unitsPerEm / noto_colrv1_font["head"].unitsPerEm
+        )
+
+        checked = 0
+        failures = []
+
+        def _collect_transform_helpers(paint, layer_list):
+            pairs = []
+
+            def walk(node):
+                if node is None:
+                    return
+                fmt = getattr(node, "Format", None)
+                if fmt == 12:
+                    child = getattr(node, "Paint", None)
+                    if child is not None and hasattr(child, "Glyph"):
+                        pairs.append(child.Glyph)
+                    walk(child)
+                    return
+                if fmt == 1:
+                    for idx in range(node.FirstLayerIndex, node.FirstLayerIndex + node.NumLayers):
+                        walk(layer_list[idx])
+                    return
+                for attr in ("Paint", "SourcePaint", "BackdropPaint"):
+                    child = getattr(node, attr, None)
+                    if child is not None:
+                        walk(child)
+                for child in getattr(node, "Paints", []) or []:
+                    walk(child)
+
+            walk(paint)
+            return pairs
+
+        for cp, out_glyph in out_cmap.items():
+            src_glyph = src_cmap.get(cp)
+            if src_glyph is None:
+                continue
+            out_base = out_records.get(out_glyph)
+            src_base = src_records.get(src_glyph)
+            if out_base is None or src_base is None:
+                continue
+
+            out_helpers = _collect_transform_helpers(out_base.Paint, out_layers)
+            src_helpers = _collect_transform_helpers(src_base.Paint, src_layers)
+
+            if not out_helpers:
+                continue
+
+            checked += len(out_helpers)
+            for out_helper, src_helper in zip(out_helpers, src_helpers):
+                out_metrics = output_colrv1_regular["hmtx"].metrics[out_helper]
+                src_adv, src_lsb = noto_colrv1_font["hmtx"].metrics[src_helper]
+                expected = (otRound(src_adv * upm_scale), otRound(src_lsb * upm_scale))
+                if out_metrics == (0, 0) or out_metrics != expected:
+                    failures.append(
+                        f"U+{cp:04X}: helper {out_helper} expected {expected}, got {out_metrics}"
+                    )
+
+        assert checked > 50, f"Expected to check many transformed helper glyphs, got {checked}"
+        assert not failures, "Transformed helper metric mismatches:\n" + "\n".join(failures[:20])
