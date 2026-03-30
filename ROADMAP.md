@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 路線圖
 
-> 最後更新：2026-03-30（v1.5.2 完成；COLRv1 helper metrics / Chromium 渲染修復）
+> 最後更新：2026-03-30（v1.5.3 完成；COLRv1 驗證與回歸覆蓋補強）
 >
 > **歷史版本實作細節** → [`docs/roadmap-history.md`](./docs/roadmap-history.md)（需要查閱時再 Read）
 > **COLRv1 深度技術細節** → [`.github/colrv1-dev-notes.md`](./.github/colrv1-dev-notes.md)
@@ -18,6 +18,7 @@
 | v1.5 | BMP 符號彩色覆蓋；post 3.0→2.0 升級；75 tests | ✅ 完成 |
 | v1.5.1 | force BMP 清單 5→15；Budget 8132→8091 slots | ✅ 完成 |
 | **v1.5.2** | COLRv1 paint 座標 + helper metrics 修復（🟡🟢 Chromium 渲染回歸） | ✅ 完成 |
+| **v1.5.3** | COLRv1 高風險樣本驗證頁 + 全域 transformed-helper regression test | ✅ 完成 |
 | v2.0 | ZWJ 序列 / 旗幟 / 膚色變體 | 🔮 未來 |
 
 ---

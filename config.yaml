@@ -5,7 +5,7 @@
 # Font metadata
 font:
   family_name: "SarasaMonoTCEmoji"
-  version: "1.5.2"
+  version: "1.5.3"
   author: "sspig0127"
   # Full copyright notice — updated after running:
   #   uv run python -c "
