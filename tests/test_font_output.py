@@ -10,6 +10,7 @@ Run after building:
 """
 
 import pytest
+from fontTools.misc.roundTools import otRound
 
 _KEY_CODEPOINTS = [
     (0x1F600, "😀"),
@@ -305,4 +306,57 @@ class TestCOLRv1Output:
         family = name_table.getBestFamilyName() or ""
         assert "COLRv1" in family or "colrv1" in family.lower(), (
             f"Family name '{family}' does not indicate COLRv1 variant"
+        )
+
+    def test_transformed_helper_glyph_metrics_preserved(
+        self, output_colrv1_regular, noto_colrv1_font
+    ):
+        """COLRv1 helper glyph metrics must not collapse to (0, 0).
+
+        Regression test for the browser bug where large transformed emoji such
+        as 🟡/🟢 rendered as tiny fragments. The root cause was that merge_emoji_colrv1
+        wrote geometry helper glyph hmtx metrics as (0, 0), while Chromium's
+        PaintGlyph rendering depends on source-compatible helper metrics.
+        """
+        out_cmap = output_colrv1_regular["cmap"].getBestCmap() or {}
+        src_cmap = noto_colrv1_font["cmap"].getBestCmap() or {}
+        out_colr = output_colrv1_regular["COLR"].table
+        src_colr = noto_colrv1_font["COLR"].table
+
+        out_records = {r.BaseGlyph: r for r in out_colr.BaseGlyphList.BaseGlyphPaintRecord}
+        src_records = {r.BaseGlyph: r for r in src_colr.BaseGlyphList.BaseGlyphPaintRecord}
+        out_layers = out_colr.LayerList.Paint
+        src_layers = src_colr.LayerList.Paint
+
+        # 🟡 uses the same large-transform helper path as 🟢 and was the clearest
+        # regression reproducer in Chromium during manual verification.
+        out_glyph = out_cmap[0x1F7E1]
+        src_glyph = src_cmap[0x1F7E1]
+        out_base = out_records[out_glyph].Paint
+        src_base = src_records[src_glyph].Paint
+
+        def _first_transform_helper(layer_list, base_paint):
+            for idx in range(base_paint.FirstLayerIndex, base_paint.FirstLayerIndex + base_paint.NumLayers):
+                paint = layer_list[idx]
+                child = getattr(paint, "Paint", None)
+                if getattr(paint, "Format", None) == 12 and child is not None and hasattr(child, "Glyph"):
+                    return child.Glyph
+            raise AssertionError("Expected a Format=12 PaintTransform layer with helper glyph")
+
+        out_helper = _first_transform_helper(out_layers, out_base)
+        src_helper = _first_transform_helper(src_layers, src_base)
+
+        out_metrics = output_colrv1_regular["hmtx"].metrics[out_helper]
+        src_adv, src_lsb = noto_colrv1_font["hmtx"].metrics[src_helper]
+        upm_scale = (
+            output_colrv1_regular["head"].unitsPerEm / noto_colrv1_font["head"].unitsPerEm
+        )
+        expected = (otRound(src_adv * upm_scale), otRound(src_lsb * upm_scale))
+
+        assert out_metrics != (0, 0), (
+            f"Helper glyph {out_helper} metrics collapsed to (0, 0). "
+            "This breaks large-transform COLRv1 emoji such as U+1F7E1 🟡 in Chromium."
+        )
+        assert out_metrics == expected, (
+            f"Helper glyph {out_helper} metrics mismatch: expected {expected}, got {out_metrics}"
         )

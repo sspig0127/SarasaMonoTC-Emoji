@@ -990,6 +990,95 @@ def _apply_colrv1_rename(paint, rename_map: dict[str, str]) -> None:
             _apply_colrv1_rename(child, rename_map)
 
 
+def _scale_colrv1_paint_coords(colr_obj, upm_scale: float) -> None:
+    """Scale font-unit coordinates in a COLRv1 table by upm_scale.
+
+    When merging from a source font with a different UPM (e.g. Noto-COLRv1
+    UPM=1024) into a target font with a different UPM (e.g. Sarasa UPM=1000),
+    unitless paint values (scale ratios, rotation angles) stay unchanged, but
+    font-unit coordinates must be scaled by target_upm / source_upm.
+
+    Fields scaled per format:
+    - Format 12/13 (PaintTransform/Var): Transform.dx, Transform.dy
+    - Format 14/15 (PaintTranslate/Var): dx, dy
+    - Format 4/5  (PaintLinearGradient/Var): x0,y0,x1,y1,x2,y2
+    - Format 6/7  (PaintRadialGradient/Var): x0,y0,r0,x1,y1,r1
+    - Format 8/9  (PaintSweepGradient/Var): centerX, centerY
+    - Any format with centerX / centerY attributes (scale/rotate/skew variants)
+    - ClipList bounding boxes: xMin, yMin, xMax, yMax
+    """
+    if abs(upm_scale - 1.0) < 1e-6:
+        return
+
+    from fontTools.misc.roundTools import otRound
+
+    def scale_paint(paint) -> None:
+        if paint is None:
+            return
+        fmt = getattr(paint, "Format", None)
+
+        if fmt in (12, 13):  # PaintTransform / PaintVarTransform
+            # Affine2x3 dx/dy are F16Dot16 (float) — keep fractional part
+            t = paint.Transform
+            t.dx *= upm_scale
+            t.dy *= upm_scale
+        elif fmt in (14, 15):  # PaintTranslate / PaintVarTranslate
+            # dx/dy are FWORD (int16) — must round
+            paint.dx = otRound(paint.dx * upm_scale)
+            paint.dy = otRound(paint.dy * upm_scale)
+        elif fmt in (4, 5):  # PaintLinearGradient / Var — FWORD coords
+            for attr in ("x0", "y0", "x1", "y1", "x2", "y2"):
+                if hasattr(paint, attr):
+                    setattr(paint, attr, otRound(getattr(paint, attr) * upm_scale))
+        elif fmt in (6, 7):  # PaintRadialGradient / Var — FWORD coords
+            for attr in ("x0", "y0", "r0", "x1", "y1", "r1"):
+                if hasattr(paint, attr):
+                    setattr(paint, attr, otRound(getattr(paint, attr) * upm_scale))
+        elif fmt in (8, 9):  # PaintSweepGradient / Var — FWORD center
+            if hasattr(paint, "centerX"):
+                paint.centerX = otRound(paint.centerX * upm_scale)
+            if hasattr(paint, "centerY"):
+                paint.centerY = otRound(paint.centerY * upm_scale)
+        else:
+            # Catch-all for PaintScale/Rotate/Skew variants that use center coords
+            # (FWORD int16 — must round)
+            if hasattr(paint, "centerX"):
+                paint.centerX = otRound(paint.centerX * upm_scale)
+            if hasattr(paint, "centerY"):
+                paint.centerY = otRound(paint.centerY * upm_scale)
+
+        # Recurse into child paints (Format 1 = PaintColrLayers refs LayerList,
+        # which is iterated separately below — skip it here to avoid double-scaling)
+        if fmt == 1:
+            return
+        for attr in ("Paint", "SourcePaint", "BackdropPaint"):
+            child = getattr(paint, attr, None)
+            if child is not None:
+                scale_paint(child)
+        for child in getattr(paint, "Paints", []) or []:
+            scale_paint(child)
+
+    colr = colr_obj.table
+
+    # Scale BaseGlyphList paint trees (inline only; LayerList refs handled below)
+    if hasattr(colr, "BaseGlyphList") and colr.BaseGlyphList:
+        for record in colr.BaseGlyphList.BaseGlyphPaintRecord:
+            scale_paint(record.Paint)
+
+    # Scale ALL LayerList entries (each is an independent paint node)
+    if hasattr(colr, "LayerList") and colr.LayerList:
+        for paint in colr.LayerList.Paint:
+            scale_paint(paint)
+
+    # Scale ClipList bounding boxes
+    if hasattr(colr, "ClipList") and colr.ClipList:
+        for clip in colr.ClipList.clips.values():
+            clip.xMin = otRound(clip.xMin * upm_scale)
+            clip.yMin = otRound(clip.yMin * upm_scale)
+            clip.xMax = otRound(clip.xMax * upm_scale)
+            clip.yMax = otRound(clip.yMax * upm_scale)
+
+
 def _filter_colr_to_added_glyphs(
     base_font: TTFont,
     added_set: set[str],
@@ -1238,6 +1327,16 @@ def merge_emoji_colrv1(
                 if record.BaseGlyph in glyph_forced_rename:
                     record.BaseGlyph = glyph_forced_rename[record.BaseGlyph]
 
+    # Step 7.5: scale font-unit coords in COLR by upm_scale.
+    # PaintTransform dx/dy, PaintTranslate dx/dy, gradient control points, and
+    # ClipBox coordinates are all in source-font units (Noto UPM=1024).  After
+    # scaling glyph outlines (Step 10), the same ratio must be applied to every
+    # font-unit value in the paint tree so that transforms position correctly in
+    # the target UPM (Sarasa UPM=1000).  Unitless values (scale ratios, angles)
+    # are left unchanged.
+    if abs(upm_scale - 1.0) > 1e-6:
+        _scale_colrv1_paint_coords(colr_copy, upm_scale)
+
     # Step 8: access base_glyf BEFORE setGlyphOrder (OTS ordering constraint —
     # prevents flag-encoding change that OTS rejects; see merge_emoji() comment)
     if "glyf" in base_font:
@@ -1279,18 +1378,54 @@ def merge_emoji_colrv1(
     # IMPORTANT: access vmtx BEFORE updating maxp.numGlyphs (same ordering as merge_emoji)
     base_hmtx = base_font["hmtx"]
     geometry_deps_final_set = set(geometry_deps_final)
+    from fontTools.misc.roundTools import otRound
+
+    # Preserve source metrics for geometry deps.
+    #
+    # Although these glyphs are internal helpers (not directly mapped in cmap),
+    # Chromium's COLRv1 PaintGlyph rendering appears to depend on the helper
+    # glyph metrics/phantom-point geometry matching the source font.  Setting
+    # all geometry deps to (0, 0) shifts high-scale transformed glyphs such as
+    # 🟡/🟢 far enough that they clip incorrectly in the browser.
+    emoji_hmtx = emoji_font["hmtx"]
+    geometry_hmetrics: dict[str, tuple[int, int]] = {}
+    for orig_name, final_name in zip(geometry_deps_orig, geometry_deps_final):
+        if orig_name in emoji_hmtx.metrics:
+            adv, lsb = emoji_hmtx.metrics[orig_name]
+            geometry_hmetrics[final_name] = (
+                otRound(adv * upm_scale),
+                otRound(lsb * upm_scale),
+            )
+        else:
+            geometry_hmetrics[final_name] = (0, 0)
+
     for glyph_name in emoji_glyphs_to_add:
         if glyph_name not in base_hmtx.metrics:
-            # Geometry deps get advance=0 (internal helpers, never placed directly in text)
-            advance = 0 if glyph_name in geometry_deps_final_set else emoji_width
-            base_hmtx.metrics[glyph_name] = (advance, 0)
+            if glyph_name in geometry_deps_final_set:
+                base_hmtx.metrics[glyph_name] = geometry_hmetrics.get(glyph_name, (0, 0))
+            else:
+                base_hmtx.metrics[glyph_name] = (emoji_width, 0)
 
     if "vmtx" in base_font:
         base_vmtx = base_font["vmtx"]
+        emoji_vmtx = emoji_font["vmtx"] if "vmtx" in emoji_font else None
         for glyph_name in emoji_glyphs_to_add:
             if glyph_name not in base_vmtx.metrics:
-                advance = 0 if glyph_name in geometry_deps_final_set else emoji_width
-                base_vmtx.metrics[glyph_name] = (advance, 0)
+                if glyph_name in geometry_deps_final_set and emoji_vmtx is not None:
+                    orig_name = next(
+                        (src for src, dst in zip(geometry_deps_orig, geometry_deps_final) if dst == glyph_name),
+                        None,
+                    )
+                    if orig_name is not None and orig_name in emoji_vmtx.metrics:
+                        adv, tsb = emoji_vmtx.metrics[orig_name]
+                        base_vmtx.metrics[glyph_name] = (
+                            otRound(adv * upm_scale),
+                            otRound(tsb * upm_scale),
+                        )
+                    else:
+                        base_vmtx.metrics[glyph_name] = (0, 0)
+                else:
+                    base_vmtx.metrics[glyph_name] = (emoji_width, 0)
 
     # Update maxp AFTER all table accesses (avoids vmtx decompile byte-count mismatch)
     base_font["maxp"].numGlyphs = len(new_order)
