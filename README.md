@@ -311,12 +311,12 @@ uv run pytest tests/test_emoji_merge.py::TestScaleGlyph -v
 [VHS](https://github.com/charmbracelet/vhs) 使用 Headless Chromium + xterm.js 渲染終端機畫面，
 需使用 **Lite 變體**（glyf 格式）才能正確顯示 emoji（Color 變體的 CBDT/CBLC 點陣圖在 Chromium 中支援不穩定）。
 
-### 4K 錄製設定
+### 4K 錄製設定參考(字體大小大約40~48)
 
 ```tape
 Set Theme "Catppuccin Mocha"
 Set FontFamily "SarasaMonoTCEmojiLite"
-Set FontSize 40
+Set FontSize 48
 Set LetterSpacing 0
 Set LineHeight 1.2
 Set Width 3840
