@@ -1,6 +1,7 @@
 # Copilot Instructions — SarasaMonoTC-Emoji
 
-> 目前版本：**v1.5**（2026-03-29）
+> 目前版本：**v1.5.3**（2026-03-30）
+> COLRv1 深度技術細節 → [`.github/colrv1-dev-notes.md`](./colrv1-dev-notes.md)（debug 時再 Read）
 
 ## 專案概述
 
@@ -47,10 +48,7 @@ SarasaMonoTC-Emoji/
 │   ├── test_config.py
 │   ├── test_emoji_merge.py
 │   └── test_font_output.py
-├── verify-emoji.html           # 本地瀏覽器視覺驗證工具（需 http-server port 8765）
-├── ROADMAP.md                  # 版本規劃與技術決策記錄（主要協作文件）
-├── PLAN-COLRv1.md              # COLRv1 原始設計文件
-└── PLAN-COLRv1-greedy.md       # COLRv1 greedy 選取修改計畫（v1.4.1 實作依據）
+└── verify-emoji.html           # 本地瀏覽器視覺驗證工具（需 http-server port 8765）
 ```
 
 ---
@@ -58,25 +56,16 @@ SarasaMonoTC-Emoji/
 ## 常用指令
 
 ```bash
-# 安裝依賴
-uv sync --group dev
+uv sync --group dev                          # 安裝依賴
 
-# 建構全部樣式
-uv run python build.py             # Color
-uv run python build.py --lite      # Lite
-uv run python build.py --colrv1    # COLRv1
+uv run python build.py                       # Color 變體
+uv run python build.py --lite               # Lite 變體
+uv run python build.py --colrv1             # COLRv1 變體
+uv run python build.py --colrv1 --styles Regular  # 快速單樣式測試
 
-# 建構單一樣式（快速測試）
-uv run python build.py --styles Regular
-uv run python build.py --colrv1 --styles Regular
+uv run pytest tests/ -v --tb=short          # 執行測試
 
-# 執行測試
-uv run pytest tests/ -v --tb=short
-uv run pytest tests/test_emoji_merge.py -v
-
-# 瀏覽器視覺驗證（需先建構完成）
-uv run python -m http.server 8765
-open http://localhost:8765/verify-emoji.html
+uv run python -m http.server 8765           # 視覺驗證（搭配 verify-emoji.html）
 ```
 
 ---
@@ -97,91 +86,44 @@ open http://localhost:8765/verify-emoji.html
   `merge_emoji` Step 9.5 在偵測到 `color_forced_rename` 時自動升級至 format 2.0，
   以持久化儲存自訂字形名稱。**修改 `merge_emoji` 重命名邏輯時請確保此升級仍被觸發。**
 - **BMP 強制清單同步**：`emoji.force_color_codepoints`（Color 變體）與
-  `colrv1.force_colrv1_codepoints`（COLRv1 變體）預設值相同（5 個 BMP codepoint）。
+  `colrv1.force_colrv1_codepoints`（COLRv1 變體）預設值相同。
   **修改其中一個時，請同步修改另一個。**
-- **CBLC 衝突 debug log**：`_filter_cblc_to_added_glyphs` 現在在 build log 列出被移除的
-  glyph 名稱（最多 10 個範例）。若 log 顯示非工具字形（.notdef / space 以外）被移除，
-  可考慮將對應 codepoint 加入 `force_color_codepoints`。
+- **CBLC 衝突 debug log**：`_filter_cblc_to_added_glyphs` 在 build log 列出被移除的
+  glyph 名稱（最多 10 個範例）。若 log 顯示非工具字形被移除，可考慮加入 `force_color_codepoints`。
 
 ### COLRv1 特有
 
-**TrueType 65535 glyph 上限**：Sarasa 有 ~56,886 glyphs，若加入全量 COLRv1 geometry
-deps（~17,433 個）和 emoji stubs（~1,358 個）合計 ~75,677，超出硬性上限。
-COLRv1 必須限制選取數量（由 `_select_colrv1_emoji_greedy` 控制）。
-
-**`_select_colrv1_emoji_greedy` 兩階段選取**（`src/emoji_merge.py`）：
-- **Phase 1 — Priority 優先**：`config.yaml` 的 `colrv1.priority_codepoints`
-  清單先保證入選，不受預算截止限制（目前 27 個高頻 dev/tooling emoji：🔧🔗🚀🔒🔑🔍 等）
-- **Phase 2 — Greedy 填充**：剩餘預算依 codepoint 升序選入，首個超預算者停止
-- **結果**：600 emoji（27 priority + 573 greedy），glyph 成本 8,132/8,136 slots
-- **選取清單**：`docs/colrv1-emoji-list.json`（每次 build 自動更新，含 priority 旗標）
-
-**geometry deps walk 注意**：Noto-COLRv1 有兩種 paint 格式：
-- `PaintGlyph（Format=10）`：直接引用 geometry glyph，`walk` 可直接取得
-- `PaintColrLayers（Format=1）`：間接引用 LayerList，**必須** traverse 進 LayerList 才能找到 deps
-  （Noto-COLRv1 有 3,685/3,985 個 emoji 用此格式；v1.4.1 修復前只走 Format=10，導致 92% emoji 渲染亂碼）
-
-**可調整參數**（`config.yaml` `colrv1:` 區塊）：
-- `max_new_glyphs`：greedy 預算上限（預設 8136）
-- `priority_codepoints`：Phase 1 優先清單（修改後下次 build 生效）
-
-**Priority 清單挑選標準**（3 項）：
-1. GitHub README / Issues / CI 表格高頻出現
-2. 不在 BMP（U+FFFF 以下）— BMP 符號 Sarasa 已有，`skip_existing` 正確跳過
-3. 位於 greedy 截止點之後（~U+1F500+），greedy 無法自動選入
-
----
-
-## 版本歷史摘要
-
-| 版本 | 內容 |
-|------|------|
-| v1.0 | 初始 Color 變體（CBDT/CBLC） |
-| v1.1 | 新增 Lite 變體（glyf 單色） |
-| v1.2 | 修正 Lite emoji 尺寸（UPM 縮放） |
-| v1.3 | 測試框架 + 健壯性改善（T1–T4） |
-| v1.4 | COLRv1 第三變體 |
-| v1.4.1 | 修復 COLRv1 網頁亂碼（PaintColrLayers LayerList walk）+ greedy emoji 選取 |
-| v1.4.2 | COLRv1 priority allowlist（27 個 dev emoji 保證彩色，不受 greedy 截止限制） |
-| v1.5 | BMP 符號彩色覆蓋（5 個基礎清單）；glyph_forced_rename / color_forced_rename 機制；_update_cmap BMP guard；post 3.0→2.0 升級（_color 後綴持久化）；75 tests |
-| v1.5.1 | force BMP 清單擴增：5 → 15（新增 ↩⌨☀☁⚙❄❌➡⬆⬇）；Budget 8132→8091 slots（幾何 dep 共享節省） |
-| v2.0 | ZWJ 序列 / 旗幟 / 膚色變體（🔮 規劃中） |
+詳見 [`.github/colrv1-dev-notes.md`](./colrv1-dev-notes.md)。摘要：
+- greedy 預算 8,136 slots（Priority Phase 1 + Greedy Phase 2）
+- `_scale_colrv1_paint_coords()` 負責縮放 COLR paint tree 中的 font-unit 座標（UPM 轉換必要步驟）
+- geometry helper glyph 的 `hmtx` / `vmtx` 必須保留來源字體縮放後的 metrics，不能一律寫成 `(0, 0)`；
+  否則 Chromium 會把高倍率 transform emoji（如 🟡 / 🟢）裁出 Clip 範圍，只剩 tiny fragment
+- 可調整參數：`max_new_glyphs`、`priority_codepoints`、`force_colrv1_codepoints`
+- `verify-emoji.html` 已有來源字體對照與「COLRv1 高風險樣本」區塊，COLRv1 改動後建議至少看一次
+- `tests/test_font_output.py` 已包含單點與全域 transformed-helper regression tests；調整 merge 規則後應跑完整 COLRv1 output tests
 
 ---
 
 ## Claude Code / Copilot 協作分工
 
-本專案採用 **Claude Code**（深度除錯、架構決策）與 **GitHub Copilot**（快速編輯、文件維護）的雙 AI 協作模式。
-
 ### 適合交給 Claude Code 的任務
 
 - **字型工程除錯**：font table 結構分析（COLR/CPAL/glyf/cmap/hmtx）、OTS 驗證失敗、瀏覽器渲染異常根因分析
-- **效能 / 正確性 bug**：需讀懂多個函式上下文的根因分析（如 PaintColrLayers LayerList 未 walk、glyph 上限計算）
-- **架構決策**：新增變體、glyph 預算策略、greedy 演算法設計、新 config 參數影響評估
-- **跨工具驗證**：用 Playwright 截圖確認渲染、用 fonttools 直接檢查字體 binary
+- **效能 / 正確性 bug**：需讀懂多個函式上下文的根因分析
+- **架構決策**：新增變體、glyph 預算策略、greedy 演算法設計
 
 ### 適合交給 Copilot 的任務
 
 - 文件更新（README、ROADMAP、copilot-instructions.md）
-- 版本號 bump（`config.yaml` version 欄位、font name table）
+- 版本號 bump（`config.yaml` version 欄位）
 - Priority 清單調整（新增 / 移除 emoji codepoint）
 - 已知框架下的測試補充
-- 簡單 config 欄位新增對應的邏輯
 
 ### 交接慣例
 
-1. **Claude Code → Copilot**：Claude 完成複雜修改後，列出「待 Copilot 跟進的事項」清單（文件更新、版本 bump 等）
-2. **Copilot → Claude Code**：遇到字體渲染異常、font table 驗證失敗、或需要 Playwright 目視確認時，整理現象後交回 Claude Code
-3. **共用知識庫**：`ROADMAP.md`（版本狀態）、`copilot-instructions.md`（整體上下文）、`PLAN-*.md`（特定功能設計）是兩個 AI 的共同參考文件，內容變動後一律更新
-
-### Claude Code usage limit 考量
-
-以下任務優先安排 Copilot，減少 Claude Code context 消耗：
-- 純文件更新（README / ROADMAP / copilot-instructions.md）
-- 版本號 bump
-- Priority emoji 清單調整
-- 已知框架下的測試新增
-- `config.yaml` 小改動
+1. **Claude Code → Copilot**：複雜修改後，列出「待 Copilot 跟進的事項」
+2. **Copilot → Claude Code**：字體渲染異常、font table 驗證失敗時整理現象後交回
+3. **共用知識庫**：`ROADMAP.md`、`copilot-instructions.md`、`PLAN-*.md` 變動後一律更新
 
 ---
 

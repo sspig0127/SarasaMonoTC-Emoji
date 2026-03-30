@@ -102,6 +102,7 @@ uv run python -m http.server 8765
 
 - Noto-COLRv1 `UPM=1024`，Sarasa `UPM=1000`
 - COLRv1 不只要縮放 glyf geometry，也要同步縮放 paint tree 中的 font-unit 座標
+- `PaintGlyph` 使用到的 geometry helper glyph metrics 也要保留來源字體縮放後的值，不能直接清成 `(0, 0)`
 - `🟡` / `🟢` 這類大位移 transform emoji，是驗證 UPM 縮放是否正確的高風險樣本
 
 ### 先看哪裡
@@ -116,6 +117,7 @@ uv run python -m http.server 8765
 
 - emoji 完全缺失：先查 greedy selection 是否入選、`docs/colrv1-emoji-list.json` 是否存在該 codepoint
 - emoji 只剩碎片或 tiny shape：優先懷疑 paint tree 座標沒跟著 UPM 縮放
+- emoji 來源字體正常、合併後異常：再查 helper glyph metrics 是否被清成 `(0, 0)`
 - 瀏覽器頁面看起來仍是舊 bug：先排除 `verify-emoji.html` 或瀏覽器 font cache
 - 網頁亂碼或大量缺字：先檢查 glyph budget / greedy cutoff / OTS 行為
 
@@ -123,6 +125,7 @@ uv run python -m http.server 8765
 
 - `_scale_glyph()` 處理 geometry dep 的輪廓縮放
 - `_scale_colrv1_paint_coords()` 處理 COLR paint tree 的 `dx/dy`、gradient control points、`centerX/centerY`、`ClipList`
+- `merge_emoji_colrv1()` 會保留 geometry helper glyph 的縮放後 metrics；這是 Chromium 正確渲染高倍率 transform emoji 的必要條件
 - 只縮放 font-unit 值；不要動 scale ratio、rotation angle 這類 unitless 值
 
 ## 工作流程建議
@@ -132,7 +135,9 @@ uv run python -m http.server 8765
 3. 若是 COLRv1 問題，再補讀 `.github/colrv1-dev-notes.md`
 4. 改完先跑最小必要測試
 5. 若是渲染問題，再用 `verify-emoji.html` 做視覺確認
-6. 若更新版本或行為，補 `ROADMAP.md` / 相關文件
+6. COLRv1 改動後，至少看一次第 5 區來源字體對照與第 6 區高風險樣本
+7. COLRv1 merge 規則調整後，至少跑 `tests/test_font_output.py -k COLRv1`
+8. 若更新版本或行為，補 `ROADMAP.md` / 相關文件
 
 ## 修改前自我檢查
 
