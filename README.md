@@ -5,6 +5,12 @@
 
 **Sarasa Mono TC（更紗黑體繁中等寬）+ Emoji — 嵌入式 emoji，支援三種變體**
 
+相關技術文件：
+- [`ROADMAP.md`](ROADMAP.md) — 版本規劃與待解技術債
+- [`docs/roadmap-history.md`](docs/roadmap-history.md) — 歷史版本實作細節
+- [`docs/v2-sequence-implementation.md`](docs/v2-sequence-implementation.md) — v2.0 sequence emoji 實作設計
+- [`.github/colrv1-dev-notes.md`](.github/colrv1-dev-notes.md) — COLRv1 深度技術筆記
+
 ## 變體說明
 
 | 變體 | 字族名稱 | Emoji 格式 | 大小 | 適用場景 |
@@ -201,7 +207,7 @@ GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workf
 | `release_tag` | 發佈標籤（如 `v1.5.0`） | 必填 |
 | `sarasa_version` | Sarasa Gothic 版本號 | `1.0.36` |
 
-**執行流程：** 下載來源字體 → 執行 66 個測試 → 建構三種變體 → 打包 zip → 上傳至指定 Release
+**執行流程：** 下載來源字體 → 執行 77 個測試 → 建構三種變體 → 打包 zip → 上傳至指定 Release
 
 - 若 Release 已存在：以 `--clobber` 覆蓋現有附件
 - 若 Release 不存在：建立 draft release，由維護者手動 publish
@@ -279,6 +285,11 @@ uv run python -m http.server 8765
 open http://localhost:8765/verify-emoji.html
 ```
 
+`verify-emoji.html` 目前已包含：
+- 來源字體 vs 合併後字體對照
+- COLRv1 高風險樣本區（大量 `PaintTransform -> PaintGlyph` 案例）
+- font URL cache-busting，避免瀏覽器沿用舊字體快取
+
 ---
 
 ## 測試（開發用）
@@ -296,11 +307,11 @@ uv run pytest tests/test_emoji_merge.py::TestScaleGlyph -v
 
 | 測試組 | 所需檔案 | 執行環境 |
 |--------|----------|----------|
-| `TestScaleGlyph`、`TestFilterColrToAddedGlyphs`（12 個） | 無 | 本機 / CI |
-| `TestGetEmojiCmap`、`TestCollectGlyphDeps`（8 個） | `fonts/NotoEmoji[wght].ttf` | 本機 / CI（自動下載） |
-| `TestCollectColrv1Deps`（5 個） | `fonts/Noto-COLRv1.ttf` | 僅本機 |
-| `TestDetectFontWidths`（2 個） | `fonts/SarasaMonoTC-Regular.ttf` | 僅本機 |
-| `TestColorOutput`、`TestLiteOutput`、`TestCOLRv1Output`（24 個） | 已建構的 `output/` 字體 | 僅本機 |
+| 純邏輯測試（config / scale / cmap / filter） | 無 | 本機 / CI |
+| Noto Emoji 依賴測試（`get_emoji_cmap` / `collect_glyph_deps`） | `fonts/NotoEmoji[wght].ttf` | 本機 / CI（自動下載） |
+| Noto COLRv1 依賴測試（`TestCollectColrv1Deps`） | `fonts/Noto-COLRv1.ttf` | 僅本機 |
+| Sarasa 依賴測試（`TestDetectFontWidths`） | `fonts/SarasaMonoTC-Regular.ttf` | 僅本機 |
+| output font 驗證（Color / Lite / COLRv1） | 已建構的 `output/` 字體 | 僅本機 |
 
 字體檔案不存在時，相關測試自動 skip（不算失敗）。
 
@@ -340,8 +351,8 @@ Set Height 2160
 
 ### COLRv1 變體
 - **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）
-- **Emoji 數量**：600 個 emoji（glyph 預算上限 8,136 slots），採兩階段選取：
-  1. **Priority 優先**：27 個常用 dev/tooling emoji（🔧🔗🚀🔒🔑🔍🟢🟡 等）優先保證選入
+- **Emoji 數量**：604 個 emoji（glyph 預算上限 8,136 slots），採兩階段選取：
+  1. **Priority 優先**：42 個 priority / forced emoji 先保證選入
   2. **Greedy 填充**：剩餘預算依 codepoint 升序填入常用舊 emoji
   - 完整選取清單：[`docs/colrv1-emoji-list.json`](docs/colrv1-emoji-list.json)
   - 可透過 `config.yaml` 的 `colrv1.max_new_glyphs` 調整預算
@@ -353,7 +364,8 @@ Set Height 2160
   - ⚠️ ❌ ⭐ ➡️ ⚙️ 等 BMP 符號透過 `force_colrv1_codepoints` 單獨管理
   - Priority 清單選取標準：**在 GitHub README / Issues / PR / CI 表格中高頻出現**，且不在 Sarasa 原有 cmap 中
   - 涵蓋：工具類（🔧🔨🛠️）、安全類（🔒🔑🛡️）、狀態圓點（🔴🟡🟢🔵）、連結導覽（🔗🔍🔖）、動作類（🚀🎉🐛）等
-- **技術**：7,536 個 geometry helper glyphs（PaintGlyph 節點引用）+ 600 個空 glyf stub；paint tree 驅動彩色渲染
+- **技術**：7,487 個 geometry helper glyphs（PaintGlyph 節點引用）+ 604 個空 glyf stub；paint tree 驅動彩色渲染
+- **Chromium 相容性重點**：除了縮放 COLR paint tree 的 font-unit 座標之外，geometry helper glyph 的 metrics 也必須保留來源字體縮放後的值；若 helper metrics 被清成 `(0, 0)`，🟡 / 🟢 這類高倍率 transform emoji 會只剩 tiny fragment
 - **檔案大小**：~26 MB（比 Color 小 26%；COLRv1 向量資料比 PNG 點陣圖精簡）
 - **支援環境**：Chrome/Chromium 98+、Firefox 107+；macOS 系統級支援需 macOS 13+
 - **名稱衝突處理**：Sarasa 已有同名 glyph 時自動加 `_colrv1` 後綴（build log 會列出衝突數量）
