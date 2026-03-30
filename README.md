@@ -314,10 +314,11 @@ uv run pytest tests/test_emoji_merge.py::TestScaleGlyph -v
 ### 4K 錄製設定
 
 ```tape
+Set Theme "Catppuccin Mocha"
 Set FontFamily "SarasaMonoTCEmojiLite"
-Set FontSize 46
-Set LetterSpacing 2
-Set LineHeight 1.0
+Set FontSize 40
+Set LetterSpacing 0
+Set LineHeight 1.2
 Set Width 3840
 Set Height 2160
 ```
