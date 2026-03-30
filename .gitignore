@@ -5,3 +5,10 @@ __pycache__/
 *.pyo
 .DS_Store
 .venv/
+.playwright-mcp/
+CLAUDE.md.bak-*
+SarasaMonoTCEmoji-*.zip
+SarasaMonoTCEmojiLite-*.zip
+SarasaMonoTCEmojiCOLRv1-*.zip
+bmp-color-verification.png
+verify-*.png
