@@ -183,7 +183,27 @@ colrv1:
   # priority_sequences — high-value sequence emoji to attempt before the
   # remaining-budget greedy fill for COLRv1 sequence support.
   # Format: space-separated codepoint sequence.
+  # Order matters: earlier entries are attempted first.
   priority_sequences:
+    # 核心職業 / 家庭 / 膚色樣本
     - "U+1F469 U+200D U+1F4BB"  # 👩‍💻 woman technologist
+    - "U+1F468 U+200D U+1F4BB"  # 👨‍💻 man technologist
+    - "U+1F469 U+200D U+1F52C"  # 👩‍🔬 woman scientist
+    - "U+1F468 U+200D U+1F469 U+200D U+1F467 U+200D U+1F466"  # 👨‍👩‍👧‍👦 family
     - "U+1F44B U+1F3FB"         # 👋🏻 waving hand: light skin tone
+    - "U+1F44D U+1F3FD"         # 👍🏽 thumbs up: medium skin tone
+    # 核心旗幟：以臺灣情境最高頻為先
+    - "U+1F1F9 U+1F1FC"         # 🇹🇼 Taiwan flag
+    - "U+1F1EF U+1F1F5"         # 🇯🇵 Japan flag
     - "U+1F1FA U+1F1F8"         # 🇺🇸 United States flag
+    - "U+1F1E8 U+1F1F3"         # 🇨🇳 China flag
+    # 第二批旗幟：以臺灣常見新聞、旅遊、商務、移居情境優先
+    - "U+1F1F0 U+1F1F7"         # 🇰🇷 South Korea flag
+    - "U+1F1F8 U+1F1EC"         # 🇸🇬 Singapore flag
+    - "U+1F1ED U+1F1F0"         # 🇭🇰 Hong Kong SAR China flag
+    - "U+1F1F9 U+1F1ED"         # 🇹🇭 Thailand flag
+    - "U+1F1FB U+1F1F3"         # 🇻🇳 Vietnam flag
+    - "U+1F1F5 U+1F1ED"         # 🇵🇭 Philippines flag
+    - "U+1F1E8 U+1F1E6"         # 🇨🇦 Canada flag
+    - "U+1F1E6 U+1F1FA"         # 🇦🇺 Australia flag
+    - "U+1F1EC U+1F1E7"         # 🇬🇧 United Kingdom flag

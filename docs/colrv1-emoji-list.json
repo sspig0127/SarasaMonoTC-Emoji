@@ -1,9 +1,9 @@
 {
-  "generated": "2026-03-31T01:13:01.630900+00:00",
+  "generated": "2026-03-31T01:51:25.935632+00:00",
   "version": "2.0.0",
   "max_new_glyphs": 8136,
-  "selected_count": 604,
-  "total_glyph_cost": 8091,
+  "selected_count": 597,
+  "total_glyph_cost": 7913,
   "emoji": [
     {
       "codepoint": "U+21A9",
@@ -5376,69 +5376,6 @@
       "unicode_name": "PAPERCLIP",
       "geometry_deps_count": 8,
       "new_glyph_cost": 9,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4CF",
-      "char": "📏",
-      "glyph_name": "u1F4CF",
-      "unicode_name": "STRAIGHT RULER",
-      "geometry_deps_count": 16,
-      "new_glyph_cost": 17,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4D0",
-      "char": "📐",
-      "glyph_name": "u1F4D0",
-      "unicode_name": "TRIANGULAR RULER",
-      "geometry_deps_count": 18,
-      "new_glyph_cost": 19,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4D1",
-      "char": "📑",
-      "glyph_name": "u1F4D1",
-      "unicode_name": "BOOKMARK TABS",
-      "geometry_deps_count": 12,
-      "new_glyph_cost": 13,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4D2",
-      "char": "📒",
-      "glyph_name": "u1F4D2",
-      "unicode_name": "LEDGER",
-      "geometry_deps_count": 15,
-      "new_glyph_cost": 15,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4D3",
-      "char": "📓",
-      "glyph_name": "u1F4D3",
-      "unicode_name": "NOTEBOOK",
-      "geometry_deps_count": 111,
-      "new_glyph_cost": 109,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4D4",
-      "char": "📔",
-      "glyph_name": "u1F4D4",
-      "unicode_name": "NOTEBOOK WITH DECORATIVE COVER",
-      "geometry_deps_count": 11,
-      "new_glyph_cost": 4,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4D5",
-      "char": "📕",
-      "glyph_name": "u1F4D5",
-      "unicode_name": "CLOSED BOOK",
-      "geometry_deps_count": 8,
-      "new_glyph_cost": 1,
       "priority": false
     }
   ]

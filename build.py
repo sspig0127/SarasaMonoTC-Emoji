@@ -107,6 +107,20 @@ def _parse_codepoint_sequence(value: str) -> tuple[int, ...]:
     return tuple(int(part.replace("U+", "").replace("u+", ""), 16) for part in parts)
 
 
+def _dedupe_codepoint_sequences(
+    sequences: list[tuple[int, ...]],
+) -> list[tuple[int, ...]]:
+    """Preserve config order while removing duplicate sequences."""
+    seen: set[tuple[int, ...]] = set()
+    ordered: list[tuple[int, ...]] = []
+    for sequence in sequences:
+        if sequence in seen:
+            continue
+        seen.add(sequence)
+        ordered.append(sequence)
+    return ordered
+
+
 def build_single_font(
     style: str,
     base_font_path: Path,
@@ -119,7 +133,7 @@ def build_single_font(
     colrv1: bool = False,
     max_new_glyphs: int | None = None,
     priority_codepoints: set[int] | None = None,
-    priority_sequences: set[tuple[int, ...]] | None = None,
+    priority_sequences: list[tuple[int, ...]] | None = None,
     force_codepoints: set[int] | None = None,
 ) -> tuple[str, list[dict]]:
     """Build a single font variant with emoji merged in.
@@ -335,8 +349,10 @@ Configuration priority: CLI args > config.yaml > defaults
             if _raw_priority else None
         )
         _raw_priority_sequences = get_config_value(yaml_config, "colrv1", "priority_sequences") or []
-        colrv1_priority_sequences: set[tuple[int, ...]] | None = (
-            {_parse_codepoint_sequence(s) for s in _raw_priority_sequences}
+        colrv1_priority_sequences: list[tuple[int, ...]] | None = (
+            _dedupe_codepoint_sequences(
+                [_parse_codepoint_sequence(s) for s in _raw_priority_sequences]
+            )
             if _raw_priority_sequences else None
         )
         # Parse force codepoints — BMP symbols to colorize despite skip_existing

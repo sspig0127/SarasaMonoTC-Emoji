@@ -1178,7 +1178,7 @@ def _select_colrv1_sequences_greedy(
     remaining_budget: int,
     selected_emoji_names: set[str],
     existing_deps: set[str],
-    priority_sequences: set[tuple[int, ...]] | None = None,
+    priority_sequences: list[tuple[int, ...]] | None = None,
 ) -> tuple[list[EmojiEntry], set[str]]:
     """Select COLRv1 sequence glyphs within remaining glyph budget.
 
@@ -1196,7 +1196,9 @@ def _select_colrv1_sequences_greedy(
     total_cost = 0
     occupied = set(selected_emoji_names) | set(existing_deps)
 
-    priority_set = priority_sequences or set()
+    priority_order = priority_sequences or []
+    priority_set = set(priority_order)
+    entries_by_codepoints = {entry.codepoints: entry for entry in sequence_entries}
 
     def try_add(entry: EmojiEntry) -> bool:
         nonlocal total_cost
@@ -1215,8 +1217,9 @@ def _select_colrv1_sequences_greedy(
         total_cost += cost
         return True
 
-    for entry in sorted(sequence_entries, key=lambda e: e.codepoints):
-        if entry.codepoints in priority_set:
+    for codepoints in priority_order:
+        entry = entries_by_codepoints.get(codepoints)
+        if entry is not None:
             try_add(entry)
 
     for entry in sorted(sequence_entries, key=lambda e: e.codepoints):
@@ -1226,6 +1229,29 @@ def _select_colrv1_sequences_greedy(
             break
 
     return selected, accumulated_deps
+
+
+def _estimate_colrv1_priority_sequence_cost(
+    sequence_entries: list[EmojiEntry],
+    emoji_font: TTFont,
+    priority_sequences: list[tuple[int, ...]] | None,
+) -> int:
+    """Estimate the glyph-slot cost of the configured priority sequences."""
+    if not priority_sequences:
+        return 0
+
+    entries_by_codepoints = {entry.codepoints: entry for entry in sequence_entries}
+    selected = [
+        entries_by_codepoints[codepoints]
+        for codepoints in priority_sequences
+        if codepoints in entries_by_codepoints
+    ]
+    if not selected:
+        return 0
+
+    seq_glyphs = {entry.source_glyph for entry in selected}
+    deps = _collect_colrv1_paint_glyph_deps(emoji_font, seq_glyphs)
+    return len(seq_glyphs | deps)
 
 
 def _apply_colrv1_rename(paint, rename_map: dict[str, str]) -> None:
@@ -1380,7 +1406,7 @@ def merge_emoji_colrv1(
     config: FontConfig,
     max_new_glyphs: int | None = None,
     priority_codepoints: set[int] | None = None,
-    priority_sequences: set[tuple[int, ...]] | None = None,
+    priority_sequences: list[tuple[int, ...]] | None = None,
     force_codepoints: set[int] | None = None,
 ) -> tuple[TTFont, list[dict]]:
     """Merge Noto COLRv1 color vector emoji into SarasaMonoTC.
@@ -1487,6 +1513,22 @@ def merge_emoji_colrv1(
     # internally to calculate per-emoji costs.
     selection_records: list[dict] = []
     if max_new_glyphs is not None:
+        reserved_sequence_budget = _estimate_colrv1_priority_sequence_cost(
+            all_sequence_entries,
+            emoji_font,
+            priority_sequences,
+        )
+        effective_single_budget = max_new_glyphs - reserved_sequence_budget
+        if effective_single_budget <= 0:
+            raise ValueError(
+                f"COLRv1 max_new_glyphs={max_new_glyphs} is too small after reserving "
+                f"{reserved_sequence_budget} slots for priority sequences"
+            )
+        if reserved_sequence_budget:
+            print(
+                f"  Reserving {reserved_sequence_budget} glyph slots for priority sequences "
+                f"(single-emoji budget: {effective_single_budget}/{max_new_glyphs})"
+            )
         # Trigger COLR decompilation once before greedy scan so that repeated
         # internal calls to _collect_colrv1_paint_glyph_deps are cache-warm.
         colr_table_pre = emoji_font["COLR"].table
@@ -1497,7 +1539,7 @@ def merge_emoji_colrv1(
         # so _collect_colrv1_paint_glyph_deps inside greedy can look them up in COLR.
         combined_priority = (priority_codepoints or set()) | (force_codepoints or set())
         emoji_cmap, selection_records = _select_colrv1_emoji_greedy(
-            emoji_cmap, emoji_font, max_new_glyphs,
+            emoji_cmap, emoji_font, effective_single_budget,
             combined_priority if combined_priority else None,
         )
         if not emoji_cmap:

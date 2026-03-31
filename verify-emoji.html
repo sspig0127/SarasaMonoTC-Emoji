@@ -151,48 +151,53 @@ ABABABABABABAB
 git commit -m "feat: 加入彩色 emoji 支援 🎨"</div>
 
 <h2>5. v2.0 Sequence Emoji 驗證</h2>
-<div class="label">這一區專門檢查 ZWJ / 膚色 / 旗幟 sequence；若 glyph 有合併但 GSUB 沒接好，通常會拆成多個單獨字符</div>
+<div class="label" id="sequenceSectionHint">這一區專門檢查 ZWJ / 膚色 / 旗幟 sequence；若 glyph 有合併但 GSUB 沒接好，通常會拆成多個單獨字符</div>
 <div class="grid">
   <div>
     <div class="label">ZWJ / 職業 / 家庭</div>
-    <div class="mono">👩‍💻 👨‍💻 👩‍🔬
-👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
-🧑‍💻 🧑‍🔬 🧑‍🚀</div>
+    <div class="mono" id="sequenceZwjBlock">woman technologist  👩‍💻
+man technologist    👨‍💻
+woman scientist     👩‍🔬
+family              👨‍👩‍👧‍👦
+women + girl        👩‍👩‍👧
+men + boy           👨‍👨‍👦</div>
   </div>
   <div>
     <div class="label">膚色變體</div>
-    <div class="mono">👋🏻 👋🏽 👋🏿
-👍🏻 👍🏽 👍🏿
-🙌🏻 🙌🏽 🙌🏿</div>
+    <div class="mono" id="sequenceSkinToneBlock">light   👋🏻 👍🏻 🙌🏻 ☝🏻
+medium  👋🏽 👍🏽 🙌🏽 ☝🏽
+dark    👋🏿 👍🏿 🙌🏿 ☝🏿</div>
   </div>
   <div>
     <div class="label">旗幟</div>
-    <div class="mono">🇺🇸 🇯🇵 🇹🇼
-🇬🇧 🇨🇦 🇰🇷
-🇫🇷 🇩🇪 🇺🇦</div>
+    <div class="mono" id="sequenceFlagBlock">United States (US)  🇺🇸   Japan  (JP)  🇯🇵
+Taiwan        (TW)  🇹🇼   China  (CN)  🇨🇳
+United Kingdom(GB)  🇬🇧   Canada (CA)  🇨🇦</div>
   </div>
   <div>
     <div class="label">混排情境</div>
-    <div class="mono">feat(ui): 加入 👩‍💻 onboarding 流程
-docs: 補齊 🇺🇸 / 🇯🇵 / 🇹🇼 範例
+    <div class="mono" id="sequenceMixedBlock">feat(ui): 加入 👩‍💻 / 👨‍💻 onboarding
+docs: 補齊 TW 🇹🇼 / JP 🇯🇵 / CN 🇨🇳 範例
 review: 手勢反應改成 👋🏻 👍🏽 🙌🏿</div>
   </div>
 </div>
 
 <h2>6. v2.0 Sequence 對照（Merged vs Source）</h2>
-<div class="label">若右欄原始字體正常、左欄合併後仍拆成多字符，通常表示輸出字體缺少 sequence glyph 或 GSUB ligature 規則</div>
+<div class="label" id="sequenceCompareHint">若右欄原始字體正常、左欄合併後仍拆成多字符，通常表示輸出字體缺少 sequence glyph 或 GSUB ligature 規則</div>
 <div class="compare-grid">
   <div class="compare-card">
     <div class="compare-title">Merged Output (Sequence)</div>
-    <div class="compare-line compare-merged">👩‍💻 👨‍💻 👩‍🔬
-👋🏻 👍🏽 🙌🏿
-🇺🇸 🇯🇵 🇹🇼</div>
+    <div class="compare-line compare-merged" id="compareSequenceMerged">tech   👩‍💻 👨‍💻 👩‍🔬
+family 👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
+skin   👋🏻 👍🏻   👋🏽 👍🏽   👋🏿 👍🏿
+flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦</div>
   </div>
   <div class="compare-card">
     <div class="compare-title">Source Emoji Font (Sequence)</div>
-    <div class="compare-line compare-source">👩‍💻 👨‍💻 👩‍🔬
-👋🏻 👍🏽 🙌🏿
-🇺🇸 🇯🇵 🇹🇼</div>
+    <div class="compare-line compare-source" id="compareSequenceSource">tech   👩‍💻 👨‍💻 👩‍🔬
+family 👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
+skin   👋🏻 👍🏻   👋🏽 👍🏽   👋🏿 👍🏿
+flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦</div>
   </div>
 </div>
 
@@ -268,6 +273,27 @@ const VARIANTS = {
     sourceFontLabel: 'NotoColorEmoji.ttf',
     badgeClass: 'badge-color',
     badgeText: 'Color',
+    sequenceHint: 'Color 變體應能顯示這一區全部 sequence 樣本。',
+    sequenceCompareHint: '若右欄原始字體正常、左欄合併後仍拆成多字符，通常表示輸出字體缺少 sequence glyph 或 GSUB ligature 規則。',
+    sequenceZwj: `woman technologist  👩‍💻
+man technologist    👨‍💻
+woman scientist     👩‍🔬
+family              👨‍👩‍👧‍👦
+women + girl        👩‍👩‍👧
+men + boy           👨‍👨‍👦`,
+    sequenceSkinTone: `light   👋🏻 👍🏻 🙌🏻 ☝🏻
+medium  👋🏽 👍🏽 🙌🏽 ☝🏽
+dark    👋🏿 👍🏿 🙌🏿 ☝🏿`,
+    sequenceFlag: `United States (US)  🇺🇸   Japan  (JP)  🇯🇵
+Taiwan        (TW)  🇹🇼   China  (CN)  🇨🇳
+United Kingdom(GB)  🇬🇧   Canada (CA)  🇨🇦`,
+    sequenceMixed: `feat(ui): 加入 👩‍💻 / 👨‍💻 onboarding
+docs: 補齊 TW 🇹🇼 / JP 🇯🇵 / CN 🇨🇳 範例
+review: 手勢反應改成 👋🏻 👍🏽 🙌🏿`,
+    sequenceCompare: `tech   👩‍💻 👨‍💻 👩‍🔬
+family 👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
+skin   👋🏻 👍🏻   👋🏽 👍🏽   👋🏿 👍🏿
+flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦`,
   },
   lite: {
     dir: 'output/fonts-lite',
@@ -277,6 +303,27 @@ const VARIANTS = {
     sourceFontLabel: 'NotoEmoji[wght].ttf',
     badgeClass: 'badge-lite',
     badgeText: 'Lite',
+    sequenceHint: 'Lite 變體應能顯示這一區全部 sequence 樣本。',
+    sequenceCompareHint: '若右欄原始字體正常、左欄合併後仍拆成多字符，通常表示輸出字體缺少 sequence glyph 或 GSUB ligature 規則。',
+    sequenceZwj: `woman technologist  👩‍💻
+man technologist    👨‍💻
+woman scientist     👩‍🔬
+family              👨‍👩‍👧‍👦
+women + girl        👩‍👩‍👧
+men + boy           👨‍👨‍👦`,
+    sequenceSkinTone: `light   👋🏻 👍🏻 🙌🏻 ☝🏻
+medium  👋🏽 👍🏽 🙌🏽 ☝🏽
+dark    👋🏿 👍🏿 🙌🏿 ☝🏿`,
+    sequenceFlag: `United States (US)  🇺🇸   Japan  (JP)  🇯🇵
+Taiwan        (TW)  🇹🇼   China  (CN)  🇨🇳
+United Kingdom(GB)  🇬🇧   Canada (CA)  🇨🇦`,
+    sequenceMixed: `feat(ui): 加入 👩‍💻 / 👨‍💻 onboarding
+docs: 補齊 TW 🇹🇼 / JP 🇯🇵 / CN 🇨🇳 範例
+review: 手勢反應改成 👋🏻 👍🏽 🙌🏿`,
+    sequenceCompare: `tech   👩‍💻 👨‍💻 👩‍🔬
+family 👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
+skin   👋🏻 👍🏻   👋🏽 👍🏽   👋🏿 👍🏿
+flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦`,
   },
   colrv1: {
     dir: 'output/fonts-colrv1',
@@ -286,8 +333,40 @@ const VARIANTS = {
     sourceFontLabel: 'Noto-COLRv1.ttf',
     badgeClass: 'badge-colrv1',
     badgeText: 'COLRv1',
+    sequenceHint: 'COLRv1 目前採 glyph budget 限制；此區只顯示目前 Regular 實際已納入、且適合人工比對的 sequence 樣本。',
+    sequenceCompareHint: 'COLRv1 若需更多職業 / 家庭 sequence，請擴增 config.yaml 的 colrv1.priority_sequences 或 glyph budget；下列樣本應完整對照。',
+    sequenceZwj: `woman technologist  👩‍💻
+man technologist    👨‍💻
+family              👨‍👩‍👧‍👦`,
+    sequenceSkinTone: `light   👋🏻 ☝🏻
+medium  👍🏽
+note    目前這版尚未納入 dark-skin compare sample`,
+    sequenceFlag: `Taiwan        (TW)  🇹🇼   Japan  (JP)  🇯🇵   United States (US)  🇺🇸
+China         (CN)  🇨🇳   South Korea (KR) 🇰🇷   Singapore   (SG)  🇸🇬
+Hong Kong     (HK)  🇭🇰   Thailand   (TH)  🇹🇭   Vietnam     (VN)  🇻🇳
+Philippines   (PH)  🇵🇭   Canada     (CA)  🇨🇦   Australia   (AU)  🇦🇺
+United Kingdom(GB)  🇬🇧`,
+    sequenceMixed: `feat(ui): 加入 👩‍💻 / 👨‍💻 / family 👨‍👩‍👧‍👦
+docs: 補齊 TW 🇹🇼 / JP 🇯🇵 / US 🇺🇸 / CN 🇨🇳 / KR 🇰🇷
+review: 手勢反應改成 light 👋🏻 / medium 👍🏽 / light ☝🏻`,
+    sequenceCompare: `tech   👩‍💻 👨‍💻
+family 👨‍👩‍👧‍👦
+skin   👋🏻 ☝🏻   👍🏽
+flags  🇹🇼 🇯🇵 🇺🇸 🇨🇳 🇰🇷 🇸🇬 🇭🇰 🇹🇭 🇻🇳 🇵🇭 🇨🇦 🇦🇺 🇬🇧`,
   },
 };
+
+function updateSequenceSamples() {
+  const cfg = VARIANTS[currentVariant];
+  document.getElementById('sequenceSectionHint').textContent = cfg.sequenceHint;
+  document.getElementById('sequenceCompareHint').textContent = cfg.sequenceCompareHint;
+  document.getElementById('sequenceZwjBlock').textContent = cfg.sequenceZwj;
+  document.getElementById('sequenceSkinToneBlock').textContent = cfg.sequenceSkinTone;
+  document.getElementById('sequenceFlagBlock').textContent = cfg.sequenceFlag;
+  document.getElementById('sequenceMixedBlock').textContent = cfg.sequenceMixed;
+  document.getElementById('compareSequenceMerged').textContent = cfg.sequenceCompare;
+  document.getElementById('compareSequenceSource').textContent = cfg.sequenceCompare;
+}
 
 let currentVariant = 'color';
 let currentFontCacheKey = `${Date.now()}`;
@@ -347,6 +426,7 @@ async function loadFonts() {
   ).join('');
 
   updateFontFamily();
+  updateSequenceSamples();
 
   try {
     await loadFont(manifest.fonts[0]);
