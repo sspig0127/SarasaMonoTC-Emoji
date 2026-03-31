@@ -335,6 +335,14 @@ uv run pytest tests/test_emoji_merge.py::TestScaleGlyph -v
 [VHS](https://github.com/charmbracelet/vhs) 使用 Headless Chromium + xterm.js 渲染終端機畫面，
 需使用 **Lite 變體**（glyf 格式）才能正確顯示 emoji（Color 變體的 CBDT/CBLC 點陣圖在 Chromium 中支援不穩定）。
 
+如果你的首要目標是：
+- VHS 錄影
+- xterm.js / Headless Chromium
+- 無法控制系統 emoji fallback 的終端機或嵌入環境
+
+建議把 **Lite** 視為主要產品線。`COLRv1` 目前更適合「想保留彩色 emoji、且宿主 renderer 已知支援 COLRv1」的環境，
+不建議當作 VHS / fallback-sensitive workflow 的唯一依賴。
+
 ### 4K 錄製設定參考(字體大小大約40~48)
 
 ```tape
@@ -362,6 +370,9 @@ Set Height 2160
 - **檔案大小**：比 Color 變體約小 30%（無點陣圖資料）
 - **渲染**：Emoji 以終端機前景色顯示（單色），完整支援 Chromium/xterm.js
 - **Sequence 支援**：已支援 ZWJ / 膚色 / 旗幟，透過輸出字體中的 GSUB ligature 規則實作
+- **定位**：目前最適合 VHS、終端機錄影、以及無法信任系統 fallback 行為的環境
+- **旗幟可讀性**：對 `TW / JP / US / CN / GB / CA` 六個常見旗幟額外做了縮寫字母放大微調，維持 2 columns 前提下改善辨識度
+- **已知限制**：Lite 旗幟仍受限於 2-column 固定寬度；國家縮寫字母可讀性雖已微調，但目前仍無法完全達到 source emoji font 的視覺大小。若需要更接近原始彩色旗幟的呈現，應優先使用 Color / COLRv1 變體
 
 ### COLRv1 變體
 - **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）
@@ -385,6 +396,7 @@ Set Height 2160
 - **檔案大小**：~26 MB（比 Color 小 26%；COLRv1 向量資料比 PNG 點陣圖精簡）
 - **支援環境**：Chrome/Chromium 98+、Firefox 107+；macOS 系統級支援需 macOS 13+
 - **名稱衝突處理**：Sarasa 已有同名 glyph 時自動加 `_colrv1` 後綴（build log 會列出衝突數量）
+- **定位**：適合現代瀏覽器 / GUI renderer 的彩色顯示；若以 VHS / xterm.js 穩定錄製為第一優先，仍應優先選 Lite
 
 ### 共同
 - **Emoji 範圍**：單一 codepoint + sequence emoji（ZWJ / 膚色 / 旗幟）

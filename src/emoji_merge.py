@@ -525,6 +525,121 @@ def _scale_glyph(glyph, scale: float) -> None:
             comp.y = y
 
 
+_LITE_TUNED_FLAG_SEQUENCES = {
+    (0x1F1FA, 0x1F1F8),  # 🇺🇸
+    (0x1F1EF, 0x1F1F5),  # 🇯🇵
+    (0x1F1F9, 0x1F1FC),  # 🇹🇼
+    (0x1F1E8, 0x1F1F3),  # 🇨🇳
+    (0x1F1EC, 0x1F1E7),  # 🇬🇧
+    (0x1F1E8, 0x1F1E6),  # 🇨🇦
+}
+_LITE_FLAG_COMPONENT_SCALE = 1.16
+
+
+def _scale_simple_glyph_about_center(
+    glyph,
+    scale_x: float,
+    scale_y: float,
+) -> None:
+    """Scale a simple glyph around its own bbox center.
+
+    Used by Lite flag tuning: keep the outer flag box unchanged while making
+    the country abbreviation letters slightly larger inside the box.
+    """
+    if glyph is None or glyph.numberOfContours <= 0 or not hasattr(glyph, "coordinates"):
+        return
+    if abs(scale_x - 1.0) < 1e-6 and abs(scale_y - 1.0) < 1e-6:
+        return
+    if not glyph.coordinates:
+        return
+
+    from fontTools.misc.roundTools import otRound
+
+    glyph.recalcBounds(None)
+    cx = (glyph.xMin + glyph.xMax) / 2.0
+    cy = (glyph.yMin + glyph.yMax) / 2.0
+
+    new_coords = []
+    for x, y in glyph.coordinates:
+        sx = otRound(cx + ((x - cx) * scale_x))
+        sy = otRound(cy + ((y - cy) * scale_y))
+        _check_int16(sx, "coord.x", scale_x)
+        _check_int16(sy, "coord.y", scale_y)
+        new_coords.append((sx, sy))
+
+    glyph.coordinates[:] = new_coords
+    glyph.recalcBounds(None)
+
+
+def _tune_lite_flag_ligatures(
+    base_font: TTFont,
+    sequence_entries: list[EmojiEntry],
+    base_hmtx,
+    base_vmtx,
+) -> int:
+    """Slightly enlarge selected Lite flag abbreviations for readability.
+
+    Noto Emoji's monochrome flags are designed for a wider advance than the
+    final Sarasa 2-column slot. After the merge forces every emoji to advance
+    width 1000, the country abbreviation can look noticeably smaller than the
+    source font. For a small allowlist of high-frequency flags, clone the two
+    letter component glyphs, scale them around their own center, and retarget
+    the flag ligature to the tuned copies.
+    """
+    base_glyf = base_font["glyf"]
+    current_order = list(base_font.getGlyphOrder())
+    added_names: list[str] = []
+    added_count = 0
+    entries_by_codepoints = {
+        entry.codepoints: entry
+        for entry in sequence_entries
+        if entry.codepoints in _LITE_TUNED_FLAG_SEQUENCES
+    }
+
+    for codepoints in _LITE_TUNED_FLAG_SEQUENCES:
+        entry = entries_by_codepoints.get(codepoints)
+        if entry is None or entry.source_glyph not in base_glyf.glyphs:
+            continue
+
+        ligature = base_glyf[entry.source_glyph]
+        ligature.expand(base_glyf)
+        components = getattr(ligature, "components", None) or []
+        if ligature.numberOfContours >= 0 or len(components) < 3:
+            continue
+
+        seq_tag = "".join(f"{cp:04X}" for cp in codepoints)
+        # Component 0 is the shared outer flag outline. Only tune the letters.
+        for index, comp in enumerate(components[1:], start=1):
+            original_name = comp.glyphName
+            if original_name not in base_glyf.glyphs:
+                continue
+
+            tuned_name = f"{original_name}.liteflag.{seq_tag}.{index}"
+            if tuned_name not in base_glyf.glyphs:
+                tuned_glyph = copy.deepcopy(base_glyf[original_name])
+                tuned_glyph.expand(base_glyf)
+                _scale_simple_glyph_about_center(
+                    tuned_glyph,
+                    _LITE_FLAG_COMPONENT_SCALE,
+                    _LITE_FLAG_COMPONENT_SCALE,
+                )
+                base_glyf[tuned_name] = tuned_glyph
+                current_order.append(tuned_name)
+                added_names.append(tuned_name)
+                if original_name in base_hmtx.metrics:
+                    base_hmtx.metrics[tuned_name] = base_hmtx.metrics[original_name]
+                if base_vmtx is not None and original_name in base_vmtx.metrics:
+                    base_vmtx.metrics[tuned_name] = base_vmtx.metrics[original_name]
+                added_count += 1
+
+            comp.glyphName = tuned_name
+
+    if added_names:
+        base_font.setGlyphOrder(current_order)
+
+    return added_count
+
+
 def _collect_glyph_deps(
     emoji_font: TTFont,
     target_names: set[str],
@@ -723,9 +838,23 @@ def merge_emoji_lite(
         for glyph_name in emoji_glyphs_to_add:
             if glyph_name not in base_vmtx.metrics:
                 base_vmtx.metrics[glyph_name] = (emoji_width, 0)
+    else:
+        base_vmtx = None
+
+    tuned_flag_components = _tune_lite_flag_ligatures(
+        base_font,
+        sequence_entries,
+        base_hmtx,
+        base_vmtx,
+    )
+    if tuned_flag_components:
+        print(
+            "  Tuned Lite flag abbreviation components: "
+            f"{tuned_flag_components} glyph clones for readability"
+        )
 
     # Update maxp AFTER all table accesses (avoids vmtx decompile byte-count mismatch)
-    base_font["maxp"].numGlyphs = len(new_order)
+    base_font["maxp"].numGlyphs = len(base_font.getGlyphOrder())
 
     # Step 7: update cmap
     added_set = set(emoji_glyphs_to_add)

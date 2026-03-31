@@ -23,6 +23,7 @@ from src.emoji_merge import (
     _filter_colr_to_added_glyphs,
     _update_cmap,
     _scale_glyph,
+    _scale_simple_glyph_about_center,
     collect_emoji_entries,
     detect_font_widths,
     extract_emoji_sequences,
@@ -176,6 +177,18 @@ class TestScaleGlyph:
         msg = str(exc_info.value)
         assert "35000" in msg  # the out-of-range value
         assert "int16" in msg
+
+    def test_scale_simple_glyph_about_center_preserves_center(self):
+        """Center-based scaling should enlarge the glyph without drifting."""
+        g = _simple_glyph([(100, 200), (300, 400)])
+        before_center = ((g.xMin + g.xMax) / 2, (g.yMin + g.yMax) / 2)
+        _scale_simple_glyph_about_center(g, 1.5, 1.5)
+        after_center = ((g.xMin + g.xMax) / 2, (g.yMin + g.yMax) / 2)
+        assert after_center == before_center
+        assert g.xMin == 50
+        assert g.xMax == 350
+        assert g.yMin == 150
+        assert g.yMax == 450
 
 
 # ---------------------------------------------------------------------------
