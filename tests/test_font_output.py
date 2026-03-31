@@ -9,7 +9,10 @@ Run after building:
     pytest tests/test_font_output.py -v
 """
 
+from pathlib import Path
+
 import pytest
+from fontTools.ttLib import TTFont
 from fontTools.misc.roundTools import otRound
 
 _KEY_CODEPOINTS = [
@@ -22,6 +25,44 @@ _KEY_CODEPOINTS = [
 _MIN_COLOR_GLYPHS = 56_000
 # Sarasa + emoji outlines only: slightly more than Sarasa alone (~3 800 emoji)
 _MIN_LITE_GLYPHS = 5_000
+_STYLE_MATRIX = ("Regular", "Italic", "Bold", "BoldItalic")
+_ROOT = Path(__file__).parent.parent
+
+
+def _has_ligature_sequence(font, codepoints: tuple[int, ...]) -> bool:
+    """Return True when GSUB contains a ligature rule for the given codepoints."""
+    if "GSUB" not in font:
+        return False
+
+    cmap = font["cmap"].getBestCmap() or {}
+    expected_components = []
+    for cp in codepoints:
+        glyph_name = cmap.get(cp)
+        if glyph_name is None:
+            return False
+        expected_components.append(glyph_name)
+
+    expected_components = tuple(expected_components)
+    for lookup in font["GSUB"].table.LookupList.Lookup:
+        if lookup.LookupType != 4:
+            continue
+        for subtable in lookup.SubTable:
+            ligatures = getattr(subtable, "ligatures", None) or {}
+            lig_list = ligatures.get(expected_components[0], [])
+            for ligature in lig_list:
+                components = (expected_components[0], *ligature.Component)
+                if components == expected_components:
+                    return True
+
+    return False
+
+
+def _load_output_font(variant_dir: str, family_prefix: str, style: str) -> TTFont:
+    """Open a built output font for a specific variant/style, or skip."""
+    path = _ROOT / "output" / variant_dir / f"{family_prefix}-{style}.ttf"
+    if not path.exists():
+        pytest.skip(f"Output font not found: {path}")
+    return TTFont(str(path))
 
 
 # ---------------------------------------------------------------------------
@@ -124,6 +165,29 @@ class TestColorOutput:
                 "base name on reload."
             )
 
+    def test_has_sequence_gsub_for_zwj_skin_tone_and_flag(self, output_color_regular):
+        """Color output must carry representative v2.0 sequence ligatures in GSUB."""
+        assert _has_ligature_sequence(output_color_regular, (0x1F469, 0x200D, 0x1F4BB)), (
+            "Missing 👩‍💻 ZWJ ligature in Color GSUB"
+        )
+        assert _has_ligature_sequence(output_color_regular, (0x1F44B, 0x1F3FB)), (
+            "Missing 👋🏻 skin-tone ligature in Color GSUB"
+        )
+        assert _has_ligature_sequence(output_color_regular, (0x1F1FA, 0x1F1F8)), (
+            "Missing 🇺🇸 flag ligature in Color GSUB"
+        )
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_have_sequence_gsub(self, style):
+        """All built Color styles should carry representative v2.0 sequence ligatures."""
+        font = _load_output_font("fonts", "SarasaMonoTCEmoji", style)
+        try:
+            assert _has_ligature_sequence(font, (0x1F469, 0x200D, 0x1F4BB))
+            assert _has_ligature_sequence(font, (0x1F44B, 0x1F3FB))
+            assert _has_ligature_sequence(font, (0x1F1FA, 0x1F1F8))
+        finally:
+            font.close()
+
 
 # ---------------------------------------------------------------------------
 # Lite variant (glyf TrueType outlines)
@@ -218,6 +282,29 @@ class TestLiteOutput:
             f"Family name '{family}' does not indicate Lite variant"
         )
 
+    def test_has_sequence_gsub_for_zwj_skin_tone_and_flag(self, output_lite_regular):
+        """Lite output must carry representative v2.0 sequence ligatures in GSUB."""
+        assert _has_ligature_sequence(output_lite_regular, (0x1F469, 0x200D, 0x1F4BB)), (
+            "Missing 👩‍💻 ZWJ ligature in Lite GSUB"
+        )
+        assert _has_ligature_sequence(output_lite_regular, (0x1F44B, 0x1F3FB)), (
+            "Missing 👋🏻 skin-tone ligature in Lite GSUB"
+        )
+        assert _has_ligature_sequence(output_lite_regular, (0x1F1FA, 0x1F1F8)), (
+            "Missing 🇺🇸 flag ligature in Lite GSUB"
+        )
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_have_sequence_gsub(self, style):
+        """All built Lite styles should carry representative v2.0 sequence ligatures."""
+        font = _load_output_font("fonts-lite", "SarasaMonoTCEmojiLite", style)
+        try:
+            assert _has_ligature_sequence(font, (0x1F469, 0x200D, 0x1F4BB))
+            assert _has_ligature_sequence(font, (0x1F44B, 0x1F3FB))
+            assert _has_ligature_sequence(font, (0x1F1FA, 0x1F1F8))
+        finally:
+            font.close()
+
 
 # ---------------------------------------------------------------------------
 # COLRv1 variant (color vector)
@@ -307,6 +394,29 @@ class TestCOLRv1Output:
         assert "COLRv1" in family or "colrv1" in family.lower(), (
             f"Family name '{family}' does not indicate COLRv1 variant"
         )
+
+    def test_has_sequence_gsub_for_zwj_skin_tone_and_flag(self, output_colrv1_regular):
+        """COLRv1 output should carry representative v2.0 sequence ligatures when selected."""
+        assert _has_ligature_sequence(output_colrv1_regular, (0x1F469, 0x200D, 0x1F4BB)), (
+            "Missing 👩‍💻 ZWJ ligature in COLRv1 GSUB"
+        )
+        assert _has_ligature_sequence(output_colrv1_regular, (0x1F44B, 0x1F3FB)), (
+            "Missing 👋🏻 skin-tone ligature in COLRv1 GSUB"
+        )
+        assert _has_ligature_sequence(output_colrv1_regular, (0x1F1FA, 0x1F1F8)), (
+            "Missing 🇺🇸 flag ligature in COLRv1 GSUB"
+        )
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_have_sequence_gsub(self, style):
+        """All built COLRv1 styles should carry the representative priority sequences."""
+        font = _load_output_font("fonts-colrv1", "SarasaMonoTCEmojiCOLRv1", style)
+        try:
+            assert _has_ligature_sequence(font, (0x1F469, 0x200D, 0x1F4BB))
+            assert _has_ligature_sequence(font, (0x1F44B, 0x1F3FB))
+            assert _has_ligature_sequence(font, (0x1F1FA, 0x1F1F8))
+        finally:
+            font.close()
 
     def test_transformed_helper_glyph_metrics_preserved(
         self, output_colrv1_regular, noto_colrv1_font

@@ -101,6 +101,12 @@ def _cleanup_partial_outputs(
     print(f"  Cleaned up {removed} partial output file(s)")
 
 
+def _parse_codepoint_sequence(value: str) -> tuple[int, ...]:
+    """Parse a config sequence like 'U+1F469 U+200D U+1F4BB'."""
+    parts = [part for part in value.split() if part]
+    return tuple(int(part.replace("U+", "").replace("u+", ""), 16) for part in parts)
+
+
 def build_single_font(
     style: str,
     base_font_path: Path,
@@ -113,6 +119,7 @@ def build_single_font(
     colrv1: bool = False,
     max_new_glyphs: int | None = None,
     priority_codepoints: set[int] | None = None,
+    priority_sequences: set[tuple[int, ...]] | None = None,
     force_codepoints: set[int] | None = None,
 ) -> tuple[str, list[dict]]:
     """Build a single font variant with emoji merged in.
@@ -129,6 +136,8 @@ def build_single_font(
         colrv1: If True, use COLRv1 vector merge
         max_new_glyphs: COLRv1 only — glyph budget for greedy selection
         priority_codepoints: COLRv1 only — codepoints always included before greedy fill
+        priority_sequences: COLRv1 only — sequence codepoint tuples to include
+            before the remaining-budget greedy fill for sequences
         force_codepoints: BMP codepoints forced to color even when skip_existing would
             otherwise preserve Sarasa's monochrome glyph (COLRv1: via stub rename;
             Color CBDT: via color bitmap rename)
@@ -155,6 +164,7 @@ def build_single_font(
             config=config,
             max_new_glyphs=max_new_glyphs,
             priority_codepoints=priority_codepoints,
+            priority_sequences=priority_sequences,
             force_codepoints=force_codepoints,
         )
     else:
@@ -324,6 +334,11 @@ Configuration priority: CLI args > config.yaml > defaults
             {int(s.replace("U+", "").replace("u+", ""), 16) for s in _raw_priority}
             if _raw_priority else None
         )
+        _raw_priority_sequences = get_config_value(yaml_config, "colrv1", "priority_sequences") or []
+        colrv1_priority_sequences: set[tuple[int, ...]] | None = (
+            {_parse_codepoint_sequence(s) for s in _raw_priority_sequences}
+            if _raw_priority_sequences else None
+        )
         # Parse force codepoints — BMP symbols to colorize despite skip_existing
         _raw_force = get_config_value(yaml_config, "colrv1", "force_colrv1_codepoints") or []
         colrv1_force_codepoints: set[int] | None = (
@@ -341,6 +356,7 @@ Configuration priority: CLI args > config.yaml > defaults
         colrv1_max_new_glyphs = None
         colrv1_emoji_list_path = None
         colrv1_priority_codepoints = None
+        colrv1_priority_sequences = None
         colrv1_force_codepoints = None
         color_force_codepoints = None
     else:
@@ -350,6 +366,7 @@ Configuration priority: CLI args > config.yaml > defaults
         colrv1_max_new_glyphs = None
         colrv1_emoji_list_path = None
         colrv1_priority_codepoints = None
+        colrv1_priority_sequences = None
         colrv1_force_codepoints = None
         # Parse Color variant forced BMP codepoints
         _raw_color_force = get_config_value(yaml_config, "emoji", "force_color_codepoints") or []
@@ -474,6 +491,7 @@ Configuration priority: CLI args > config.yaml > defaults
                 lite=is_lite, colrv1=is_colrv1,
                 max_new_glyphs=colrv1_max_new_glyphs,
                 priority_codepoints=colrv1_priority_codepoints,
+                priority_sequences=colrv1_priority_sequences,
                 force_codepoints=effective_force_codepoints,
             )
             if records and not colrv1_selection_records:
@@ -491,6 +509,7 @@ Configuration priority: CLI args > config.yaml > defaults
                         is_lite, is_colrv1,
                         colrv1_max_new_glyphs,
                         colrv1_priority_codepoints,
+                        colrv1_priority_sequences,
                         effective_force_codepoints,
                     )
                     futures[future] = style

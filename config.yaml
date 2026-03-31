@@ -5,7 +5,7 @@
 # Font metadata
 font:
   family_name: "SarasaMonoTCEmoji"
-  version: "1.5.3"
+  version: "2.0.0"
   author: "sspig0127"
   # Full copyright notice — updated after running:
   #   uv run python -c "
@@ -180,3 +180,10 @@ colrv1:
     # 常用通用 emoji
     - "U+1F525"  # 🔥 fire
     - "U+1F600"  # 😀 grinning face
+  # priority_sequences — high-value sequence emoji to attempt before the
+  # remaining-budget greedy fill for COLRv1 sequence support.
+  # Format: space-separated codepoint sequence.
+  priority_sequences:
+    - "U+1F469 U+200D U+1F4BB"  # 👩‍💻 woman technologist
+    - "U+1F44B U+1F3FB"         # 👋🏻 waving hand: light skin tone
+    - "U+1F1FA U+1F1F8"         # 🇺🇸 United States flag

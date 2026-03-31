@@ -10,15 +10,22 @@ Test groups:
 import array
 
 import pytest
+from fontTools.ttLib import TTFont
+from fontTools.ttLib.tables import otTables
 from fontTools.ttLib.tables._g_l_y_f import Glyph, GlyphCoordinates, GlyphComponent
 
 from src.emoji_merge import (
+    EmojiEntry,
+    _append_ligature_lookup_to_gsub,
+    _build_sequence_ligature_map,
     _collect_glyph_deps,
     _collect_colrv1_paint_glyph_deps,
     _filter_colr_to_added_glyphs,
     _update_cmap,
     _scale_glyph,
+    collect_emoji_entries,
     detect_font_widths,
+    extract_emoji_sequences,
     get_emoji_cmap,
 )
 
@@ -196,6 +203,64 @@ def _mock_font(width_list: list) -> object:
     return _Font()
 
 
+def _make_mock_gsub_font(feature_tag: str = "ccmp") -> TTFont:
+    """Build a minimal font with an empty GSUB table and one feature record."""
+    from fontTools.ttLib.tables import G_S_U_B_
+
+    font = TTFont()
+    font.setGlyphOrder(
+        [
+            ".notdef",
+            "u1F469",
+            "uni200D",
+            "u1F4BB",
+            "glyph_emoji_woman_technologist",
+        ]
+    )
+
+    gsub_wrapper = G_S_U_B_.table_G_S_U_B_()
+    gsub = otTables.GSUB()
+    gsub.Version = 0x00010000
+
+    script_list = otTables.ScriptList()
+    script_record = otTables.ScriptRecord()
+    script_record.ScriptTag = "DFLT"
+    script = otTables.Script()
+    default_lang = otTables.LangSys()
+    default_lang.LookupOrder = None
+    default_lang.ReqFeatureIndex = 0xFFFF
+    default_lang.FeatureIndex = [0]
+    default_lang.FeatureCount = 1
+    script.DefaultLangSys = default_lang
+    script.LangSysRecord = []
+    script.LangSysCount = 0
+    script_record.Script = script
+    script_list.ScriptRecord = [script_record]
+    script_list.ScriptCount = 1
+    gsub.ScriptList = script_list
+
+    feature_list = otTables.FeatureList()
+    feature_record = otTables.FeatureRecord()
+    feature_record.FeatureTag = feature_tag
+    feature = otTables.Feature()
+    feature.FeatureParams = None
+    feature.LookupListIndex = []
+    feature.LookupCount = 0
+    feature_record.Feature = feature
+    feature_list.FeatureRecord = [feature_record]
+    feature_list.FeatureCount = 1
+    gsub.FeatureList = feature_list
+
+    lookup_list = otTables.LookupList()
+    lookup_list.Lookup = []
+    lookup_list.LookupCount = 0
+    gsub.LookupList = lookup_list
+
+    gsub_wrapper.table = gsub
+    font["GSUB"] = gsub_wrapper
+    return font
+
+
 class TestDetectFontWidths:
     def test_sarasa_returns_500_1000(self, sarasa_font):
         """Sarasa Mono TC UPM=1000 → half=500, full=1000."""
@@ -267,6 +332,136 @@ class TestGetEmojiCmap:
         """Result must contain a significant number of emoji."""
         cmap = get_emoji_cmap(noto_emoji_font)
         assert len(cmap) > 500, f"Expected >500 emoji, got {len(cmap)}"
+
+
+# ---------------------------------------------------------------------------
+# extract_emoji_sequences — requires emoji font with GSUB ligatures
+# ---------------------------------------------------------------------------
+
+class TestExtractEmojiSequences:
+    def test_returns_nonempty_dict(self, noto_emoji_font):
+        """Noto Emoji must expose at least some GSUB-backed emoji sequences."""
+        sequences = extract_emoji_sequences(noto_emoji_font)
+        assert len(sequences) > 100, f"Expected >100 sequences, got {len(sequences)}"
+
+    def test_detects_zwj_sequence(self, noto_emoji_font):
+        """ZWJ sequence 👩‍💻 must resolve to a ligature glyph."""
+        sequences = extract_emoji_sequences(noto_emoji_font)
+        seq = (0x1F469, 0x200D, 0x1F4BB)
+        glyph_name = sequences.get(seq)
+        assert glyph_name, "Missing 👩‍💻 sequence in GSUB extraction"
+
+    def test_detects_skin_tone_sequence(self, noto_emoji_font):
+        """Skin-tone sequence 👋🏻 must resolve to a ligature glyph."""
+        sequences = extract_emoji_sequences(noto_emoji_font)
+        seq = (0x1F44B, 0x1F3FB)
+        glyph_name = sequences.get(seq)
+        assert glyph_name, "Missing 👋🏻 sequence in GSUB extraction"
+
+    def test_detects_flag_sequence(self, noto_emoji_font):
+        """Regional indicator flag 🇺🇸 must resolve to a ligature glyph."""
+        sequences = extract_emoji_sequences(noto_emoji_font)
+        seq = (0x1F1FA, 0x1F1F8)
+        glyph_name = sequences.get(seq)
+        assert glyph_name, "Missing 🇺🇸 sequence in GSUB extraction"
+
+    def test_sequence_components_can_include_zwj_and_modifiers(self, noto_emoji_font):
+        """ZWJ and skin-tone modifiers must remain resolvable in sequences."""
+        sequences = extract_emoji_sequences(noto_emoji_font)
+        contains_zwj = any(0x200D in seq for seq in sequences)
+        contains_skin_tone = any(any(0x1F3FB <= cp <= 0x1F3FF for cp in seq) for seq in sequences)
+        assert contains_zwj, "Expected at least one ZWJ sequence"
+        assert contains_skin_tone, "Expected at least one skin-tone sequence"
+
+
+# ---------------------------------------------------------------------------
+# collect_emoji_entries / sequence GSUB helpers
+# ---------------------------------------------------------------------------
+
+class TestCollectEmojiEntries:
+    def test_collects_single_and_sequence_entries(self, noto_emoji_font):
+        """Shared metadata must include both single-codepoint and sequence emoji."""
+        entries = collect_emoji_entries(noto_emoji_font, source_table_kind="glyf")
+        assert any(entry.kind == "single" for entry in entries)
+        assert any(entry.kind == "sequence" for entry in entries)
+
+    def test_contains_key_sequence_entries(self, noto_emoji_font):
+        """Representative v2.0 target sequences must appear in normalized metadata."""
+        entries = collect_emoji_entries(noto_emoji_font, source_table_kind="glyf")
+        seqs = {entry.codepoints for entry in entries if entry.kind == "sequence"}
+        assert (0x1F469, 0x200D, 0x1F4BB) in seqs
+        assert (0x1F44B, 0x1F3FB) in seqs
+        assert (0x1F1FA, 0x1F1F8) in seqs
+
+
+class TestSequenceLigatureHelpers:
+    def test_build_sequence_ligature_map_uses_merged_cmap(self):
+        """Sequence GSUB rules should resolve component glyphs through merged cmap."""
+        entries = [
+            EmojiEntry(
+                codepoints=(0x1F469, 0x200D, 0x1F4BB),
+                source_glyph="glyph_emoji_woman_technologist",
+                kind="sequence",
+                source_table_kind="glyf",
+            ),
+            EmojiEntry(
+                codepoints=(0x1F44B,),
+                source_glyph="u1F44B",
+                kind="single",
+                source_table_kind="glyf",
+            ),
+        ]
+        merged_cmap = {
+            0x1F469: "u1F469",
+            0x200D: "uni200D",
+            0x1F4BB: "u1F4BB",
+        }
+        ligatures = _build_sequence_ligature_map(
+            entries,
+            merged_cmap,
+            {"glyph_emoji_woman_technologist"},
+        )
+        assert ligatures == {
+            ("u1F469", "uni200D", "u1F4BB"): "glyph_emoji_woman_technologist"
+        }
+
+    def test_build_sequence_ligature_map_skips_missing_inputs(self):
+        """Sequences missing any component glyph in merged cmap must be skipped."""
+        entries = [
+            EmojiEntry(
+                codepoints=(0x1F1FA, 0x1F1F8),
+                source_glyph="glyph_flag_us",
+                kind="sequence",
+                source_table_kind="glyf",
+            ),
+        ]
+        ligatures = _build_sequence_ligature_map(entries, {0x1F1FA: "u1F1FA"}, {"glyph_flag_us"})
+        assert ligatures == {}
+
+    def test_append_ligature_lookup_to_existing_ccmp(self):
+        """New sequence ligatures should append as a GSUB lookup on ccmp features."""
+        font = _make_mock_gsub_font()
+        appended = _append_ligature_lookup_to_gsub(
+            font,
+            {("u1F469", "uni200D", "u1F4BB"): "glyph_emoji_woman_technologist"},
+        )
+        assert appended == 1
+
+        gsub = font["GSUB"].table
+        assert gsub.LookupList.LookupCount == 1
+        feature_record = gsub.FeatureList.FeatureRecord[0]
+        assert feature_record.FeatureTag == "ccmp"
+        assert feature_record.Feature.LookupListIndex == [0]
+
+    def test_append_ligature_lookup_is_noop_without_matching_feature(self):
+        """Fonts without a target feature tag should not keep a detached lookup."""
+        font = _make_mock_gsub_font(feature_tag="liga")
+        appended = _append_ligature_lookup_to_gsub(
+            font,
+            {("u1F469", "uni200D", "u1F4BB"): "glyph_emoji_woman_technologist"},
+        )
+        assert appended == 0
+        assert font["GSUB"].table.LookupList.LookupCount == 0
 
 
 # ---------------------------------------------------------------------------

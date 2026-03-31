@@ -16,11 +16,14 @@ Background research:
 
 import copy
 from collections import Counter
+from dataclasses import dataclass
 from typing import Optional
 
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables import _c_m_a_p as cmap_module
+from fontTools.ttLib.tables import otTables
 from fontTools.ttLib.tables._g_l_y_f import Glyph as TTGlyph
+from fontTools.otlLib.builder import buildLigatureSubstSubtable, buildLookup
 
 from .config import FontConfig
 
@@ -36,6 +39,16 @@ _SKIP_CODEPOINT_RANGES = [
     (0xFE00, 0xFE0F),    # Variation Selectors
     (0xE0100, 0xE01EF),  # Variation Selectors Supplement
 ]
+
+
+@dataclass(frozen=True)
+class EmojiEntry:
+    """Normalized emoji metadata shared across variants."""
+
+    codepoints: tuple[int, ...]
+    source_glyph: str
+    kind: str  # "single" | "sequence"
+    source_table_kind: str  # "CBDT" | "glyf" | "COLRv1"
 
 
 def get_emoji_cmap(emoji_font: TTFont) -> dict[int, str]:
@@ -58,6 +71,155 @@ def get_emoji_cmap(emoji_font: TTFont) -> dict[int, str]:
             continue
         result[cp] = name
     return result
+
+
+def extract_emoji_sequences(emoji_font: TTFont) -> dict[tuple[int, ...], str]:
+    """Extract multi-codepoint emoji sequences from GSUB ligatures.
+
+    v1.x only reads the font cmap, which naturally limits the project to
+    single-codepoint emoji. Sequence emoji such as ZWJ, skin-tone, and flag
+    forms are typically encoded as GSUB ligature substitutions instead.
+
+    This helper scans LookupType 4 (Ligature Substitution) and resolves each
+    glyph sequence back to its source Unicode codepoints using the font cmap.
+    Unlike get_emoji_cmap(), the reverse cmap here intentionally keeps control
+    codepoints such as ZWJ and variation selectors because they are valid
+    components of emoji sequences.
+
+    Args:
+        emoji_font: TTFont object for an emoji source font
+
+    Returns:
+        Dict mapping codepoint tuples -> ligature glyph name
+    """
+    if "GSUB" not in emoji_font:
+        return {}
+
+    raw_cmap = emoji_font["cmap"].getBestCmap() or {}
+    glyph_to_codepoint: dict[str, int] = {}
+    for cp, glyph_name in raw_cmap.items():
+        glyph_to_codepoint.setdefault(glyph_name, cp)
+
+    sequences: dict[tuple[int, ...], str] = {}
+    for lookup in emoji_font["GSUB"].table.LookupList.Lookup:
+        if lookup.LookupType != 4:
+            continue
+
+        for subtable in lookup.SubTable:
+            ligatures = getattr(subtable, "ligatures", None) or {}
+            for first_glyph, ligature_records in ligatures.items():
+                first_cp = glyph_to_codepoint.get(first_glyph)
+                if first_cp is None:
+                    continue
+
+                for ligature in ligature_records:
+                    codepoints = [first_cp]
+                    for component_glyph in ligature.Component:
+                        cp = glyph_to_codepoint.get(component_glyph)
+                        if cp is None:
+                            break
+                        codepoints.append(cp)
+                    else:
+                        if len(codepoints) >= 2:
+                            sequences[tuple(codepoints)] = ligature.LigGlyph
+
+    return sequences
+
+
+def collect_emoji_entries(
+    emoji_font: TTFont,
+    source_table_kind: str,
+) -> list[EmojiEntry]:
+    """Collect single-codepoint and GSUB-backed sequence emoji metadata."""
+    entries = [
+        EmojiEntry(
+            codepoints=(cp,),
+            source_glyph=glyph_name,
+            kind="single",
+            source_table_kind=source_table_kind,
+        )
+        for cp, glyph_name in get_emoji_cmap(emoji_font).items()
+    ]
+
+    entries.extend(
+        EmojiEntry(
+            codepoints=codepoints,
+            source_glyph=glyph_name,
+            kind="sequence",
+            source_table_kind=source_table_kind,
+        )
+        for codepoints, glyph_name in extract_emoji_sequences(emoji_font).items()
+    )
+    return entries
+
+
+def _build_sequence_ligature_map(
+    sequence_entries: list[EmojiEntry],
+    merged_cmap: dict[int, str],
+    added_glyphs: set[str],
+) -> dict[tuple[str, ...], str]:
+    """Resolve sequence entries into GSUB ligature input/output glyph names."""
+    ligatures: dict[tuple[str, ...], str] = {}
+    for entry in sequence_entries:
+        if entry.kind != "sequence" or entry.source_glyph not in added_glyphs:
+            continue
+
+        component_names = []
+        for cp in entry.codepoints:
+            glyph_name = merged_cmap.get(cp)
+            if glyph_name is None:
+                break
+            component_names.append(glyph_name)
+        else:
+            if len(component_names) >= 2:
+                ligatures[tuple(component_names)] = entry.source_glyph
+
+    return ligatures
+
+
+def _append_ligature_lookup_to_gsub(
+    font: TTFont,
+    ligature_map: dict[tuple[str, ...], str],
+    feature_tag: str = "ccmp",
+) -> int:
+    """Append a ligature lookup to all matching GSUB features.
+
+    Returns the number of ligature rules appended. If the font lacks a GSUB
+    table or there is no usable ligature mapping, this is a no-op.
+    """
+    if not ligature_map or "GSUB" not in font:
+        return 0
+
+    gsub = font["GSUB"].table
+    if gsub.LookupList is None or gsub.FeatureList is None:
+        return 0
+
+    subtable = buildLigatureSubstSubtable(ligature_map)
+    if subtable is None:
+        return 0
+
+    lookup = buildLookup([subtable], table="GSUB")
+    lookup_index = gsub.LookupList.LookupCount
+    gsub.LookupList.Lookup.append(lookup)
+    gsub.LookupList.LookupCount += 1
+
+    attached = False
+    for feature_record in gsub.FeatureList.FeatureRecord:
+        if feature_record.FeatureTag != feature_tag:
+            continue
+        lookup_indexes = list(feature_record.Feature.LookupListIndex)
+        if lookup_index not in lookup_indexes:
+            lookup_indexes.append(lookup_index)
+            feature_record.Feature.LookupListIndex = lookup_indexes
+            feature_record.Feature.LookupCount = len(lookup_indexes)
+        attached = True
+
+    if not attached:
+        gsub.LookupList.Lookup.pop()
+        gsub.LookupList.LookupCount -= 1
+        return 0
+
+    return len(ligature_map)
 
 
 def detect_font_widths(base_font: TTFont) -> tuple[int, int]:
@@ -441,9 +603,18 @@ def merge_emoji_lite(
     emoji_width = half_width * config.emoji_width_multiplier
     print(f"  Detected widths — half: {half_width}, full: {full_width}, emoji: {emoji_width}")
 
-    # Step 2: extract emoji cmap
-    emoji_cmap = get_emoji_cmap(emoji_font)
-    print(f"  Emoji cmap entries: {len(emoji_cmap)}")
+    # Step 2: collect shared emoji metadata (single codepoints + sequences)
+    emoji_entries = collect_emoji_entries(emoji_font, source_table_kind="glyf")
+    emoji_cmap = {
+        entry.codepoints[0]: entry.source_glyph
+        for entry in emoji_entries
+        if entry.kind == "single"
+    }
+    sequence_entries = [entry for entry in emoji_entries if entry.kind == "sequence"]
+    print(
+        f"  Emoji entries: {len(emoji_entries)} "
+        f"(single: {len(emoji_cmap)}, sequence: {len(sequence_entries)})"
+    )
 
     # Step 3: filter existing codepoints
     if config.skip_existing:
@@ -464,14 +635,20 @@ def merge_emoji_lite(
             "Use NotoColorEmoji.ttf with build.py (without --lite) for the color variant."
         )
 
-    # Collect glyph names that need to be added (unique cmap values, no name conflicts)
+    # Collect glyph names that need to be added from both single-codepoint and
+    # sequence outputs. Sequence input components are resolved later via cmap
+    # and existing base glyphs; only the final ligature glyph needs copying here.
     base_existing_names = set(base_font.getGlyphOrder())
-    target_names = {name for name in emoji_cmap.values() if name not in base_existing_names}
+    target_names = {
+        entry.source_glyph for entry in emoji_entries
+        if entry.source_glyph not in base_existing_names
+    }
 
     # Expand with composite dependencies (components must precede composites)
     emoji_glyphs_to_add = _collect_glyph_deps(emoji_font, target_names, base_existing_names)
 
-    name_conflicts = len({n for n in emoji_cmap.values()}) - len(target_names)
+    unique_source_glyphs = {entry.source_glyph for entry in emoji_entries}
+    name_conflicts = len(unique_source_glyphs) - len(target_names)
     print(
         f"  Emoji glyphs to add: {len(emoji_glyphs_to_add)} "
         f"(name conflicts: {name_conflicts})"
@@ -555,6 +732,13 @@ def merge_emoji_lite(
     updated = _update_cmap(base_font, emoji_cmap, added_set)
     print(f"  cmap entries added: {updated}")
 
+    # Step 7.5: append sequence ligatures to the existing GSUB.
+    merged_cmap = base_font["cmap"].getBestCmap() or {}
+    ligature_map = _build_sequence_ligature_map(sequence_entries, merged_cmap, added_set)
+    appended_sequences = _append_ligature_lookup_to_gsub(base_font, ligature_map)
+    if appended_sequences:
+        print(f"  GSUB sequence ligatures appended: {appended_sequences}")
+
     # Step 8: update hhea and OS/2
     if "hhea" in base_font:
         base_font["hhea"].advanceWidthMax = max(
@@ -620,9 +804,18 @@ def merge_emoji(
     emoji_width = half_width * config.emoji_width_multiplier
     print(f"  Detected widths — half: {half_width}, full: {full_width}, emoji: {emoji_width}")
 
-    # Step 2: extract emoji cmap
-    emoji_cmap = get_emoji_cmap(emoji_font)
-    print(f"  Emoji cmap entries: {len(emoji_cmap)}")
+    # Step 2: collect shared emoji metadata (single codepoints + sequences)
+    emoji_entries = collect_emoji_entries(emoji_font, source_table_kind="CBDT")
+    emoji_cmap = {
+        entry.codepoints[0]: entry.source_glyph
+        for entry in emoji_entries
+        if entry.kind == "single"
+    }
+    sequence_entries = [entry for entry in emoji_entries if entry.kind == "sequence"]
+    print(
+        f"  Emoji entries: {len(emoji_entries)} "
+        f"(single: {len(emoji_cmap)}, sequence: {len(sequence_entries)})"
+    )
 
     # Step 3: filter existing codepoints (keep forced ones)
     if config.skip_existing:
@@ -768,6 +961,13 @@ def merge_emoji(
     added_set = set(emoji_glyphs_to_add)
     updated = _update_cmap(base_font, emoji_cmap, added_set, force_codepoints)
     print(f"  cmap entries added: {updated}")
+
+    # Step 8.5: append sequence ligatures to the existing GSUB.
+    merged_cmap = base_font["cmap"].getBestCmap() or {}
+    ligature_map = _build_sequence_ligature_map(sequence_entries, merged_cmap, added_set)
+    appended_sequences = _append_ligature_lookup_to_gsub(base_font, ligature_map)
+    if appended_sequences:
+        print(f"  GSUB sequence ligatures appended: {appended_sequences}")
 
     # Step 9: update hhea and OS/2
     if "hhea" in base_font:
@@ -972,6 +1172,62 @@ def _collect_colrv1_paint_glyph_deps(
     return deps
 
 
+def _select_colrv1_sequences_greedy(
+    sequence_entries: list[EmojiEntry],
+    emoji_font: TTFont,
+    remaining_budget: int,
+    selected_emoji_names: set[str],
+    existing_deps: set[str],
+    priority_sequences: set[tuple[int, ...]] | None = None,
+) -> tuple[list[EmojiEntry], set[str]]:
+    """Select COLRv1 sequence glyphs within remaining glyph budget.
+
+    Sequence glyphs are expensive in COLRv1 because each ligature glyph may
+    introduce many new geometry helper glyphs. To preserve the existing COLRv1
+    glyph-budget behavior, we greedily add sequence entries in codepoint order
+    until the remaining budget would be exceeded.
+    """
+    if remaining_budget <= 0 or not sequence_entries:
+        return [], set()
+
+    selected: list[EmojiEntry] = []
+    selected_names: set[str] = set()
+    accumulated_deps: set[str] = set()
+    total_cost = 0
+    occupied = set(selected_emoji_names) | set(existing_deps)
+
+    priority_set = priority_sequences or set()
+
+    def try_add(entry: EmojiEntry) -> bool:
+        nonlocal total_cost
+        if entry.source_glyph in occupied or entry.source_glyph in selected_names:
+            return False
+
+        deps = _collect_colrv1_paint_glyph_deps(emoji_font, {entry.source_glyph})
+        new_deps = deps - occupied - selected_names - accumulated_deps - {entry.source_glyph}
+        cost = 1 + len(new_deps)
+        if total_cost + cost > remaining_budget:
+            return False
+
+        selected.append(entry)
+        selected_names.add(entry.source_glyph)
+        accumulated_deps.update(new_deps)
+        total_cost += cost
+        return True
+
+    for entry in sorted(sequence_entries, key=lambda e: e.codepoints):
+        if entry.codepoints in priority_set:
+            try_add(entry)
+
+    for entry in sorted(sequence_entries, key=lambda e: e.codepoints):
+        if entry.codepoints in priority_set:
+            continue
+        if not try_add(entry):
+            break
+
+    return selected, accumulated_deps
+
+
 def _apply_colrv1_rename(paint, rename_map: dict[str, str]) -> None:
     """Recursively rename PaintGlyph.Glyph references in a COLRv1 paint tree."""
     if paint is None:
@@ -1124,6 +1380,7 @@ def merge_emoji_colrv1(
     config: FontConfig,
     max_new_glyphs: int | None = None,
     priority_codepoints: set[int] | None = None,
+    priority_sequences: set[tuple[int, ...]] | None = None,
     force_codepoints: set[int] | None = None,
 ) -> tuple[TTFont, list[dict]]:
     """Merge Noto COLRv1 color vector emoji into SarasaMonoTC.
@@ -1148,6 +1405,8 @@ def merge_emoji_colrv1(
             this limit.  Fixes browser garbling caused by oversized glyph tables.
         priority_codepoints: Codepoints always included before the greedy fill
             phase (e.g. commonly used dev/tooling emoji at higher codepoints).
+        priority_sequences: Sequence codepoint tuples always attempted before the
+            remaining-budget greedy fill for COLRv1 sequence glyphs.
         force_codepoints: BMP codepoints (≤ U+FFFF) that Sarasa already renders
             as monochrome glyphs.  These bypass skip_existing and get a renamed
             COLRv1 stub (e.g. uni2764 → uni2764_colrv1) so the cmap entry is
@@ -1175,9 +1434,18 @@ def merge_emoji_colrv1(
     emoji_width = half_width * config.emoji_width_multiplier
     print(f"  Detected widths — half: {half_width}, full: {full_width}, emoji: {emoji_width}")
 
-    # Step 2: extract emoji cmap
-    emoji_cmap = get_emoji_cmap(emoji_font)
-    print(f"  Emoji cmap entries: {len(emoji_cmap)}")
+    # Step 2: collect shared emoji metadata (single codepoints + sequences)
+    emoji_entries = collect_emoji_entries(emoji_font, source_table_kind="COLRv1")
+    emoji_cmap = {
+        entry.codepoints[0]: entry.source_glyph
+        for entry in emoji_entries
+        if entry.kind == "single"
+    }
+    all_sequence_entries = [entry for entry in emoji_entries if entry.kind == "sequence"]
+    print(
+        f"  Emoji entries: {len(emoji_entries)} "
+        f"(single: {len(emoji_cmap)}, sequence: {len(all_sequence_entries)})"
+    )
 
     # Step 2.5: build rename map for forced BMP codepoints that conflict with Sarasa.
     # Must happen BEFORE skip_existing filter so emoji_cmap still contains them.
@@ -1277,6 +1545,30 @@ def merge_emoji_colrv1(
         lookup_names = target_names
     geometry_deps = _collect_colrv1_paint_glyph_deps(emoji_font, lookup_names)
     geometry_deps -= lookup_names  # avoid double-counting emoji used as deps
+
+    # Step 5.5: greedily add sequence glyphs within the remaining COLRv1 budget.
+    selected_sequence_entries: list[EmojiEntry] = []
+    selected_sequence_names: set[str] = set()
+    selected_sequence_deps: set[str] = set()
+    if max_new_glyphs is not None and all_sequence_entries:
+        used_cost = len(target_names) + len(geometry_deps)
+        remaining_budget = max_new_glyphs - used_cost
+        selected_sequence_entries, selected_sequence_deps = _select_colrv1_sequences_greedy(
+            all_sequence_entries,
+            emoji_font,
+            remaining_budget,
+            lookup_names,
+            geometry_deps,
+            priority_sequences=priority_sequences,
+        )
+        selected_sequence_names = {entry.source_glyph for entry in selected_sequence_entries}
+        if selected_sequence_entries:
+            print(
+                f"  Sequence selection: {len(selected_sequence_entries)}/{len(all_sequence_entries)} "
+                f"selected, extra glyph cost: {len(selected_sequence_names) + len(selected_sequence_deps)}/{remaining_budget}"
+            )
+
+    geometry_deps |= selected_sequence_deps
     print(
         f"  Target emoji: {len(target_names)}, geometry deps: {len(geometry_deps)}, "
         f"name conflicts (skipped): {name_conflicts}"
@@ -1290,10 +1582,22 @@ def merge_emoji_colrv1(
     if rename_map:
         print(f"  Renaming {len(rename_map)} conflicting geometry dep(s): {sorted(rename_map)[:5]}")
 
+    sequence_rename_map: dict[str, str] = {}
+    for name in selected_sequence_names:
+        if name in base_existing_names:
+            sequence_rename_map[name] = f"{name}_colrv1_seq"
+    if sequence_rename_map:
+        print(
+            f"  Renaming {len(sequence_rename_map)} conflicting sequence glyph(s): "
+            f"{sorted(sequence_rename_map)[:5]}"
+        )
+
     # Build ordered lists: geometry deps first (referenced by paint trees), then emoji
     geometry_deps_orig = sorted(geometry_deps)         # original names in emoji font
     geometry_deps_final = [rename_map.get(n, n) for n in geometry_deps_orig]
-    emoji_glyphs_list = sorted(target_names)
+    sequence_glyphs_orig = sorted(selected_sequence_names)
+    sequence_glyphs_final = [sequence_rename_map.get(n, n) for n in sequence_glyphs_orig]
+    emoji_glyphs_list = sorted(target_names) + sequence_glyphs_final
     emoji_glyphs_to_add = geometry_deps_final + emoji_glyphs_list
 
     print(f"  Glyphs to add: {len(emoji_glyphs_to_add)} "
@@ -1326,6 +1630,12 @@ def merge_emoji_colrv1(
             for record in colr_table_copy.BaseGlyphList.BaseGlyphPaintRecord:
                 if record.BaseGlyph in glyph_forced_rename:
                     record.BaseGlyph = glyph_forced_rename[record.BaseGlyph]
+    if sequence_rename_map:
+        colr_table_copy = colr_copy.table
+        if hasattr(colr_table_copy, "BaseGlyphList") and colr_table_copy.BaseGlyphList:
+            for record in colr_table_copy.BaseGlyphList.BaseGlyphPaintRecord:
+                if record.BaseGlyph in sequence_rename_map:
+                    record.BaseGlyph = sequence_rename_map[record.BaseGlyph]
 
     # Step 7.5: scale font-unit coords in COLR by upm_scale.
     # PaintTransform dx/dy, PaintTranslate dx/dy, gradient control points, and
@@ -1442,6 +1752,22 @@ def merge_emoji_colrv1(
     # U+2764 → uni2764_colrv1 instead of Sarasa's original monochrome uni2764.
     updated = _update_cmap(base_font, emoji_cmap, added_emoji_set, force_codepoints)
     print(f"  cmap entries added: {updated}")
+
+    if selected_sequence_entries:
+        merged_cmap = base_font["cmap"].getBestCmap() or {}
+        gsub_sequence_entries = [
+            EmojiEntry(
+                codepoints=entry.codepoints,
+                source_glyph=sequence_rename_map.get(entry.source_glyph, entry.source_glyph),
+                kind=entry.kind,
+                source_table_kind=entry.source_table_kind,
+            )
+            for entry in selected_sequence_entries
+        ]
+        ligature_map = _build_sequence_ligature_map(gsub_sequence_entries, merged_cmap, added_emoji_set)
+        appended_sequences = _append_ligature_lookup_to_gsub(base_font, ligature_map)
+        if appended_sequences:
+            print(f"  GSUB sequence ligatures appended: {appended_sequences}")
 
     # Step 14: update hhea and OS/2
     if "hhea" in base_font:

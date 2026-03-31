@@ -150,7 +150,53 @@ ABABABABABABAB
 ⚠️  警告：emoji 寬度 1200 ≠ 預期 full_width 1000
 git commit -m "feat: 加入彩色 emoji 支援 🎨"</div>
 
-<h2>5. 合併後字體 vs 原始 emoji 字體</h2>
+<h2>5. v2.0 Sequence Emoji 驗證</h2>
+<div class="label">這一區專門檢查 ZWJ / 膚色 / 旗幟 sequence；若 glyph 有合併但 GSUB 沒接好，通常會拆成多個單獨字符</div>
+<div class="grid">
+  <div>
+    <div class="label">ZWJ / 職業 / 家庭</div>
+    <div class="mono">👩‍💻 👨‍💻 👩‍🔬
+👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
+🧑‍💻 🧑‍🔬 🧑‍🚀</div>
+  </div>
+  <div>
+    <div class="label">膚色變體</div>
+    <div class="mono">👋🏻 👋🏽 👋🏿
+👍🏻 👍🏽 👍🏿
+🙌🏻 🙌🏽 🙌🏿</div>
+  </div>
+  <div>
+    <div class="label">旗幟</div>
+    <div class="mono">🇺🇸 🇯🇵 🇹🇼
+🇬🇧 🇨🇦 🇰🇷
+🇫🇷 🇩🇪 🇺🇦</div>
+  </div>
+  <div>
+    <div class="label">混排情境</div>
+    <div class="mono">feat(ui): 加入 👩‍💻 onboarding 流程
+docs: 補齊 🇺🇸 / 🇯🇵 / 🇹🇼 範例
+review: 手勢反應改成 👋🏻 👍🏽 🙌🏿</div>
+  </div>
+</div>
+
+<h2>6. v2.0 Sequence 對照（Merged vs Source）</h2>
+<div class="label">若右欄原始字體正常、左欄合併後仍拆成多字符，通常表示輸出字體缺少 sequence glyph 或 GSUB ligature 規則</div>
+<div class="compare-grid">
+  <div class="compare-card">
+    <div class="compare-title">Merged Output (Sequence)</div>
+    <div class="compare-line compare-merged">👩‍💻 👨‍💻 👩‍🔬
+👋🏻 👍🏽 🙌🏿
+🇺🇸 🇯🇵 🇹🇼</div>
+  </div>
+  <div class="compare-card">
+    <div class="compare-title">Source Emoji Font (Sequence)</div>
+    <div class="compare-line compare-source">👩‍💻 👨‍💻 👩‍🔬
+👋🏻 👍🏽 🙌🏿
+🇺🇸 🇯🇵 🇹🇼</div>
+  </div>
+</div>
+
+<h2>7. 合併後字體 vs 原始 emoji 字體</h2>
 <div class="label">若右欄原始字體正常、左欄合併後字體異常，問題大概率在 merge 後的 font tables</div>
 <div class="compare-grid">
   <div class="compare-card">
@@ -169,7 +215,7 @@ git commit -m "feat: 加入彩色 emoji 支援 🎨"</div>
   </div>
 </div>
 
-<h2>6. COLRv1 高風險樣本</h2>
+<h2>8. COLRv1 高風險樣本</h2>
 <div class="label">這一區刻意挑選大量依賴 PaintTransform helper glyph 的 emoji；若 COLRv1 merge 有回歸，通常會先在這裡露出來</div>
 <div class="compare-grid">
   <div class="compare-card">
@@ -190,7 +236,7 @@ git commit -m "feat: 加入彩色 emoji 支援 🎨"</div>
   </div>
 </div>
 
-<h2>7. Emoji Unicode 範圍覆蓋測試</h2>
+<h2>9. Emoji Unicode 範圍覆蓋測試</h2>
 <div class="label">各 Unicode 區塊抽樣（應顯示正確字符，非豆腐）</div>
 <div class="mono">U+2600 ☀️☁️⛅🌤️🌈⚡❄️🌊
 U+1F300 🌍🌏🌕🌙⭐🌟💫✨
@@ -199,7 +245,7 @@ U+1F680 🚀✈️🚂🚗🛳️🏍️🛺🚁
 U+1F900 🤯🥺🤮🥴🤠🥸🤡👹
 U+1FA70 🧋🫂🪄🪅🪆🎭🎪🪩</div>
 
-<h2>8. Emoji 視覺尺寸對比文字</h2>
+<h2>10. Emoji 視覺尺寸對比文字</h2>
 <div class="label">emoji 高度應與相鄰文字相近，不應偏大或偏小（Lite 變體 UPM 縮放驗證）</div>
 <div class="size-compare">
   <p>A😀B &nbsp; X😂Y &nbsp; P🔥Q &nbsp; T⭐U &nbsp; W🎉Z</p>
