@@ -1,6 +1,6 @@
 [project]
 name = "sarasa-mono-tc-emoji"
-version = "1.0.0"
+version = "2.0.0"
 description = "Sarasa Mono TC with NotoColorEmoji — color emoji support"
 readme = "README.md"
 requires-python = ">=3.10"

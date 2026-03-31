@@ -6,7 +6,15 @@
 
 - `v1.5.3` 已完成並發佈
 - COLRv1 Chromium helper metrics bug 已修復
-- 文件已補齊到可準備開始 `v2.0`
+- `v2.0` sequence emoji MVP 已串通三個變體：
+  - Color
+  - Lite
+  - COLRv1
+- 已完成代表樣本：
+  - `👩‍💻`
+  - `👋🏻`
+  - `🇺🇸`
+- `verify-emoji.html` 已補上 ZWJ / 膚色 / 旗幟驗證區
 
 ## 下個版本主線
 
@@ -15,16 +23,19 @@
   - ZWJ
   - 膚色變體
   - 旗幟
+- `v2.x` 可評估新增第四變體：emoji + Nerd Fonts PUA
 
 ## 下次開工建議先做
 
-1. 讀 `docs/v2-sequence-implementation.md`
-2. 在 `src/emoji_merge.py` 設計 `extract_emoji_sequences()`
-3. 先為 `👩‍💻`、`👋🏻`、`🇺🇸` 補來源字體測試
-4. 先在 `Regular + Lite` 跑第一條 end-to-end
+1. 補 `Italic / Bold / BoldItalic` 的 output font 自動化檢查
+2. 規劃 `v2.0` 版本號、release note 與發佈條件
+3. 評估是否需要擴增 `colrv1.priority_sequences`
+4. 視需要補更多高價值 sequence regression cases
 
 ## 暫時不要重做的事
 
 - 不用再重新調查 `🟡` / `🟢` 的 COLRv1 bug
 - 不用再重新整理 `v1.5.2` / `v1.5.3` 歷史
 - 不用再把 zip / png 驗證產物納入版本控制
+- 先不要把 Nerd Fonts PUA merge 插隊到 `v2.0` sequence 主線之前
+- 不用再重做 `extract_emoji_sequences()` / shared metadata 的基礎設計

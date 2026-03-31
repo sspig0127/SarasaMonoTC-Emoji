@@ -5,6 +5,19 @@
 
 **Sarasa Mono TC（更紗黑體繁中等寬）+ Emoji — 嵌入式 emoji，支援三種變體**
 
+## v2.0 重點
+
+- 支援 sequence emoji：
+  - ZWJ
+  - 膚色變體
+  - 旗幟
+- `Color` / `Lite` / `COLRv1` 三個變體都已接上 sequence-aware GSUB
+- 已驗證代表樣本：
+  - `👩‍💻`
+  - `👋🏻`
+  - `🇺🇸`
+- `verify-emoji.html` 已新增 ZWJ / 膚色 / 旗幟驗證區
+
 相關技術文件：
 - [`ROADMAP.md`](ROADMAP.md) — 版本規劃與待解技術債
 - [`docs/roadmap-history.md`](docs/roadmap-history.md) — 歷史版本實作細節
@@ -204,10 +217,10 @@ GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workf
 
 | 輸入參數 | 說明 | 預設值 |
 |----------|------|--------|
-| `release_tag` | 發佈標籤（如 `v1.5.0`） | 必填 |
+| `release_tag` | 發佈標籤（如 `v2.0.0`） | 必填 |
 | `sarasa_version` | Sarasa Gothic 版本號 | `1.0.36` |
 
-**執行流程：** 下載來源字體 → 執行 77 個測試 → 建構三種變體 → 打包 zip → 上傳至指定 Release
+**執行流程：** 下載來源字體 → 執行 103 個測試 → 建構三種變體 → 打包 zip → 上傳至指定 Release
 
 - 若 Release 已存在：以 `--clobber` 覆蓋現有附件
 - 若 Release 不存在：建立 draft release，由維護者手動 publish
@@ -348,6 +361,7 @@ Set Height 2160
 - **Emoji 格式**：glyf TrueType outline（Noto Emoji variable font 的預設字重）
 - **檔案大小**：比 Color 變體約小 30%（無點陣圖資料）
 - **渲染**：Emoji 以終端機前景色顯示（單色），完整支援 Chromium/xterm.js
+- **Sequence 支援**：已支援 ZWJ / 膚色 / 旗幟，透過輸出字體中的 GSUB ligature 規則實作
 
 ### COLRv1 變體
 - **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）
@@ -357,8 +371,10 @@ Set Height 2160
   - 完整選取清單：[`docs/colrv1-emoji-list.json`](docs/colrv1-emoji-list.json)
   - 可透過 `config.yaml` 的 `colrv1.max_new_glyphs` 調整預算
   - 可透過 `config.yaml` 的 `colrv1.priority_codepoints` 自訂優先 emoji 清單
+  - 可透過 `config.yaml` 的 `colrv1.priority_sequences` 自訂高價值 sequence 清單
 - **BMP 彩色覆蓋**：❤ ⭐ ⚠ ☺ ⚡ 等 BMP 符號可透過 `config.yaml` 的 `colrv1.force_colrv1_codepoints`
   強制使用 COLRv1 向量著色，取代 Sarasa 原有單色字形
+- **Sequence 支援**：已支援 sequence emoji，但目前採剩餘 glyph budget 內的 priority / greedy 選取，不是全量 sequence 覆蓋
 - **Priority 清單挑選依據**：
   - Greedy 填充以 codepoint 升序排列，截止點約在 U+1F4FB，導致 U+1F500+ 的高頻 dev emoji 被排除
   - ⚠️ ❌ ⭐ ➡️ ⚙️ 等 BMP 符號透過 `force_colrv1_codepoints` 單獨管理
@@ -371,7 +387,7 @@ Set Height 2160
 - **名稱衝突處理**：Sarasa 已有同名 glyph 時自動加 `_colrv1` 後綴（build log 會列出衝突數量）
 
 ### 共同
-- **Emoji 範圍**：單一 codepoint（ZWJ 序列/旗幟等複雜 emoji 留待 v2）
+- **Emoji 範圍**：單一 codepoint + sequence emoji（ZWJ / 膚色 / 旗幟）
 - **工具**：純 Python + fonttools，無需 FontForge 或 FontLab
 - **OTS 相容**：`recalcBBoxes=False` 保留 Sarasa 原始 glyph raw bytes，通過 OTS 9.2 驗證
 
