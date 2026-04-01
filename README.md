@@ -296,6 +296,32 @@ print(f'OK — Total glyphs: {len(f.getGlyphOrder())}')
 # 瀏覽器目視驗證
 uv run python -m http.server 8765
 open http://localhost:8765/verify-emoji.html
+停止伺服器：
+
+**前景執行時：** 回到啟動伺服器的終端機視窗，按 `Ctrl+C` 即可。
+
+**背景執行時：** 若已把伺服器放到後台（例如執行 `uv run python -m http.server 8765 &`），先查出進程 ID（PID）：
+
+```bash
+lsof -i :8765
+```
+
+輸出類似：
+```
+COMMAND   PID  USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+python  12345   mac    3u  IPv4 0x1234567890abcdef      0t0  TCP localhost:8765 (LISTEN)
+```
+
+然後結束該進程：
+
+```bash
+kill 12345
+```
+
+或直接用一行指令強制結束佔用該 port 的進程：
+
+```bash
+lsof -ti :8765 | xargs kill -9
 ```
 
 `verify-emoji.html` 目前已包含：
