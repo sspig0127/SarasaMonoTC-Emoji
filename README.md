@@ -19,7 +19,7 @@
 - `verify-emoji.html` 已新增 ZWJ / 膚色 / 旗幟驗證區
 
 相關技術文件：
-- [`ROADMAP.md`](ROADMAP.md) — 版本規劃與待解技術債
+- [`ROADMAP.md`](ROADMAP.md) — 版本規劃與維護追蹤
 - [`docs/roadmap-history.md`](docs/roadmap-history.md) — 歷史版本實作細節
 - [`docs/v2-sequence-implementation.md`](docs/v2-sequence-implementation.md) — v2.0 sequence emoji 實作設計
 - [`.github/colrv1-dev-notes.md`](.github/colrv1-dev-notes.md) — COLRv1 深度技術筆記
@@ -130,8 +130,8 @@ Emoji 標準由 Unicode Consortium 維護（[UTS #51](https://unicode.org/report
 |------------|--------------|----------|
 | Emoji 15.0 | Unicode 15.0 | 2022-09 |
 | Emoji 15.1 | Unicode 15.1 | 2023-09 |
-| **Emoji 16.0** | Unicode 16.0 | 2024-09（目前最新） |
-| Emoji 17.0（預計） | Unicode 17.0 | 2025-09 |
+| Emoji 16.0 | Unicode 16.0 | 2024-09 |
+| **Emoji 17.0** | Unicode 17.0 | 2025-09（目前最新） |
 
 更新依據：
 - **Color 變體**：追蹤 `googlefonts/noto-emoji` releases → 更新 `fonts/NotoColorEmoji.ttf`
@@ -220,7 +220,7 @@ GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workf
 | `release_tag` | 發佈標籤（如 `v2.0.0`） | 必填 |
 | `sarasa_version` | Sarasa Gothic 版本號 | `1.0.36` |
 
-**執行流程：** 下載來源字體 → 執行 103 個測試 → 建構三種變體 → 打包 zip → 上傳至指定 Release
+**執行流程：** 下載來源字體 → 執行 105 個測試 → 建構三種變體 → 打包 zip → 上傳至指定 Release
 
 - 若 Release 已存在：以 `--clobber` 覆蓋現有附件
 - 若 Release 不存在：建立 draft release，由維護者手動 publish
