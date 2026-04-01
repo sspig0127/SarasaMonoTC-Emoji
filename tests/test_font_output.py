@@ -57,6 +57,34 @@ def _has_ligature_sequence(font, codepoints: tuple[int, ...]) -> bool:
     return False
 
 
+def _resolve_ligature_output(font, codepoints: tuple[int, ...]) -> str | None:
+    """Return the ligature output glyph name for the given codepoint sequence."""
+    if "GSUB" not in font:
+        return None
+
+    cmap = font["cmap"].getBestCmap() or {}
+    expected_components = []
+    for cp in codepoints:
+        glyph_name = cmap.get(cp)
+        if glyph_name is None:
+            return None
+        expected_components.append(glyph_name)
+
+    expected_components = tuple(expected_components)
+    for lookup in font["GSUB"].table.LookupList.Lookup:
+        if lookup.LookupType != 4:
+            continue
+        for subtable in lookup.SubTable:
+            ligatures = getattr(subtable, "ligatures", None) or {}
+            lig_list = ligatures.get(expected_components[0], [])
+            for ligature in lig_list:
+                components = (expected_components[0], *ligature.Component)
+                if components == expected_components:
+                    return ligature.LigGlyph
+
+    return None
+
+
 def _load_output_font(variant_dir: str, family_prefix: str, style: str) -> TTFont:
     """Open a built output font for a specific variant/style, or skip."""
     path = _ROOT / "output" / variant_dir / f"{family_prefix}-{style}.ttf"
@@ -280,6 +308,53 @@ class TestLiteOutput:
         family = name_table.getBestFamilyName() or ""
         assert "Emoji" in family and "Lite" in family, (
             f"Family name '{family}' does not indicate Lite variant"
+        )
+
+    @pytest.mark.parametrize(
+        ("label", "codepoints"),
+        [
+            ("US", (0x1F1FA, 0x1F1F8)),
+            ("JP", (0x1F1EF, 0x1F1F5)),
+            ("TW", (0x1F1F9, 0x1F1FC)),
+            ("CN", (0x1F1E8, 0x1F1F3)),
+            ("GB", (0x1F1EC, 0x1F1E7)),
+            ("CA", (0x1F1E8, 0x1F1E6)),
+        ],
+    )
+    def test_poc_flags_use_custom_components(self, output_lite_regular, label, codepoints):
+        """The six Lite PoC flags should resolve to the custom template + letters."""
+        glyph_name = _resolve_ligature_output(output_lite_regular, codepoints)
+        assert glyph_name, f"Missing ligature output for {label}"
+
+        glyf = output_lite_regular["glyf"]
+        glyph = glyf[glyph_name]
+        glyph.expand(glyf)
+        component_names = [comp.glyphName for comp in getattr(glyph, "components", None) or []]
+        assert len(component_names) == 3, (
+            f"{label}: expected 3 components, got {component_names}"
+        )
+        assert component_names[0] == "poc_lite_flag_template", (
+            f"{label}: expected PoC flag template, got {component_names}"
+        )
+        assert component_names[1].startswith("poc_lite_letter."), (
+            f"{label}: expected custom left letter, got {component_names}"
+        )
+        assert component_names[2].startswith("poc_lite_letter."), (
+            f"{label}: expected custom right letter, got {component_names}"
+        )
+
+    def test_non_target_flag_keeps_original_components(self, output_lite_regular):
+        """Non-target flags should not be rebuilt with the PoC component system."""
+        glyph_name = _resolve_ligature_output(output_lite_regular, (0x1F1E9, 0x1F1EA))  # 🇩🇪
+        assert glyph_name, "Missing ligature output for 🇩🇪"
+
+        glyf = output_lite_regular["glyf"]
+        glyph = glyf[glyph_name]
+        glyph.expand(glyf)
+        component_names = [comp.glyphName for comp in getattr(glyph, "components", None) or []]
+        assert component_names, "Expected 🇩🇪 to remain a composite glyph"
+        assert all(not name.startswith("poc_lite_") for name in component_names), (
+            f"Non-target flag unexpectedly uses PoC components: {component_names}"
         )
 
     def test_has_sequence_gsub_for_zwj_skin_tone_and_flag(self, output_lite_regular):

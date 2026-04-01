@@ -17,6 +17,9 @@ from fontTools.ttLib.tables._g_l_y_f import Glyph, GlyphCoordinates, GlyphCompon
 from src.emoji_merge import (
     EmojiEntry,
     _append_ligature_lookup_to_gsub,
+    _build_lite_flag_poc,
+    _build_poc_flag_template,
+    _build_poc_letter_canonical,
     _build_sequence_ligature_map,
     _collect_glyph_deps,
     _collect_colrv1_paint_glyph_deps,
@@ -28,6 +31,8 @@ from src.emoji_merge import (
     detect_font_widths,
     extract_emoji_sequences,
     get_emoji_cmap,
+    _POC_LETTER_W,
+    _POC_LETTER_H,
 )
 
 _INT16_MIN = -32768
@@ -192,8 +197,116 @@ class TestScaleGlyph:
 
 
 # ---------------------------------------------------------------------------
-# detect_font_widths — requires Sarasa source font
+# Lite PoC flag helpers — pure logic, always runs (no font files needed)
 # ---------------------------------------------------------------------------
+
+class TestLitePocFlagHelpers:
+    def test_flag_template_two_contours(self):
+        """Flag template must be a 2-contour glyph (outer fill + inner hole)."""
+        g = _build_poc_flag_template(1000)
+        assert g.numberOfContours == 2
+        assert len(list(g.coordinates)) == 8
+        assert g.endPtsOfContours == [3, 7]
+        assert g.xMin == 20
+        assert g.xMax == 980
+
+    def test_flag_template_respects_emoji_width(self):
+        g = _build_poc_flag_template(500)
+        assert g.xMax == 480   # 500 - 20
+
+    def test_letter_canonical_fills_poc_box(self):
+        """Condensed letter must exactly fill the canonical W×H box."""
+        src = _simple_glyph([(0, 0), (200, 0), (200, 400), (0, 400)])
+        result = _build_poc_letter_canonical(src)
+        assert result.numberOfContours == 1
+        assert result.xMin == 0
+        assert result.xMax == _POC_LETTER_W
+        assert result.yMin == 0
+        assert result.yMax == _POC_LETTER_H
+
+    def test_letter_canonical_composite_returns_empty(self):
+        """Composite letter glyphs return a safe empty placeholder."""
+        src = _composite_glyph([("base", 0, 0)])
+        result = _build_poc_letter_canonical(src)
+        assert result.numberOfContours == 0
+
+    def test_build_lite_flag_poc_rebuilds_us_flag(self):
+        """US flag composite is rebuilt with template + two PoC letter glyphs."""
+        from fontTools.ttLib import TTFont
+        from fontTools.ttLib.tables._g_l_y_f import table__g_l_y_f as GlyfTable
+
+        font = TTFont()
+        order = [".notdef", "flagbox", "u1F1FA", "u1F1F8", "u1F1FA_u1F1F8"]
+        font.setGlyphOrder(order)
+
+        glyf = GlyfTable()
+        glyf.glyphs = {}
+        glyf.setGlyphOrder(order)
+        glyf.glyphs["flagbox"] = _simple_glyph([(0, -150), (1000, 750)])
+        glyf.glyphs["u1F1FA"] = _simple_glyph([(50, 0), (250, 500)])
+        glyf.glyphs["u1F1F8"] = _simple_glyph([(50, 0), (250, 500)])
+        glyf.glyphs["u1F1FA_u1F1F8"] = _composite_glyph(
+            [("flagbox", 0, 0), ("u1F1FA", 100, 100), ("u1F1F8", 600, 100)]
+        )
+        font["glyf"] = glyf
+
+        class _Hmtx:
+            metrics = {n: (1000, 0) for n in order}
+
+        entries = [EmojiEntry(
+            codepoints=(0x1F1FA, 0x1F1F8),
+            source_glyph="u1F1FA_u1F1F8",
+            kind="sequence",
+            source_table_kind="glyf",
+        )]
+
+        added = _build_lite_flag_poc(font, entries, _Hmtx(), None, 1000)
+
+        assert added == 3  # template + 2 letter copies
+        rebuilt = glyf.glyphs["u1F1FA_u1F1F8"]
+        assert rebuilt.numberOfContours == -1
+        assert len(rebuilt.components) == 3
+        assert rebuilt.components[0].glyphName == "poc_lite_flag_template"
+        assert rebuilt.components[1].glyphName == "poc_lite_letter.u1F1FA"
+        assert rebuilt.components[2].glyphName == "poc_lite_letter.u1F1F8"
+        # Letter glyphs should occupy the canonical box
+        assert glyf.glyphs["poc_lite_letter.u1F1FA"].xMin == 0
+        assert glyf.glyphs["poc_lite_letter.u1F1FA"].xMax == _POC_LETTER_W
+
+    def test_build_lite_flag_poc_non_target_unchanged(self):
+        """Non-target flag sequences are not touched."""
+        from fontTools.ttLib import TTFont
+        from fontTools.ttLib.tables._g_l_y_f import table__g_l_y_f as GlyfTable
+
+        font = TTFont()
+        order = [".notdef", "flagbox", "u1F1E9", "u1F1EA", "u1F1E9_u1F1EA"]
+        font.setGlyphOrder(order)
+
+        glyf = GlyfTable()
+        glyf.glyphs = {}
+        glyf.glyphs["flagbox"] = _simple_glyph([(0, 0), (1000, 750)])
+        glyf.glyphs["u1F1E9"] = _simple_glyph([(0, 0), (200, 500)])
+        glyf.glyphs["u1F1EA"] = _simple_glyph([(0, 0), (200, 500)])
+        orig = _composite_glyph([("flagbox", 0, 0), ("u1F1E9", 0, 0), ("u1F1EA", 0, 0)])
+        glyf.glyphs["u1F1E9_u1F1EA"] = orig
+        font["glyf"] = glyf
+
+        class _Hmtx:
+            metrics = {n: (1000, 0) for n in order}
+
+        entries = [EmojiEntry(
+            codepoints=(0x1F1E9, 0x1F1EA),  # 🇩🇪 DE — not in target set
+            source_glyph="u1F1E9_u1F1EA",
+            kind="sequence",
+            source_table_kind="glyf",
+        )]
+
+        added = _build_lite_flag_poc(font, entries, _Hmtx(), None, 1000)
+        assert added == 0
+        assert glyf.glyphs["u1F1E9_u1F1EA"] is orig  # unchanged
+
+
+
 
 def _mock_font(width_list: list) -> object:
     """Minimal font mock with empty cmap to force the fallback detection path."""
