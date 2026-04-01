@@ -294,6 +294,31 @@ class TestLiteOutput:
             "Missing 🇺🇸 flag ligature in Lite GSUB"
         )
 
+    def test_forced_bmp_codepoints_use_lite_glyph(self, output_lite_regular):
+        """Lite variant should override configured BMP symbols with Noto outlines.
+
+        These codepoints already exist in Sarasa. Lite now follows the same
+        allowlist as Color/COLRv1, renaming conflicting glyphs with a `_lite`
+        suffix so the Noto Emoji outline survives save/reload.
+        """
+        cmap = output_lite_regular["cmap"].getBestCmap() or {}
+        expected = {
+            0x2328: "uni2328_lite",
+            0x274C: "uni274C_lite",
+            0x2764: "redHeart",
+            0x2B06: "arrowup_lite",
+            0x2B07: "arrowdown_lite",
+            0x2B50: "uni2B50_lite",
+            0x26A0: "warning",
+            0x263A: "smileface_lite",
+            0x26A1: "highVoltage",
+        }
+        for cp, glyph_name in expected.items():
+            glyph = cmap.get(cp, "")
+            assert glyph == glyph_name, (
+                f"U+{cp:04X}: expected {glyph_name!r}, got {glyph!r}"
+            )
+
     @pytest.mark.parametrize("style", _STYLE_MATRIX)
     def test_all_styles_have_sequence_gsub(self, style):
         """All built Lite styles should carry representative v2.0 sequence ligatures."""

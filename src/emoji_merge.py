@@ -688,6 +688,7 @@ def merge_emoji_lite(
     base_font_path: str,
     emoji_font_path: str,
     config: FontConfig,
+    force_codepoints: set[int] | None = None,
 ) -> TTFont:
     """Merge Noto Emoji glyf outlines (monochrome) into SarasaMonoTC.
 
@@ -704,6 +705,9 @@ def merge_emoji_lite(
         base_font_path: Path to SarasaMonoTC-{Style}.ttf
         emoji_font_path: Path to NotoEmoji-Regular.ttf (glyf-based font)
         config: FontConfig object
+        force_codepoints: BMP codepoints to force Lite outline override even
+            when skip_existing=True. Conflicting glyph names are renamed with
+            a `_lite` suffix so the Noto outline can coexist with Sarasa.
 
     Returns:
         Merged TTFont object (caller must call .save() and .close())
@@ -731,11 +735,36 @@ def merge_emoji_lite(
         f"(single: {len(emoji_cmap)}, sequence: {len(sequence_entries)})"
     )
 
+    base_existing_names = set(base_font.getGlyphOrder())
+
+    # Step 2.5: build rename map for forced BMP codepoints that conflict with Sarasa.
+    lite_forced_rename: dict[str, str] = {}
+    if force_codepoints:
+        for cp in force_codepoints:
+            if cp in emoji_cmap:
+                orig_name = emoji_cmap[cp]
+                if orig_name in base_existing_names:
+                    lite_forced_rename[orig_name] = f"{orig_name}_lite"
+        if lite_forced_rename:
+            print(
+                f"  Forced Lite BMP renames: {len(lite_forced_rename)} "
+                f"(e.g. {next(iter(lite_forced_rename))} → "
+                f"{next(iter(lite_forced_rename.values()))})"
+            )
+        emoji_cmap = {
+            cp: lite_forced_rename.get(name, name)
+            for cp, name in emoji_cmap.items()
+        }
+
     # Step 3: filter existing codepoints
     if config.skip_existing:
         base_cmap = base_font["cmap"].getBestCmap() or {}
         before = len(emoji_cmap)
-        emoji_cmap = {cp: name for cp, name in emoji_cmap.items() if cp not in base_cmap}
+        emoji_cmap = {
+            cp: name
+            for cp, name in emoji_cmap.items()
+            if cp not in base_cmap or (force_codepoints is not None and cp in force_codepoints)
+        }
         print(f"  Filtered existing codepoints: {before} → {len(emoji_cmap)}")
 
     if not emoji_cmap:
@@ -753,17 +782,20 @@ def merge_emoji_lite(
     # Collect glyph names that need to be added from both single-codepoint and
     # sequence outputs. Sequence input components are resolved later via cmap
     # and existing base glyphs; only the final ligature glyph needs copying here.
-    base_existing_names = set(base_font.getGlyphOrder())
-    target_names = {
-        entry.source_glyph for entry in emoji_entries
-        if entry.source_glyph not in base_existing_names
+    target_source_names = {
+        entry.source_glyph
+        for entry in emoji_entries
+        if entry.source_glyph not in base_existing_names or entry.source_glyph in lite_forced_rename
     }
 
     # Expand with composite dependencies (components must precede composites)
-    emoji_glyphs_to_add = _collect_glyph_deps(emoji_font, target_names, base_existing_names)
+    dep_skip_names = base_existing_names - set(lite_forced_rename)
+    source_glyphs_to_add = _collect_glyph_deps(emoji_font, target_source_names, dep_skip_names)
+    emoji_glyphs_to_add = [lite_forced_rename.get(name, name) for name in source_glyphs_to_add]
+    lite_rename_to_orig = {v: k for k, v in lite_forced_rename.items()}
 
     unique_source_glyphs = {entry.source_glyph for entry in emoji_entries}
-    name_conflicts = len(unique_source_glyphs) - len(target_names)
+    name_conflicts = len(unique_source_glyphs) - len(target_source_names)
     print(
         f"  Emoji glyphs to add: {len(emoji_glyphs_to_add)} "
         f"(name conflicts: {name_conflicts})"
@@ -793,7 +825,8 @@ def merge_emoji_lite(
     copied = 0
     for glyph_name in emoji_glyphs_to_add:
         if glyph_name not in base_glyf.glyphs:
-            src = emoji_glyf.glyphs.get(glyph_name)
+            src_name = lite_rename_to_orig.get(glyph_name, glyph_name)
+            src = emoji_glyf.glyphs.get(src_name)
             if src is not None:
                 glyph_copy = copy.deepcopy(src)
                 _scale_glyph(glyph_copy, upm_scale)
@@ -858,7 +891,7 @@ def merge_emoji_lite(
 
     # Step 7: update cmap
     added_set = set(emoji_glyphs_to_add)
-    updated = _update_cmap(base_font, emoji_cmap, added_set)
+    updated = _update_cmap(base_font, emoji_cmap, added_set, force_codepoints)
     print(f"  cmap entries added: {updated}")
 
     # Step 7.5: append sequence ligatures to the existing GSUB.
@@ -877,6 +910,18 @@ def merge_emoji_lite(
 
     from .utils import merge_os2_ranges
     merge_os2_ranges(base_font, emoji_font)
+
+    # Persist _lite glyph names across save/reload when forced BMP overrides are active.
+    if lite_forced_rename and "post" in base_font:
+        post = base_font["post"]
+        _ = post.formatType
+        if post.formatType == 3.0:
+            print("  Upgrading post table 3.0→2.0 to persist forced Lite glyph names")
+            post.formatType = 2.0
+            if not hasattr(post, "extraNames"):
+                post.extraNames = []
+            if not hasattr(post, "mapping"):
+                post.mapping = {}
 
     _strip_mac_name_records(base_font)
 

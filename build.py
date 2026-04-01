@@ -170,6 +170,7 @@ def build_single_font(
             base_font_path=str(base_font_path),
             emoji_font_path=str(emoji_font_path),
             config=config,
+            force_codepoints=force_codepoints,
         )
     elif colrv1:
         merged_font, selection_records = merge_emoji_colrv1(
@@ -374,7 +375,11 @@ Configuration priority: CLI args > config.yaml > defaults
         colrv1_priority_codepoints = None
         colrv1_priority_sequences = None
         colrv1_force_codepoints = None
-        color_force_codepoints = None
+        _raw_color_force = get_config_value(yaml_config, "emoji", "force_color_codepoints") or []
+        color_force_codepoints: set[int] | None = (
+            {int(s.replace("U+", "").replace("u+", ""), 16) for s in _raw_color_force}
+            if _raw_color_force else None
+        )
     else:
         family_name = get_config_value(yaml_config, "font", "family_name") or "SarasaMonoTCEmoji"
         variant_emoji_font = None
@@ -494,8 +499,7 @@ Configuration priority: CLI args > config.yaml > defaults
     # Determine effective force_codepoints for this variant
     effective_force_codepoints: set[int] | None = (
         colrv1_force_codepoints if is_colrv1
-        else color_force_codepoints if not is_lite
-        else None
+        else color_force_codepoints
     )
 
     if parallel <= 1:
