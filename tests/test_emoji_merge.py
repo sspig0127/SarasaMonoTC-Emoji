@@ -260,7 +260,13 @@ class TestLitePocFlagHelpers:
             source_table_kind="glyf",
         )]
 
-        added = _build_lite_flag_poc(font, entries, _Hmtx(), None, 1000)
+        added = _build_lite_flag_poc(
+            font,
+            entries,
+            _Hmtx(),
+            None,
+            1000,
+        )
 
         assert added == 3  # template + 2 letter copies
         rebuilt = glyf.glyphs["u1F1FA_u1F1F8"]
@@ -273,8 +279,8 @@ class TestLitePocFlagHelpers:
         assert glyf.glyphs["poc_lite_letter.u1F1FA"].xMin == 0
         assert glyf.glyphs["poc_lite_letter.u1F1FA"].xMax == _POC_LETTER_W
 
-    def test_build_lite_flag_poc_non_target_unchanged(self):
-        """Non-target flag sequences are not touched."""
+    def test_build_lite_flag_poc_rebuilds_germany_without_whitelist(self):
+        """Any RI-pair flag should now be rebuilt, not only a curated whitelist."""
         from fontTools.ttLib import TTFont
         from fontTools.ttLib.tables._g_l_y_f import table__g_l_y_f as GlyfTable
 
@@ -284,6 +290,7 @@ class TestLitePocFlagHelpers:
 
         glyf = GlyfTable()
         glyf.glyphs = {}
+        glyf.setGlyphOrder(order)
         glyf.glyphs["flagbox"] = _simple_glyph([(0, 0), (1000, 750)])
         glyf.glyphs["u1F1E9"] = _simple_glyph([(0, 0), (200, 500)])
         glyf.glyphs["u1F1EA"] = _simple_glyph([(0, 0), (200, 500)])
@@ -301,9 +308,58 @@ class TestLitePocFlagHelpers:
             source_table_kind="glyf",
         )]
 
-        added = _build_lite_flag_poc(font, entries, _Hmtx(), None, 1000)
+        added = _build_lite_flag_poc(
+            font,
+            entries,
+            _Hmtx(),
+            None,
+            1000,
+        )
+        assert added == 3
+        rebuilt = glyf.glyphs["u1F1E9_u1F1EA"]
+        assert rebuilt is not orig
+        assert rebuilt.components[0].glyphName == "poc_lite_flag_template"
+        assert rebuilt.components[1].glyphName == "poc_lite_letter.u1F1E9"
+        assert rebuilt.components[2].glyphName == "poc_lite_letter.u1F1EA"
+
+    def test_build_lite_flag_poc_ignores_non_flag_sequences(self):
+        """Non-RI sequences should remain untouched."""
+        from fontTools.ttLib import TTFont
+        from fontTools.ttLib.tables._g_l_y_f import table__g_l_y_f as GlyfTable
+
+        font = TTFont()
+        order = [".notdef", "woman", "zwj", "laptop", "woman_zwj_laptop"]
+        font.setGlyphOrder(order)
+
+        glyf = GlyfTable()
+        glyf.glyphs = {}
+        glyf.setGlyphOrder(order)
+        glyf.glyphs["woman"] = _simple_glyph([(0, 0), (200, 500)])
+        glyf.glyphs["zwj"] = _simple_glyph([(0, 0), (10, 10)])
+        glyf.glyphs["laptop"] = _simple_glyph([(0, 0), (300, 200)])
+        orig = _composite_glyph([("woman", 0, 0), ("zwj", 220, 0), ("laptop", 260, 0)])
+        glyf.glyphs["woman_zwj_laptop"] = orig
+        font["glyf"] = glyf
+
+        class _Hmtx:
+            metrics = {n: (1000, 0) for n in order}
+
+        entries = [EmojiEntry(
+            codepoints=(0x1F469, 0x200D, 0x1F4BB),
+            source_glyph="woman_zwj_laptop",
+            kind="sequence",
+            source_table_kind="glyf",
+        )]
+
+        added = _build_lite_flag_poc(
+            font,
+            entries,
+            _Hmtx(),
+            None,
+            1000,
+        )
         assert added == 0
-        assert glyf.glyphs["u1F1E9_u1F1EA"] is orig  # unchanged
+        assert glyf.glyphs["woman_zwj_laptop"] is orig
 
 
 

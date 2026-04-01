@@ -526,15 +526,6 @@ def _scale_glyph(glyph, scale: float) -> None:
             comp.y = y
 
 
-_LITE_POC_FLAG_SEQS = frozenset({
-    (0x1F1FA, 0x1F1F8),  # 🇺🇸 US
-    (0x1F1EF, 0x1F1F5),  # 🇯🇵 JP
-    (0x1F1F9, 0x1F1FC),  # 🇹🇼 TW
-    (0x1F1E8, 0x1F1F3),  # 🇨🇳 CN
-    (0x1F1EC, 0x1F1E7),  # 🇬🇧 GB
-    (0x1F1E8, 0x1F1E6),  # 🇨🇦 CA
-})
-
 # PoC flag body geometry — tuned for the Sarasa 1000-UPM 2-column emoji slot.
 # The outer rectangle spans the full emoji advance; a 35-unit border creates
 # the inner space where the two letter glyphs are centered.
@@ -664,6 +655,14 @@ def _build_poc_letter_canonical(src_glyph: TTGlyph) -> TTGlyph:
     return g
 
 
+def _is_regional_indicator_flag_sequence(codepoints: tuple[int, ...]) -> bool:
+    """Return True for standard two-codepoint regional-indicator flags."""
+    return (
+        len(codepoints) == 2
+        and all(0x1F1E6 <= cp <= 0x1F1FF for cp in codepoints)
+    )
+
+
 def _build_lite_flag_poc(
     base_font: TTFont,
     sequence_entries: list[EmojiEntry],
@@ -671,17 +670,18 @@ def _build_lite_flag_poc(
     base_vmtx,
     emoji_width: int,
 ) -> int:
-    """Build custom 2-column flag composites for the six PoC target sequences.
+    """Build custom 2-column flag composites for all RI-pair flag sequences.
 
-    Replaces the old scaling-only approach. For each target flag:
+    Replaces the old scaling-only approach. For each supported flag:
       1. Creates a shared flag body template glyph sized for the 1000-wide slot.
       2. Builds condensed letter copies (independently scaled to _POC_LETTER_W ×
          _POC_LETTER_H) for every unique letter component found in the composites.
-      3. Rebuilds the six flag ligature glyphs as 3-component composites:
-         flag-template + left-letter + right-letter, with offsets that centre
-         each letter in its half of the flag interior.
+      3. Rebuilds the flag ligature glyphs as 3-component composites:
+          flag-template + left-letter + right-letter, with offsets that centre
+          each letter in its half of the flag interior.
 
-    Letters shared across flags (e.g. C in 🇨🇳/🇨🇦) reuse the same canonical
+    Only standard regional-indicator flag sequences are rebuilt; ZWJ and skin-tone
+    sequences remain untouched. Letters shared across flags (e.g. C in 🇨🇳/🇨🇦) reuse the same canonical
     glyph. Returns the total number of new helper glyphs added.
     """
     base_glyf = base_font["glyf"]
@@ -691,7 +691,7 @@ def _build_lite_flag_poc(
     entries_by_codepoints = {
         entry.codepoints: entry
         for entry in sequence_entries
-        if entry.codepoints in _LITE_POC_FLAG_SEQS
+        if _is_regional_indicator_flag_sequence(entry.codepoints)
     }
     if not entries_by_codepoints:
         return 0
@@ -710,9 +710,8 @@ def _build_lite_flag_poc(
     # Maps original letter glyph name → canonical PoC glyph name.
     letter_map: dict[str, str] = {}
 
-    for codepoints in _LITE_POC_FLAG_SEQS:
-        entry = entries_by_codepoints.get(codepoints)
-        if entry is None or entry.source_glyph not in base_glyf.glyphs:
+    for entry in entries_by_codepoints.values():
+        if entry.source_glyph not in base_glyf.glyphs:
             continue
 
         ligature = base_glyf[entry.source_glyph]
@@ -750,9 +749,8 @@ def _build_lite_flag_poc(
         c.y = y
         return c
 
-    for codepoints in _LITE_POC_FLAG_SEQS:
-        entry = entries_by_codepoints.get(codepoints)
-        if entry is None or entry.source_glyph not in base_glyf.glyphs:
+    for entry in entries_by_codepoints.values():
+        if entry.source_glyph not in base_glyf.glyphs:
             continue
 
         ligature = base_glyf[entry.source_glyph]

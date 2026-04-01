@@ -170,9 +170,11 @@ dark    👋🏿 👍🏿 🙌🏿 ☝🏿</div>
   </div>
   <div>
     <div class="label">旗幟</div>
-    <div class="mono" id="sequenceFlagBlock">United States (US)  🇺🇸   Japan  (JP)  🇯🇵
-Taiwan        (TW)  🇹🇼   China  (CN)  🇨🇳
-United Kingdom(GB)  🇬🇧   Canada (CA)  🇨🇦</div>
+    <div class="mono" id="sequenceFlagBlock">United States (US)  🇺🇸   Japan  (JP)  🇯🇵   Taiwan        (TW)  🇹🇼
+China         (CN)  🇨🇳   United Kingdom(GB)  🇬🇧   Canada       (CA)  🇨🇦
+Singapore     (SG)  🇸🇬   Australia   (AU)  🇦🇺   Thailand      (TH)  🇹🇭
+Philippines   (PH)  🇵🇭   Vietnam     (VN)  🇻🇳   New Zealand   (NZ)  🇳🇿
+South Korea   (KR)  🇰🇷   Hong Kong   (HK)  🇭🇰</div>
   </div>
   <div>
     <div class="label">混排情境</div>
@@ -190,14 +192,14 @@ review: 手勢反應改成 👋🏻 👍🏽 🙌🏿</div>
     <div class="compare-line compare-merged" id="compareSequenceMerged">tech   👩‍💻 👨‍💻 👩‍🔬
 family 👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
 skin   👋🏻 👍🏻   👋🏽 👍🏽   👋🏿 👍🏿
-flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦</div>
+flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦 🇸🇬 🇦🇺 🇹🇭 🇵🇭 🇻🇳 🇳🇿 🇰🇷 🇭🇰</div>
   </div>
   <div class="compare-card">
     <div class="compare-title">Source Emoji Font (Sequence)</div>
     <div class="compare-line compare-source" id="compareSequenceSource">tech   👩‍💻 👨‍💻 👩‍🔬
 family 👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
 skin   👋🏻 👍🏻   👋🏽 👍🏽   👋🏿 👍🏿
-flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦</div>
+flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦 🇸🇬 🇦🇺 🇹🇭 🇵🇭 🇻🇳 🇳🇿 🇰🇷 🇭🇰</div>
   </div>
 </div>
 
@@ -284,16 +286,18 @@ men + boy           👨‍👨‍👦`,
     sequenceSkinTone: `light   👋🏻 👍🏻 🙌🏻 ☝🏻
 medium  👋🏽 👍🏽 🙌🏽 ☝🏽
 dark    👋🏿 👍🏿 🙌🏿 ☝🏿`,
-    sequenceFlag: `United States (US)  🇺🇸   Japan  (JP)  🇯🇵
-Taiwan        (TW)  🇹🇼   China  (CN)  🇨🇳
-United Kingdom(GB)  🇬🇧   Canada (CA)  🇨🇦`,
+    sequenceFlag: `United States (US)  🇺🇸   Japan  (JP)  🇯🇵   Taiwan        (TW)  🇹🇼
+China         (CN)  🇨🇳   United Kingdom(GB)  🇬🇧   Canada       (CA)  🇨🇦
+Singapore     (SG)  🇸🇬   Australia   (AU)  🇦🇺   Thailand      (TH)  🇹🇭
+Philippines   (PH)  🇵🇭   Vietnam     (VN)  🇻🇳   New Zealand   (NZ)  🇳🇿
+South Korea   (KR)  🇰🇷   Hong Kong   (HK)  🇭🇰`,
     sequenceMixed: `feat(ui): 加入 👩‍💻 / 👨‍💻 onboarding
 docs: 補齊 TW 🇹🇼 / JP 🇯🇵 / CN 🇨🇳 範例
 review: 手勢反應改成 👋🏻 👍🏽 🙌🏿`,
     sequenceCompare: `tech   👩‍💻 👨‍💻 👩‍🔬
 family 👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
 skin   👋🏻 👍🏻   👋🏽 👍🏽   👋🏿 👍🏿
-flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦`,
+flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦 🇸🇬 🇦🇺 🇹🇭 🇵🇭 🇻🇳 🇳🇿 🇰🇷 🇭🇰`,
   },
   lite: {
     dir: 'output/fonts-lite',
@@ -303,8 +307,8 @@ flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦`,
     sourceFontLabel: 'NotoEmoji[wght].ttf',
     badgeClass: 'badge-lite',
     badgeText: 'Lite',
-    sequenceHint: 'Lite 變體應能顯示這一區全部 sequence 樣本；其中旗幟區的 US / JP / TW / CN / GB / CA 是目前 2-column PoC 的重點觀察對象。',
-    sequenceCompareHint: 'Lite 旗幟請優先觀察 US / JP / TW / CN / GB / CA 六面 PoC 樣本；若右欄原始字體正常、左欄仍拆字或縮寫過小，代表 Lite flag PoC 仍需調整。',
+    sequenceHint: 'Lite 變體應能顯示這一區全部 sequence 樣本；所有標準國旗 sequence 現在都套用 2-column 自訂旗面設計。',
+    sequenceCompareHint: 'Lite 旗幟請優先觀察這些常用樣本；若右欄原始字體正常、左欄仍拆字或縮寫過小，代表 Lite flag 設計仍需調整。',
     sequenceZwj: `woman technologist  👩‍💻
 man technologist    👨‍💻
 woman scientist     👩‍🔬
@@ -314,16 +318,18 @@ men + boy           👨‍👨‍👦`,
     sequenceSkinTone: `light   👋🏻 👍🏻 🙌🏻 ☝🏻
 medium  👋🏽 👍🏽 🙌🏽 ☝🏽
 dark    👋🏿 👍🏿 🙌🏿 ☝🏿`,
-    sequenceFlag: `United States (US)  🇺🇸   Japan  (JP)  🇯🇵
-Taiwan        (TW)  🇹🇼   China  (CN)  🇨🇳
-United Kingdom(GB)  🇬🇧   Canada (CA)  🇨🇦`,
+    sequenceFlag: `United States (US)  🇺🇸   Japan  (JP)  🇯🇵   Taiwan        (TW)  🇹🇼
+China         (CN)  🇨🇳   United Kingdom(GB)  🇬🇧   Canada       (CA)  🇨🇦
+Singapore     (SG)  🇸🇬   Australia   (AU)  🇦🇺   Thailand      (TH)  🇹🇭
+Philippines   (PH)  🇵🇭   Vietnam     (VN)  🇻🇳   New Zealand   (NZ)  🇳🇿
+South Korea   (KR)  🇰🇷   Hong Kong   (HK)  🇭🇰`,
     sequenceMixed: `feat(ui): 加入 👩‍💻 / 👨‍💻 onboarding
 docs: 補齊 TW 🇹🇼 / JP 🇯🇵 / CN 🇨🇳 範例
 review: 手勢反應改成 👋🏻 👍🏽 🙌🏿`,
     sequenceCompare: `tech   👩‍💻 👨‍💻 👩‍🔬
 family 👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
 skin   👋🏻 👍🏻   👋🏽 👍🏽   👋🏿 👍🏿
-flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦`,
+flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦 🇸🇬 🇦🇺 🇹🇭 🇵🇭 🇻🇳 🇳🇿 🇰🇷 🇭🇰`,
   },
   colrv1: {
     dir: 'output/fonts-colrv1',

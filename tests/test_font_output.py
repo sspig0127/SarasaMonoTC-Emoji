@@ -27,6 +27,24 @@ _MIN_COLOR_GLYPHS = 56_000
 _MIN_LITE_GLYPHS = 5_000
 _STYLE_MATRIX = ("Regular", "Italic", "Bold", "BoldItalic")
 _ROOT = Path(__file__).parent.parent
+_LITE_POC_FLAGS = [
+    ("US", (0x1F1FA, 0x1F1F8)),
+    ("JP", (0x1F1EF, 0x1F1F5)),
+    ("TW", (0x1F1F9, 0x1F1FC)),
+    ("CN", (0x1F1E8, 0x1F1F3)),
+    ("GB", (0x1F1EC, 0x1F1E7)),
+    ("CA", (0x1F1E8, 0x1F1E6)),
+    ("SG", (0x1F1F8, 0x1F1EC)),
+    ("AU", (0x1F1E6, 0x1F1FA)),
+    ("TH", (0x1F1F9, 0x1F1ED)),
+    ("PH", (0x1F1F5, 0x1F1ED)),
+    ("VN", (0x1F1FB, 0x1F1F3)),
+    ("NZ", (0x1F1F3, 0x1F1FF)),
+    ("KR", (0x1F1F0, 0x1F1F7)),
+    ("HK", (0x1F1ED, 0x1F1F0)),
+]
+_REGIONAL_INDICATOR_START = 0x1F1E6
+_REGIONAL_INDICATOR_END = 0x1F1FF
 
 
 def _has_ligature_sequence(font, codepoints: tuple[int, ...]) -> bool:
@@ -83,6 +101,41 @@ def _resolve_ligature_output(font, codepoints: tuple[int, ...]) -> str | None:
                     return ligature.LigGlyph
 
     return None
+
+
+def _collect_ri_flag_ligatures(font) -> dict[tuple[int, int], str]:
+    """Return all GSUB ligatures whose input is a 2-codepoint RI flag sequence."""
+    if "GSUB" not in font:
+        return {}
+
+    cmap = font["cmap"].getBestCmap() or {}
+    glyph_to_cp = {glyph_name: cp for cp, glyph_name in cmap.items()}
+    result: dict[tuple[int, int], str] = {}
+
+    for lookup in font["GSUB"].table.LookupList.Lookup:
+        if lookup.LookupType != 4:
+            continue
+        for subtable in lookup.SubTable:
+            ligatures = getattr(subtable, "ligatures", None) or {}
+            for first_glyph, lig_list in ligatures.items():
+                first_cp = glyph_to_cp.get(first_glyph)
+                if first_cp is None:
+                    continue
+                for ligature in lig_list:
+                    cps = [first_cp]
+                    for component_name in ligature.Component:
+                        cp = glyph_to_cp.get(component_name)
+                        if cp is None:
+                            cps = []
+                            break
+                        cps.append(cp)
+                    if len(cps) != 2:
+                        continue
+                    if not all(_REGIONAL_INDICATOR_START <= cp <= _REGIONAL_INDICATOR_END for cp in cps):
+                        continue
+                    result[(cps[0], cps[1])] = ligature.LigGlyph
+
+    return result
 
 
 def _load_output_font(variant_dir: str, family_prefix: str, style: str) -> TTFont:
@@ -310,19 +363,9 @@ class TestLiteOutput:
             f"Family name '{family}' does not indicate Lite variant"
         )
 
-    @pytest.mark.parametrize(
-        ("label", "codepoints"),
-        [
-            ("US", (0x1F1FA, 0x1F1F8)),
-            ("JP", (0x1F1EF, 0x1F1F5)),
-            ("TW", (0x1F1F9, 0x1F1FC)),
-            ("CN", (0x1F1E8, 0x1F1F3)),
-            ("GB", (0x1F1EC, 0x1F1E7)),
-            ("CA", (0x1F1E8, 0x1F1E6)),
-        ],
-    )
+    @pytest.mark.parametrize(("label", "codepoints"), _LITE_POC_FLAGS)
     def test_poc_flags_use_custom_components(self, output_lite_regular, label, codepoints):
-        """The six Lite PoC flags should resolve to the custom template + letters."""
+        """Representative Lite flags should resolve to the custom template + letters."""
         glyph_name = _resolve_ligature_output(output_lite_regular, codepoints)
         assert glyph_name, f"Missing ligature output for {label}"
 
@@ -343,19 +386,27 @@ class TestLiteOutput:
             f"{label}: expected custom right letter, got {component_names}"
         )
 
-    def test_non_target_flag_keeps_original_components(self, output_lite_regular):
-        """Non-target flags should not be rebuilt with the PoC component system."""
-        glyph_name = _resolve_ligature_output(output_lite_regular, (0x1F1E9, 0x1F1EA))  # 🇩🇪
-        assert glyph_name, "Missing ligature output for 🇩🇪"
-
+    def test_all_ri_flags_use_custom_components(self, output_lite_regular):
+        """All standard RI-pair flag ligatures should use the custom Lite flag system."""
+        ligatures = _collect_ri_flag_ligatures(output_lite_regular)
+        assert ligatures, "Expected at least one RI-pair flag ligature in Lite output"
         glyf = output_lite_regular["glyf"]
-        glyph = glyf[glyph_name]
-        glyph.expand(glyf)
-        component_names = [comp.glyphName for comp in getattr(glyph, "components", None) or []]
-        assert component_names, "Expected 🇩🇪 to remain a composite glyph"
-        assert all(not name.startswith("poc_lite_") for name in component_names), (
-            f"Non-target flag unexpectedly uses PoC components: {component_names}"
-        )
+        for codepoints, glyph_name in ligatures.items():
+            glyph = glyf[glyph_name]
+            glyph.expand(glyf)
+            component_names = [comp.glyphName for comp in getattr(glyph, "components", None) or []]
+            assert len(component_names) == 3, (
+                f"{codepoints}: expected 3 custom flag components, got {component_names}"
+            )
+            assert component_names[0] == "poc_lite_flag_template", (
+                f"{codepoints}: expected PoC template, got {component_names}"
+            )
+            assert component_names[1].startswith("poc_lite_letter."), (
+                f"{codepoints}: expected custom left letter, got {component_names}"
+            )
+            assert component_names[2].startswith("poc_lite_letter."), (
+                f"{codepoints}: expected custom right letter, got {component_names}"
+            )
 
     def test_has_sequence_gsub_for_zwj_skin_tone_and_flag(self, output_lite_regular):
         """Lite output must carry representative v2.0 sequence ligatures in GSUB."""

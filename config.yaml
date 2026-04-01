@@ -92,6 +92,9 @@ lite:
   emoji_font: "NotoEmoji[wght].ttf"
   output_dir: "output/fonts-lite"
   description: "Sarasa Mono TC (更紗黑體繁中等寬) with embedded Noto Emoji — monochrome emoji for VHS recording and lightweight terminals"
+  # Lite 旗幟不再使用白名單控制。
+  # 所有標準 Regional Indicator 雙碼國旗 sequence 都會套用
+  # 2-column 自訂旗面 + 壓縮字母設計。
 
 # COLRv1 variant — color vector emoji
 # Emoji source: Noto COLRv1 font (googlefonts/noto-emoji, SIL OFL)
