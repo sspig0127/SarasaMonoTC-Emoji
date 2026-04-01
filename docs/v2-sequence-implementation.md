@@ -1,8 +1,10 @@
 # v2.0 Sequence Emoji 實作設計
 
-> 最後更新：2026-03-31
+> 最後更新：2026-04-01
 > 對應版本目標：`v2.0`
 > 搭配閱讀：[`ROADMAP.md`](../ROADMAP.md)、[`src/emoji_merge.py`](../src/emoji_merge.py)
+>
+> 註：`v2.0` 已發佈；本文保留為 sequence 實作與回歸設計紀錄。
 
 ---
 

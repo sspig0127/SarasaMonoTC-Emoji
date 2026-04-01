@@ -117,6 +117,7 @@ Phase 1 挑選條件（3 項）：
 
 | 項目 | 修正版本 |
 |------|---------|
+| Release workflow Node.js 20 warning（checkout/cache 已升 v5；setup-uv 仍待 node24） | 2026-04 |
 | BMP 符號（☺ ⭐ ⚠ 等）在 COLRv1 呈現黑白 | v1.5 |
 | Mac platform name 移除時機 | v1.3 |
 | config 型別未驗證（parallel、emoji_width_multiplier） | v1.3 |

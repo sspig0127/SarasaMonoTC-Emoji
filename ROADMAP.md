@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 路線圖
 
-> 最後更新：2026-03-31（v2.0 sequence MVP 已串通三變體）
+> 最後更新：2026-04-01（v2.0 已發佈；release workflow 只剩 setup-uv warning 待追蹤）
 >
 > **歷史版本實作細節** → [`docs/roadmap-history.md`](./docs/roadmap-history.md)（需要查閱時再 Read）
 > **COLRv1 深度技術細節** → [`.github/colrv1-dev-notes.md`](./.github/colrv1-dev-notes.md)
@@ -20,14 +20,14 @@
 | v1.5.1 | force BMP 清單 5→15；Budget 8132→8091 slots | ✅ 完成 |
 | **v1.5.2** | COLRv1 paint 座標 + helper metrics 修復（🟡🟢 Chromium 渲染回歸） | ✅ 完成 |
 | **v1.5.3** | COLRv1 高風險樣本驗證頁 + 全域 transformed-helper regression test | ✅ 完成 |
-| v2.0 | ZWJ 序列 / 旗幟 / 膚色變體 | 🚧 進行中 |
+| v2.0 | ZWJ 序列 / 旗幟 / 膚色變體 + release workflow 收尾 | ✅ 已發佈 |
 | v2.x | 評估第四變體：Emoji + Nerd Fonts PUA | 🔍 評估中 |
 
 ---
 
-## v2.0 — 完整 Emoji 支援（進行中）
+## v2.0 — 完整 Emoji 支援（已發佈 / 維護中）
 
-目前約 40% 現代 emoji 因需要 ZWJ 序列而缺席。v2.0 目標是補齊這個缺口。
+v2.0.0 已補齊這個 sequence emoji 缺口；此段保留作為設計與維護背景。
 
 | 類型 | 範例 | 技術需求 |
 |------|------|---------|
@@ -47,6 +47,9 @@
   - 三個變體的 GSUB sequence ligature 寫入
   - source / unit / output tests
   - `verify-emoji.html` 的 ZWJ / 膚色 / 旗幟驗證區
+- 已發佈：
+  - `v2.0.0` release
+  - release workflow 已更新為 `actions/checkout@v5` / `actions/cache@v5`
 - 已驗證代表樣本：
   - `👩‍💻`
   - `👋🏻`
@@ -56,11 +59,11 @@
   - 再用剩餘 glyph budget 選入 sequence
   - `config.yaml` 的 `colrv1.priority_sequences` 可保證高價值 sequence 優先納入
 
-### 目前仍未完成
+### 後續仍待補強
 
 - 全 style 自動化驗證仍以 `Regular` 為主
 - COLRv1 sequence 仍不是全量納入，而是 budget 內的優先 / greedy 選取
-- release notes / 版本號 / 發佈流程尚未切到 v2.0
+- release workflow 的最後一個 Node.js 20 warning 只剩 `astral-sh/setup-uv@v4`
 
 ### 實作拆解建議
 
@@ -70,7 +73,7 @@
 | P2 | 將 sequence 產生為 Sarasa 端可用的 GSUB ligature | merged GSUB、cmap / glyph order 整合 | ✅ |
 | P3 | 先補齊高價值序列 | ZWJ 家庭、性別職業、膚色變體、旗幟 | ✅ MVP |
 | P4 | 補測試與驗證工具 | sequence regression tests、verify 頁增加 sequence 專區 | ✅ MVP |
-| P5 | 擴到所有 style 與 release 流程 | 全 style 驗證、版本 / 發佈整理 | 🔜 |
+| P5 | 擴到所有 style 與 release 流程 | 全 style 驗證、版本 / 發佈整理 | ✅ |
 
 ### 程式面需要新增的能力
 
@@ -107,6 +110,7 @@
 - 補 `Italic / Bold / BoldItalic` 的 output font 自動化檢查
 - 決定 COLRv1 sequence 是否需要擴增 `priority_sequences`
 - 規劃版本號、release note、zip / manifest 更新策略
+- 追蹤 `astral-sh/setup-uv` 的 node24 版，並在可用時更新 release workflow
 
 ### 測試需求（目前狀態）
 
