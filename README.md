@@ -371,8 +371,8 @@ Set Height 2160
 - **渲染**：Emoji 以終端機前景色顯示（單色），完整支援 Chromium/xterm.js
 - **Sequence 支援**：已支援 ZWJ / 膚色 / 旗幟，透過輸出字體中的 GSUB ligature 規則實作
 - **定位**：目前最適合 VHS、終端機錄影、以及無法信任系統 fallback 行為的環境
-- **旗幟可讀性**：對 `TW / JP / US / CN / GB / CA` 六個常見旗幟額外做了縮寫字母放大微調，維持 2 columns 前提下改善辨識度
-- **已知限制**：Lite 旗幟仍受限於 2-column 固定寬度；國家縮寫字母可讀性雖已微調，但目前仍無法完全達到 source emoji font 的視覺大小。若需要更接近原始彩色旗幟的呈現，應優先使用 Color / COLRv1 變體
+- **旗幟設計**：所有標準 Regional Indicator 雙碼旗幟序列一律套用 2-column 自訂旗面設計（共享旗面模板 + 壓縮字母組件），視覺上維持 2 columns 且提升辨識度
+- **已知限制**：Lite 旗幟以單色 outline 顯示，無法重現 Color / COLRv1 的彩色旗面。若需要彩色旗幟，應優先使用 Color / COLRv1 變體
 
 ### COLRv1 變體
 - **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）
