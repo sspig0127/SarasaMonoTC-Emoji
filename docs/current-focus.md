@@ -18,8 +18,14 @@
   - `🇺🇸`
 - `verify-emoji.html` 已補上 ZWJ / 膚色 / 旗幟驗證區
 - Lite verify page 已改用較穩定的 text-presentation 樣本，降低 `FE0F` 觸發彩色 fallback 的干擾
-- Lite 六個高頻旗幟（`TW / JP / US / CN / GB / CA`）已開始做可讀性微調
-- Lite 旗幟縮寫在 2-column 限制下仍有可讀性上限；目前先記錄為已知限制，暫不再做高風險 flag redraw
+
+### Lite 旗幟設計（已完成）
+
+- **所有**標準 Regional Indicator（RI）雙碼序列都套用 2-column 自訂旗面設計
+  - 共享旗面模板 `poc_lite_flag_template` + 壓縮字母組件 `poc_lite_letter.*`
+  - 53 個 helper glyph（共用字母 + 模板），覆蓋全部 RI-pair 旗幟
+- 不再使用白名單：之前的 `lite.custom_flag_sequences` 設定已移除
+- 唯一有旗幟選取控制的變體是 **COLRv1**（受 glyph budget 限制，透過 `colrv1.priority_sequences` 優先保留高頻旗幟）
 
 ## 後續主線
 
@@ -32,7 +38,7 @@
 ## 下次開工建議先做
 
 1. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
-2. 檢查 Lite 旗幟微調在 `Italic / Bold / BoldItalic` 的視覺一致性
+2. 檢查 Lite 旗幟新設計在 `Italic / Bold / BoldItalic` 的視覺一致性
 3. 視使用情境繼續調整 `colrv1.priority_sequences`
 4. 視需要補更多高價值 sequence regression cases
 
@@ -43,3 +49,4 @@
 - 不用再把 zip / png 驗證產物納入版本控制
 - 先不要把 Nerd Fonts PUA merge 插隊到 `v2.0` sequence 主線之前
 - 不用再重做 `extract_emoji_sequences()` / shared metadata 的基礎設計
+- 不用重建 Lite 旗幟白名單：現在已全域套用，不需要分批加入

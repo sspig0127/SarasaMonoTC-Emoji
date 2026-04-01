@@ -91,6 +91,14 @@ uv run python -m http.server 8765           # 視覺驗證（搭配 verify-emoji
 - **CBLC 衝突 debug log**：`_filter_cblc_to_added_glyphs` 在 build log 列出被移除的
   glyph 名稱（最多 10 個範例）。若 log 顯示非工具字形被移除，可考慮加入 `force_color_codepoints`。
 
+### Lite 特有
+
+- **旗幟全域設計**：所有標準 Regional Indicator（RI）雙碼旗幟序列，一律套用 2-column 自訂旗面設計。
+  - 共享模板 `poc_lite_flag_template` + 壓縮字母組件 `poc_lite_letter.*`（共 53 個 helper glyph）
+  - 無白名單控制，不需要在 `config.yaml` 維護 `custom_flag_sequences`
+  - 若要加 debug / 觀察樣本，直接修改 `verify-emoji.html` 的旗幟樣本清單即可
+  - 相關程式碼：`src/emoji_merge.py:_build_lite_flag_poc()`、`_is_regional_indicator_flag_sequence()`
+
 ### COLRv1 特有
 
 詳見 [`.github/colrv1-dev-notes.md`](./colrv1-dev-notes.md)。摘要：
