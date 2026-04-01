@@ -22,7 +22,8 @@ from typing import Optional
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables import _c_m_a_p as cmap_module
 from fontTools.ttLib.tables import otTables
-from fontTools.ttLib.tables._g_l_y_f import Glyph as TTGlyph
+from fontTools.ttLib.tables.ttProgram import Program
+from fontTools.ttLib.tables._g_l_y_f import Glyph as TTGlyph, GlyphCoordinates, GlyphComponent
 from fontTools.otlLib.builder import buildLigatureSubstSubtable, buildLookup
 
 from .config import FontConfig
@@ -525,15 +526,39 @@ def _scale_glyph(glyph, scale: float) -> None:
             comp.y = y
 
 
-_LITE_TUNED_FLAG_SEQUENCES = {
-    (0x1F1FA, 0x1F1F8),  # 🇺🇸
-    (0x1F1EF, 0x1F1F5),  # 🇯🇵
-    (0x1F1F9, 0x1F1FC),  # 🇹🇼
-    (0x1F1E8, 0x1F1F3),  # 🇨🇳
-    (0x1F1EC, 0x1F1E7),  # 🇬🇧
-    (0x1F1E8, 0x1F1E6),  # 🇨🇦
-}
-_LITE_FLAG_COMPONENT_SCALE = 1.16
+_LITE_POC_FLAG_SEQS = frozenset({
+    (0x1F1FA, 0x1F1F8),  # 🇺🇸 US
+    (0x1F1EF, 0x1F1F5),  # 🇯🇵 JP
+    (0x1F1F9, 0x1F1FC),  # 🇹🇼 TW
+    (0x1F1E8, 0x1F1F3),  # 🇨🇳 CN
+    (0x1F1EC, 0x1F1E7),  # 🇬🇧 GB
+    (0x1F1E8, 0x1F1E6),  # 🇨🇦 CA
+})
+
+# PoC flag body geometry — tuned for the Sarasa 1000-UPM 2-column emoji slot.
+# The outer rectangle spans the full emoji advance; a 35-unit border creates
+# the inner space where the two letter glyphs are centered.
+_POC_FLAG_X0, _POC_FLAG_X1 = 20, 980
+_POC_FLAG_Y0, _POC_FLAG_Y1 = -150, 750
+_POC_FLAG_BORDER = 35
+_POC_INNER_X0 = _POC_FLAG_X0 + _POC_FLAG_BORDER   # 55
+_POC_INNER_X1 = _POC_FLAG_X1 - _POC_FLAG_BORDER   # 945
+_POC_INNER_Y0 = _POC_FLAG_Y0 + _POC_FLAG_BORDER   # -115
+_POC_INNER_Y1 = _POC_FLAG_Y1 - _POC_FLAG_BORDER   # 715
+_POC_INNER_MID_X = (_POC_INNER_X0 + _POC_INNER_X1) // 2   # 500
+_POC_LETTER_GAP = 10   # horizontal gap between the two letters at centre
+_POC_LEFT_CX = (_POC_INNER_X0 + _POC_INNER_MID_X - _POC_LETTER_GAP) // 2   # 275
+_POC_RIGHT_CX = (_POC_INNER_MID_X + _POC_LETTER_GAP + _POC_INNER_X1) // 2  # 725
+_POC_CENTER_Y = (_POC_INNER_Y0 + _POC_INNER_Y1) // 2   # 300
+
+# Each letter is condensed (non-uniform x/y scaling) to fill this canonical box.
+_POC_LETTER_W = 360
+_POC_LETTER_H = 580
+# Component offsets to centre the canonical letter box within each letter zone.
+_POC_LEFT_LETTER_X = _POC_LEFT_CX - _POC_LETTER_W // 2    # 95
+_POC_LEFT_LETTER_Y = _POC_CENTER_Y - _POC_LETTER_H // 2   # 10
+_POC_RIGHT_LETTER_X = _POC_RIGHT_CX - _POC_LETTER_W // 2  # 545
+_POC_RIGHT_LETTER_Y = _POC_LEFT_LETTER_Y                   # 10
 
 
 def _scale_simple_glyph_about_center(
@@ -541,11 +566,7 @@ def _scale_simple_glyph_about_center(
     scale_x: float,
     scale_y: float,
 ) -> None:
-    """Scale a simple glyph around its own bbox center.
-
-    Used by Lite flag tuning: keep the outer flag box unchanged while making
-    the country abbreviation letters slightly larger inside the box.
-    """
+    """Scale a simple glyph around its own bbox center."""
     if glyph is None or glyph.numberOfContours <= 0 or not hasattr(glyph, "coordinates"):
         return
     if abs(scale_x - 1.0) < 1e-6 and abs(scale_y - 1.0) < 1e-6:
@@ -571,32 +592,125 @@ def _scale_simple_glyph_about_center(
     glyph.recalcBounds(None)
 
 
-def _tune_lite_flag_ligatures(
+def _build_poc_flag_template(emoji_width: int) -> TTGlyph:
+    """Build a rectangular frame glyph for the PoC 2-column flag body.
+
+    Outer contour is CCW (filled in TrueType y-up coordinates); inner contour
+    is CW (creates a hole), producing a visible border frame.
+    """
+    import array as _array
+
+    x0, x1 = 20, emoji_width - 20
+    y0, y1 = _POC_FLAG_Y0, _POC_FLAG_Y1
+    b = _POC_FLAG_BORDER
+    xi0, xi1 = x0 + b, x1 - b
+    yi0, yi1 = y0 + b, y1 - b
+
+    outer = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]     # CCW — filled
+    inner = [(xi0, yi0), (xi0, yi1), (xi1, yi1), (xi1, yi0)]  # CW — hole
+
+    g = TTGlyph()
+    g.numberOfContours = 2
+    g.coordinates = GlyphCoordinates(outer + inner)
+    g.flags = _array.array("B", [1] * 8)
+    g.endPtsOfContours = [3, 7]
+    g.program = Program()
+    g.xMin, g.yMin, g.xMax, g.yMax = x0, y0, x1, y1
+    return g
+
+
+def _build_poc_letter_canonical(src_glyph: TTGlyph) -> TTGlyph:
+    """Build a condensed copy of a letter glyph scaled to the canonical PoC box.
+
+    X and Y are scaled independently so the letter fills _POC_LETTER_W ×
+    _POC_LETTER_H exactly (condensed proportions). The result sits at [0..W, 0..H].
+    Composite glyphs are not transformed — caller should expand() before calling.
+    """
+    from fontTools.misc.roundTools import otRound
+
+    if (
+        src_glyph is None
+        or src_glyph.numberOfContours <= 0
+        or not hasattr(src_glyph, "coordinates")
+        or not src_glyph.coordinates
+    ):
+        empty = TTGlyph()
+        empty.numberOfContours = 0
+        empty.program = Program()
+        return empty
+
+    src_glyph.recalcBounds(None)
+    src_w = src_glyph.xMax - src_glyph.xMin
+    src_h = src_glyph.yMax - src_glyph.yMin
+    if src_w <= 0 or src_h <= 0:
+        return copy.deepcopy(src_glyph)
+
+    scale_x = _POC_LETTER_W / src_w
+    scale_y = _POC_LETTER_H / src_h
+    tx = -src_glyph.xMin
+    ty = -src_glyph.yMin
+
+    g = copy.deepcopy(src_glyph)
+    new_coords = []
+    for x, y in g.coordinates:
+        nx = otRound((x + tx) * scale_x)
+        ny = otRound((y + ty) * scale_y)
+        _check_int16(nx, "poc_letter.x", scale_x)
+        _check_int16(ny, "poc_letter.y", scale_y)
+        new_coords.append((nx, ny))
+    g.coordinates = GlyphCoordinates(new_coords)
+    g.program = Program()
+    g.recalcBounds(None)
+    return g
+
+
+def _build_lite_flag_poc(
     base_font: TTFont,
     sequence_entries: list[EmojiEntry],
     base_hmtx,
     base_vmtx,
+    emoji_width: int,
 ) -> int:
-    """Slightly enlarge selected Lite flag abbreviations for readability.
+    """Build custom 2-column flag composites for the six PoC target sequences.
 
-    Noto Emoji's monochrome flags are designed for a wider advance than the
-    final Sarasa 2-column slot. After the merge forces every emoji to advance
-    width 1000, the country abbreviation can look noticeably smaller than the
-    source font. For a small allowlist of high-frequency flags, clone the two
-    letter component glyphs, scale them around their own center, and retarget
-    the flag ligature to the tuned copies.
+    Replaces the old scaling-only approach. For each target flag:
+      1. Creates a shared flag body template glyph sized for the 1000-wide slot.
+      2. Builds condensed letter copies (independently scaled to _POC_LETTER_W ×
+         _POC_LETTER_H) for every unique letter component found in the composites.
+      3. Rebuilds the six flag ligature glyphs as 3-component composites:
+         flag-template + left-letter + right-letter, with offsets that centre
+         each letter in its half of the flag interior.
+
+    Letters shared across flags (e.g. C in 🇨🇳/🇨🇦) reuse the same canonical
+    glyph. Returns the total number of new helper glyphs added.
     """
     base_glyf = base_font["glyf"]
     current_order = list(base_font.getGlyphOrder())
     added_names: list[str] = []
-    added_count = 0
+
     entries_by_codepoints = {
         entry.codepoints: entry
         for entry in sequence_entries
-        if entry.codepoints in _LITE_TUNED_FLAG_SEQUENCES
+        if entry.codepoints in _LITE_POC_FLAG_SEQS
     }
+    if not entries_by_codepoints:
+        return 0
 
-    for codepoints in _LITE_TUNED_FLAG_SEQUENCES:
+    # --- Step 1: shared flag body template ---
+    template_name = "poc_lite_flag_template"
+    if template_name not in base_glyf.glyphs:
+        base_glyf[template_name] = _build_poc_flag_template(emoji_width)
+        current_order.append(template_name)
+        added_names.append(template_name)
+        base_hmtx.metrics[template_name] = (emoji_width, 0)
+        if base_vmtx is not None:
+            base_vmtx.metrics[template_name] = (emoji_width, 0)
+
+    # --- Step 2: condensed letter copies ---
+    # Maps original letter glyph name → canonical PoC glyph name.
+    letter_map: dict[str, str] = {}
+
+    for codepoints in _LITE_POC_FLAG_SEQS:
         entry = entries_by_codepoints.get(codepoints)
         if entry is None or entry.source_glyph not in base_glyf.glyphs:
             continue
@@ -607,37 +721,66 @@ def _tune_lite_flag_ligatures(
         if ligature.numberOfContours >= 0 or len(components) < 3:
             continue
 
-        seq_tag = "".join(f"{cp:04X}" for cp in codepoints)
-        # Component 0 is the shared outer flag outline. Only tune the letters.
-        for index, comp in enumerate(components[1:], start=1):
-            original_name = comp.glyphName
-            if original_name not in base_glyf.glyphs:
+        for comp in components[1:3]:
+            orig_name = comp.glyphName
+            if orig_name in letter_map or orig_name not in base_glyf.glyphs:
                 continue
 
-            tuned_name = f"{original_name}.liteflag.{seq_tag}.{index}"
-            if tuned_name not in base_glyf.glyphs:
-                tuned_glyph = copy.deepcopy(base_glyf[original_name])
-                tuned_glyph.expand(base_glyf)
-                _scale_simple_glyph_about_center(
-                    tuned_glyph,
-                    _LITE_FLAG_COMPONENT_SCALE,
-                    _LITE_FLAG_COMPONENT_SCALE,
-                )
-                base_glyf[tuned_name] = tuned_glyph
-                current_order.append(tuned_name)
-                added_names.append(tuned_name)
-                if original_name in base_hmtx.metrics:
-                    base_hmtx.metrics[tuned_name] = base_hmtx.metrics[original_name]
-                if base_vmtx is not None and original_name in base_vmtx.metrics:
-                    base_vmtx.metrics[tuned_name] = base_vmtx.metrics[original_name]
-                added_count += 1
+            poc_name = f"poc_lite_letter.{orig_name}"
+            if poc_name not in base_glyf.glyphs:
+                src = base_glyf[orig_name]
+                if hasattr(src, "expand"):
+                    src.expand(base_glyf)
+                canonical = _build_poc_letter_canonical(src)
+                base_glyf[poc_name] = canonical
+                current_order.append(poc_name)
+                added_names.append(poc_name)
+                base_hmtx.metrics[poc_name] = (emoji_width, 0)
+                if base_vmtx is not None:
+                    base_vmtx.metrics[poc_name] = (emoji_width, 0)
 
-            comp.glyphName = tuned_name
+            letter_map[orig_name] = poc_name
+
+    # --- Step 3: rebuild flag composites ---
+    def _comp(name: str, x: int, y: int) -> GlyphComponent:
+        c = GlyphComponent()
+        c.glyphName = name
+        c.flags = 0
+        c.x = x
+        c.y = y
+        return c
+
+    for codepoints in _LITE_POC_FLAG_SEQS:
+        entry = entries_by_codepoints.get(codepoints)
+        if entry is None or entry.source_glyph not in base_glyf.glyphs:
+            continue
+
+        ligature = base_glyf[entry.source_glyph]
+        ligature.expand(base_glyf)
+        components = getattr(ligature, "components", None) or []
+        if ligature.numberOfContours >= 0 or len(components) < 3:
+            continue
+
+        left_poc = letter_map.get(components[1].glyphName)
+        right_poc = letter_map.get(components[2].glyphName)
+        if left_poc is None or right_poc is None:
+            continue
+
+        new_g = TTGlyph()
+        new_g.numberOfContours = -1
+        new_g.components = [
+            _comp(template_name, 0, 0),
+            _comp(left_poc, _POC_LEFT_LETTER_X, _POC_LEFT_LETTER_Y),
+            _comp(right_poc, _POC_RIGHT_LETTER_X, _POC_RIGHT_LETTER_Y),
+        ]
+        new_g.program = Program()
+        new_g.recalcBounds(base_glyf)
+        base_glyf[entry.source_glyph] = new_g
 
     if added_names:
         base_font.setGlyphOrder(current_order)
 
-    return added_count
+    return len(added_names)
 
 
 def _collect_glyph_deps(
@@ -874,17 +1017,15 @@ def merge_emoji_lite(
     else:
         base_vmtx = None
 
-    tuned_flag_components = _tune_lite_flag_ligatures(
+    tuned_flag_components = _build_lite_flag_poc(
         base_font,
         sequence_entries,
         base_hmtx,
         base_vmtx,
+        emoji_width,
     )
     if tuned_flag_components:
-        print(
-            "  Tuned Lite flag abbreviation components: "
-            f"{tuned_flag_components} glyph clones for readability"
-        )
+        print(f"  Built Lite PoC flag glyphs: {tuned_flag_components} helper glyphs added")
 
     # Update maxp AFTER all table accesses (avoids vmtx decompile byte-count mismatch)
     base_font["maxp"].numGlyphs = len(base_font.getGlyphOrder())
