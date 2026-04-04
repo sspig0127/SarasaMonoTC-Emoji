@@ -526,6 +526,124 @@ def _scale_glyph(glyph, scale: float) -> None:
             comp.y = y
 
 
+def _load_nerd_pua_glyphs(
+    nerd_font: TTFont,
+    icon_ranges: list[tuple[int, int]],
+) -> dict[int, str]:
+    """Load BMP PUA glyphs from the Nerd font limited to configured ranges."""
+    raw_cmap = nerd_font["cmap"].getBestCmap() or {}
+    return {
+        cp: glyph_name
+        for cp, glyph_name in sorted(raw_cmap.items())
+        if cp <= 0xFFFF and any(start <= cp <= end for start, end in icon_ranges)
+    }
+
+
+def _merge_nerd_fonts_pua(
+    base_font: TTFont,
+    nerd_font: TTFont,
+    pua_glyphs: dict[int, str],
+    icon_advance: int,
+    upm_scale: float,
+) -> list[int]:
+    """Merge Nerd Fonts BMP PUA glyphs into the current base font.
+
+    Args:
+        icon_advance: Target advance width for each icon glyph.
+            Use half_width (500) for single-column icons (e.g. Powerline),
+            or full_width (1000) for double-column icons (e.g. Devicons).
+    """
+    if not pua_glyphs:
+        return []
+    if "glyf" not in nerd_font:
+        raise ValueError("Nerd font must contain a glyf table for --nerd-lite builds")
+
+    base_cmap = base_font["cmap"].getBestCmap() or {}
+    filtered_pua_glyphs = {
+        cp: glyph_name for cp, glyph_name in pua_glyphs.items() if cp not in base_cmap
+    }
+    if not filtered_pua_glyphs:
+        return []
+
+    base_glyf = base_font["glyf"]
+    nerd_glyf = nerd_font["glyf"]
+    base_hmtx = base_font["hmtx"]
+    base_vmtx = base_font["vmtx"] if "vmtx" in base_font else None
+
+    base_existing_names = set(base_font.getGlyphOrder())
+    current_order = list(base_font.getGlyphOrder())
+    target_source_names = set(filtered_pua_glyphs.values())
+    source_glyphs_to_add = _collect_glyph_deps(nerd_font, target_source_names, set())
+
+    rename_map: dict[str, str] = {}
+    reserved_names = set(base_existing_names)
+    for source_name in source_glyphs_to_add:
+        target_name = source_name
+        if target_name in reserved_names:
+            suffix_index = 1
+            target_name = f"{source_name}_nerd"
+            while target_name in reserved_names:
+                suffix_index += 1
+                target_name = f"{source_name}_nerd{suffix_index}"
+        rename_map[source_name] = target_name
+        reserved_names.add(target_name)
+
+    added_names: list[str] = []
+    renamed_count = sum(1 for source_name, target_name in rename_map.items() if source_name != target_name)
+
+    for source_name in source_glyphs_to_add:
+        target_name = rename_map[source_name]
+        src = nerd_glyf.glyphs.get(source_name)
+        if src is None:
+            continue
+
+        glyph_copy = copy.deepcopy(src)
+        if glyph_copy.numberOfContours < 0 and hasattr(glyph_copy, "components"):
+            for component in glyph_copy.components:
+                component.glyphName = rename_map.get(component.glyphName, component.glyphName)
+        _scale_glyph(glyph_copy, upm_scale)
+        base_glyf[target_name] = glyph_copy
+        if glyph_copy.numberOfContours < 0 and hasattr(glyph_copy, "recalcBounds"):
+            glyph_copy.recalcBounds(base_glyf)
+
+        current_order.append(target_name)
+        added_names.append(target_name)
+
+        lsb = getattr(glyph_copy, "xMin", 0) if glyph_copy.numberOfContours != 0 else 0
+        base_hmtx.metrics[target_name] = (icon_advance, lsb)
+        if base_vmtx is not None:
+            base_vmtx.metrics[target_name] = (icon_advance, 0)
+
+    if added_names:
+        base_font.setGlyphOrder(current_order)
+        base_font["maxp"].numGlyphs = len(current_order)
+
+    renamed_pua_glyphs = {
+        cp: rename_map[glyph_name]
+        for cp, glyph_name in filtered_pua_glyphs.items()
+        if glyph_name in rename_map
+    }
+    added_codepoints = [
+        cp for cp in sorted(renamed_pua_glyphs) if renamed_pua_glyphs[cp] in set(added_names)
+    ]
+    cmap_added = _update_cmap(base_font, renamed_pua_glyphs, set(added_names))
+
+    if "hhea" in base_font:
+        base_font["hhea"].advanceWidthMax = max(
+            base_font["hhea"].advanceWidthMax, icon_advance
+        )
+        base_font["hhea"].numberOfHMetrics = len(base_hmtx.metrics)
+
+    from .utils import merge_os2_ranges
+
+    merge_os2_ranges(base_font, nerd_font)
+    print(
+        f"  Nerd PUA glyphs added: {len(added_codepoints)} "
+        f"(glyph copies: {len(added_names)}, renamed: {renamed_count}, cmap: {cmap_added})"
+    )
+    return added_codepoints
+
+
 # PoC flag body geometry — tuned for the Sarasa 1000-UPM 2-column emoji slot.
 # The outer rectangle spans the full emoji advance; a 35-unit border creates
 # the inner space where the two letter glyphs are centered.
@@ -1067,6 +1185,93 @@ def merge_emoji_lite(
     emoji_font.close()
     print(f"  Total glyphs after merge: {len(base_font.getGlyphOrder())}")
     return base_font
+
+
+def merge_emoji_lite_nerd(
+    base_font_path: str,
+    emoji_font_path: str,
+    nerd_font_path: str,
+    config: FontConfig,
+    icon_ranges: list[tuple[int, int]],
+    single_column_ranges: list[tuple[int, int]] | None = None,
+    force_codepoints: set[int] | None = None,
+) -> TTFont:
+    """Build the Nerd Lite variant on top of the Lite pipeline.
+
+    Args:
+        single_column_ranges: PUA codepoint ranges that must stay single-column
+            (advance = half_width).  Defaults to None (all icons use full_width).
+            Use for Powerline prompt separators that must align in 1-column terminal
+            layouts (Neovim statusline, shell prompt).  All other ranges default to
+            double-column (full_width) so icons are visually proportional to emoji.
+    """
+    base_font = merge_emoji_lite(
+        base_font_path=base_font_path,
+        emoji_font_path=emoji_font_path,
+        config=config,
+        force_codepoints=force_codepoints,
+    )
+
+    print(f"  Loading Nerd font: {nerd_font_path}")
+    nerd_font = TTFont(nerd_font_path)
+    try:
+        pua_glyphs = _load_nerd_pua_glyphs(nerd_font, icon_ranges)
+        print(f"  Nerd PUA candidates: {len(pua_glyphs)}")
+        if not pua_glyphs:
+            print("  No Nerd PUA glyphs matched configured ranges.")
+            return base_font
+
+        half_width, full_width = detect_font_widths(base_font)
+        nerd_upm = nerd_font["head"].unitsPerEm
+
+        # Split glyphs into single-column (e.g. Powerline) and double-column sets.
+        single_col_cps: set[int] = set()
+        if single_column_ranges:
+            single_col_cps = {
+                cp for cp in pua_glyphs
+                if any(s <= cp <= e for s, e in single_column_ranges)
+            }
+
+        single_col_pua = {cp: gn for cp, gn in pua_glyphs.items() if cp in single_col_cps}
+        double_col_pua = {cp: gn for cp, gn in pua_glyphs.items() if cp not in single_col_cps}
+
+        total_added: list[int] = []
+
+        if single_col_pua:
+            scale_1col = half_width / nerd_upm
+            print(f"  Single-col scale ({nerd_upm}→{half_width}, ×{scale_1col:.4f}): {len(single_col_pua)} glyphs")
+            added = _merge_nerd_fonts_pua(
+                base_font=base_font,
+                nerd_font=nerd_font,
+                pua_glyphs=single_col_pua,
+                icon_advance=half_width,
+                upm_scale=scale_1col,
+            )
+            total_added.extend(added)
+
+        if double_col_pua:
+            scale_2col = full_width / nerd_upm
+            print(f"  Double-col scale ({nerd_upm}→{full_width}, ×{scale_2col:.4f}): {len(double_col_pua)} glyphs")
+            added = _merge_nerd_fonts_pua(
+                base_font=base_font,
+                nerd_font=nerd_font,
+                pua_glyphs=double_col_pua,
+                icon_advance=full_width,
+                upm_scale=scale_2col,
+            )
+            total_added.extend(added)
+
+        if not total_added:
+            print("  No new Nerd PUA icons were merged.")
+        else:
+            sample = ", ".join(f"U+{cp:04X}" for cp in total_added[:5])
+            print(
+                f"  Nerd PUA merge complete: {len(total_added)} codepoints "
+                f"({len(single_col_pua)} 1-col, {len(double_col_pua)} 2-col; sample: {sample})"
+            )
+        return base_font
+    finally:
+        nerd_font.close()
 
 
 def merge_emoji(

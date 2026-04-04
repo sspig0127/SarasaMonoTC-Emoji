@@ -1,6 +1,6 @@
 # Current Focus
 
-> 最後更新：2026-04-01
+> 最後更新：2026-04-04
 
 ## 現在狀態
 
@@ -29,24 +29,27 @@
 
 ## 後續主線
 
-- `v2.x`: 評估與維護
+- `v2.x`: Nerd Lite merge + 維護
 - 範圍：
+  - **Nerd Lite MVP 已完成**（feature/nerd-lite-mvp，134 tests 全過），待 PR merge 回 main
+    - 折衷方案：Powerline 1 欄，其他集合 2 欄
+    - 評估文件：`docs/nerd-fonts-variant-eval.md`
+    - 實作計畫：`docs/nerd-lite-impl-plan.md`
   - 追蹤 `astral-sh/setup-uv` 的 node24 版
-  - 維持 Lite 旗幟可讀性與三變體一致性
-  - 視需要評估第四變體：emoji + Nerd Fonts PUA
+  - 維持四變體一致性
 
 ## 下次開工建議先做
 
-1. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
-2. 檢查 Lite 旗幟新設計在 `Italic / Bold / BoldItalic` 的視覺一致性
-3. 視使用情境繼續調整 `colrv1.priority_sequences`
-4. 視需要補更多高價值 sequence regression cases
+1. Nerd Lite PR merge 回 main + Release workflow 加入 `--nerd-lite` 建構步驟
+2. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
+3. 補 `Italic / Bold / BoldItalic` 的 output font 自動化斷言（四個變體共同技術債）
+4. 視使用情境繼續調整 `colrv1.priority_sequences`
+5. 視需要補更多高價值 sequence regression cases
 
 ## 暫時不要重做的事
 
 - 不用再重新調查 `🟡` / `🟢` 的 COLRv1 bug
 - 不用再重新整理 `v1.5.2` / `v1.5.3` 歷史
 - 不用再把 zip / png 驗證產物納入版本控制
-- 先不要把 Nerd Fonts PUA merge 插隊到 `v2.0` sequence 主線之前
 - 不用再重做 `extract_emoji_sequences()` / shared metadata 的基礎設計
 - 不用重建 Lite 旗幟白名單：現在已全域套用，不需要分批加入

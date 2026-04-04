@@ -9,6 +9,7 @@
     --font: 'SarasaMonoTCEmoji', 'Sarasa Mono TC', monospace;
     --compare-merged-font: 'SarasaMonoTCEmoji', 'Sarasa Mono TC', monospace;
     --compare-source-font: 'NotoColorEmojiSource', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+    --nerd-lite-compare-font: 'SarasaMonoTCEmojiLite', 'Sarasa Mono TC', monospace;
   }
   body { font-family: sans-serif; margin: 40px; background: #1e1e2e; color: #cdd6f4; }
   h1, h2 { color: #cba6f7; }
@@ -24,6 +25,7 @@
   .badge-color  { background: #fab387; color: #1e1e2e; }
   .badge-lite   { background: #89dceb; color: #1e1e2e; }
   .badge-colrv1 { background: #cba6f7; color: #1e1e2e; }
+  .badge-nerd-lite { background: #94e2d5; color: #1e1e2e; }
   .size-compare { font-family: var(--font); font-size: 18px; background: #181825; padding: 16px 20px; border-radius: 8px; margin: 8px 0; }
   .size-compare p { margin: 0; line-height: 2.2; }
   .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -31,8 +33,11 @@
   .compare-title { font-size: 12px; color: #6c7086; margin-bottom: 8px; font-family: monospace; }
   .compare-merged { font-family: var(--compare-merged-font); }
   .compare-source { font-family: var(--compare-source-font); }
+  .compare-lite { font-family: var(--nerd-lite-compare-font); }
   .compare-line { font-size: 22px; line-height: 2; white-space: pre-wrap; word-break: break-word; }
   .hint { font-size: 12px; color: #9399b2; margin-top: 8px; }
+  .lite-style-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .lite-style-font { font-size: 18px; line-height: 2; background: #181825; padding: 12px 16px; border-radius: 8px; white-space: pre; }
 </style>
 </head>
 <body>
@@ -44,6 +49,7 @@
     <option value="color">Color（彩色 CBDT/CBLC）</option>
     <option value="lite">Lite（單色 glyf）</option>
     <option value="colrv1">COLRv1（彩色向量）</option>
+    <option value="nerd-lite">Nerd Lite（單色 + Nerd PUA）</option>
   </select>
   &nbsp; 字重：
   <select id="styleSelect" onchange="applyStyle()">
@@ -265,6 +271,378 @@ U+1FA70 🧋🫂🪄🪅🪆🎭🎪🪩</div>
   ✗ 異常：emoji 明顯高於文字（UPM 縮放失效），或 emoji 顯示為空白（字體未含此 codepoint）
 </div>
 
+<div id="liteFlagSection" style="display:none">
+<h2>11. Lite 旗幟跨字重一致性 <span class="variant-badge badge-lite">Lite only</span></h2>
+<div class="label">四種字重並排，觀察旗面模板與字母比例是否一致（2-column 對齊、字母清晰度、模板留白）</div>
+<div class="lite-style-grid">
+  <div><div class="label">Regular</div><div class="lite-style-font lite-col-Regular">🇺🇸 🇹🇼 🇯🇵 🇬🇧
+🇨🇳 🇨🇦 🇸🇬 🇦🇺
+🇰🇷 🇹🇭 🇻🇳 🇵🇭
+🇭🇰 🇳🇿 🇩🇪 🇫🇷</div></div>
+  <div><div class="label">Italic</div><div class="lite-style-font lite-col-Italic">🇺🇸 🇹🇼 🇯🇵 🇬🇧
+🇨🇳 🇨🇦 🇸🇬 🇦🇺
+🇰🇷 🇹🇭 🇻🇳 🇵🇭
+🇭🇰 🇳🇿 🇩🇪 🇫🇷</div></div>
+  <div><div class="label">Bold</div><div class="lite-style-font lite-col-Bold">🇺🇸 🇹🇼 🇯🇵 🇬🇧
+🇨🇳 🇨🇦 🇸🇬 🇦🇺
+🇰🇷 🇹🇭 🇻🇳 🇵🇭
+🇭🇰 🇳🇿 🇩🇪 🇫🇷</div></div>
+  <div><div class="label">Bold Italic</div><div class="lite-style-font lite-col-BoldItalic">🇺🇸 🇹🇼 🇯🇵 🇬🇧
+🇨🇳 🇨🇦 🇸🇬 🇦🇺
+🇰🇷 🇹🇭 🇻🇳 🇵🇭
+🇭🇰 🇳🇿 🇩🇪 🇫🇷</div></div>
+</div>
+<div class="lite-style-grid" style="margin-top:10px">
+  <div><div class="label">Regular — CJK 對齊</div><div class="lite-style-font lite-col-Regular">一🇹🇼二🇺🇸三🇯🇵
+TW🇹🇼US🇺🇸JP🇯🇵</div></div>
+  <div><div class="label">Italic — CJK 對齊</div><div class="lite-style-font lite-col-Italic">一🇹🇼二🇺🇸三🇯🇵
+TW🇹🇼US🇺🇸JP🇯🇵</div></div>
+  <div><div class="label">Bold — CJK 對齊</div><div class="lite-style-font lite-col-Bold">一🇹🇼二🇺🇸三🇯🇵
+TW🇹🇼US🇺🇸JP🇯🇵</div></div>
+  <div><div class="label">Bold Italic — CJK 對齊</div><div class="lite-style-font lite-col-BoldItalic">一🇹🇼二🇺🇸三🇯🇵
+TW🇹🇼US🇺🇸JP🇯🇵</div></div>
+</div>
+<div class="label" style="margin-top:8px">
+  ✓ 正常：四欄旗面比例與字母大小視覺一致，CJK 與旗幟寬度對齊<br>
+  ✗ 異常：Italic / Bold 旗面比例或字母位置明顯偏移，代表字重影響 helper glyph 定位
+</div>
+</div>
+
+<div id="nerdLiteSection" style="display:none">
+<h2>12. Nerd Lite PUA icon 驗證 <span class="variant-badge badge-nerd-lite">Nerd Lite only</span></h2>
+<div class="label">左欄：Nerd Lite 輸出（應顯示圖示）；右欄：Lite 對照（PUA 呈 □ 屬正常）。共 5 集合 + 寬度 / 混排 / prompt 驗證。</div>
+
+<!-- 12.0 折衷方案說明 -->
+<h3 style="color:#f9e2af;margin-top:1.6em;margin-bottom:0.2em">12.0 設計說明 — 折衷方案：Powerline 1 欄 / 其他集合 2 欄</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px">
+  <div style="background:#181825;padding:16px 20px;border-radius:8px;border:1px solid #89dceb">
+    <div style="font-size:12px;color:#89dceb;margin-bottom:8px;font-family:monospace">Powerline (E0A0–E0D7)：1 欄（scale = 500/2048 ≈ 0.244）</div>
+    <div style="font-family:var(--compare-merged-font);font-size:18px;line-height:2;white-space:pre">高度對比（Powerline icon 較小）：
+ABCD  ABCd
+&#xE0B0;&#xE0B2;&#xE0A0;&#xE0A2;  (Powerline 1 欄)
+一二三四  一二三四
+
+寬度對比（每格 1 欄）：
+|A| |A| |A| |A|
+|&#xE0B0;| |&#xE0B2;| |&#xE0A0;| |&#xE0A2;|
+
+Prompt 範例（分隔符貼合）：
+ user &#xE0B0; main &#xE0A0; &#xE0B0; ok
+       ↑1欄 分隔符緊接，✓ 排版正確</div>
+  </div>
+  <div style="background:#181825;padding:16px 20px;border-radius:8px;border:1px solid #a6e3a1">
+    <div style="font-size:12px;color:#a6e3a1;margin-bottom:8px;font-family:monospace">Devicons / Codicons / Octicons / Seti-UI：2 欄（scale = 1000/2048 ≈ 0.488）</div>
+    <div style="font-family:var(--compare-merged-font);font-size:18px;line-height:2;white-space:pre">高度對比（2欄 icon 與文字等高）：
+ABCD  ABCd
+&#xE700;&#xEA60;&#xF400;&#xE5FA;  (語言 logo 2 欄)
+一二三四  一二三四
+
+寬度對比（每格 2 欄）：
+|A| |A| |A| |A|
+|&#xE700;| |&#xEA60;| |&#xF400;| |&#xE5FA;|
+
+語言 logo 混排：
+&#xE700; Python  &#xE710; Node  &#xE762; Rust  &#xE724; Go</div>
+  </div>
+</div>
+<div style="background:#313244;border-radius:6px;padding:12px 16px;font-size:13px;line-height:1.7;margin-bottom:4px">
+  <b style="color:#cba6f7">目前採用折衷方案：</b> Powerline 保持 1 欄，Devicons / Codicons / Octicons / Seti-UI 改為 2 欄<br>
+  <b style="color:#89dceb">Powerline 1 欄的理由：</b><br>
+  · Powerline prompt（<code style="color:#89dceb">E0B0 ►</code> 必須剛好 1 欄，才能緊貼相鄰色塊）<br>
+  · Neovim statusline（欄位對齊依賴 icon 精確佔 1 格）<br>
+  · 任何需要字元計數對齊的 TUI 應用<br>
+  <b style="color:#a6e3a1">其他集合 2 欄的理由：</b><br>
+  · 語言 logo / 檔案類型 icon（Devicons / Codicons / Octicons）視覺比例與 emoji 一致，更易辨識<br>
+  · VHS 錄影 / 視覺展示用途比例自然<br>
+  · 不需要精確欄位對齊
+</div>
+<div style="background:#181825;border-radius:6px;padding:12px 16px;font-size:13px;font-family:monospace;line-height:1.8;margin-bottom:16px">
+  <b style="color:#f38ba8">為何 Powerline 不能改 2 欄 — prompt 破版示範：</b><br>
+  <span style="color:#a6e3a1">目前（Powerline 1 欄，正確）：</span><br>
+  <span style="font-family:var(--compare-merged-font);font-size:17px"> user  ~/proj  &#xE0B0; main &#xE0A0; &#xE0B0; ✓ 分隔符貼合</span><br>
+  <br>
+  <span style="color:#f38ba8">若 Powerline 改 2 欄（prompt 分隔符破版）：</span><br>
+  <span style="font-family:var(--compare-merged-font);font-size:17px"> user  ~/proj  <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE0B0;</span> main <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE0A0;</span> <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE0B0;</span> ✗ 分隔符佔2欄，錯位</span>
+</div>
+
+<!-- 12.1 Powerline -->
+<h3 style="color:#89dceb;margin-top:1.6em;margin-bottom:0.2em">12.1 Powerline Symbols (E0A0–E0D7) — prompt 分隔符、VCS 符號</h3>
+<div class="compare-grid">
+  <div class="compare-card">
+    <div class="compare-title">Nerd Lite ── 應顯示圖示</div>
+    <div class="compare-line compare-merged">分隔符  &#xE0B0; &#xE0B1; &#xE0B2; &#xE0B3; &#xE0B4; &#xE0B5; &#xE0B6; &#xE0B7;
+斜切    &#xE0B8; &#xE0B9; &#xE0BA; &#xE0BB; &#xE0BC; &#xE0BD; &#xE0BE; &#xE0BF;
+裝飾    &#xE0C0; &#xE0C2; &#xE0C4; &#xE0C6; &#xE0C8; &#xE0CA; &#xE0CC; &#xE0CE;
+細節    &#xE0D0; &#xE0D1; &#xE0D2; &#xE0D4; &#xE0A0; &#xE0A1; &#xE0A2; &#xE0A3;</div>
+  </div>
+  <div class="compare-card">
+    <div class="compare-title">Lite 對照 ── 應為 □ 缺字</div>
+    <div class="compare-line compare-lite">分隔符  &#xE0B0; &#xE0B1; &#xE0B2; &#xE0B3; &#xE0B4; &#xE0B5; &#xE0B6; &#xE0B7;
+斜切    &#xE0B8; &#xE0B9; &#xE0BA; &#xE0BB; &#xE0BC; &#xE0BD; &#xE0BE; &#xE0BF;
+裝飾    &#xE0C0; &#xE0C2; &#xE0C4; &#xE0C6; &#xE0C8; &#xE0CA; &#xE0CC; &#xE0CE;
+細節    &#xE0D0; &#xE0D1; &#xE0D2; &#xE0D4; &#xE0A0; &#xE0A1; &#xE0A2; &#xE0A3;</div>
+  </div>
+</div>
+
+<!-- 12.2 Devicons -->
+<h3 style="color:#89dceb;margin-top:1.6em;margin-bottom:0.2em">12.2 Devicons 語言 logo (E700–E7FF)</h3>
+<div class="compare-grid">
+  <div class="compare-card">
+    <div class="compare-title">Nerd Lite ── 應顯示語言 logo</div>
+    <div class="compare-line compare-merged">E700  &#xE700; &#xE701; &#xE702; &#xE703; &#xE704; &#xE705; &#xE706; &#xE707;
+E708  &#xE708; &#xE709; &#xE70A; &#xE70B; &#xE70C; &#xE70D; &#xE70E; &#xE70F;
+E710  &#xE710; &#xE711; &#xE712; &#xE713; &#xE714; &#xE715; &#xE716; &#xE717;
+E718  &#xE718; &#xE719; &#xE71A; &#xE71B; &#xE71C; &#xE71D; &#xE71E; &#xE71F;
+E720  &#xE720; &#xE721; &#xE722; &#xE723; &#xE724; &#xE725; &#xE726; &#xE727;
+E740  &#xE740; &#xE741; &#xE742; &#xE743; &#xE744; &#xE745; &#xE746; &#xE747;
+E750  &#xE750; &#xE751; &#xE752; &#xE753; &#xE756; &#xE757; &#xE758; &#xE759;
+E760  &#xE760; &#xE761; &#xE762; &#xE763; &#xE764; &#xE765; &#xE766; &#xE767;
+E770  &#xE770; &#xE771; &#xE772; &#xE773; &#xE774; &#xE775; &#xE776; &#xE777;
+E780  &#xE780; &#xE781; &#xE782; &#xE783; &#xE784; &#xE785; &#xE786; &#xE787;
+E790  &#xE790; &#xE791; &#xE792; &#xE793; &#xE794; &#xE795; &#xE796; &#xE797;
+E7A0  &#xE7A0; &#xE7A1; &#xE7A2; &#xE7A3; &#xE7A4; &#xE7A5; &#xE7A6; &#xE7A7;
+E7B0  &#xE7B0; &#xE7B1; &#xE7B2; &#xE7B3; &#xE7B4; &#xE7B5; &#xE7B6; &#xE7B7;
+E7C0  &#xE7C0; &#xE7C1; &#xE7C2; &#xE7C3; &#xE7C4; &#xE7C5; &#xE7C6; &#xE7C7;
+E7D0  &#xE7D0; &#xE7D1; &#xE7D2; &#xE7D3; &#xE7D4; &#xE7D5; &#xE7D6; &#xE7D7;
+E7E0  &#xE7E0; &#xE7E1; &#xE7E2; &#xE7E3; &#xE7E4; &#xE7E5; &#xE7E6; &#xE7E7;</div>
+  </div>
+  <div class="compare-card">
+    <div class="compare-title">Lite 對照 ── 應為 □ 缺字</div>
+    <div class="compare-line compare-lite">E700  &#xE700; &#xE701; &#xE702; &#xE703; &#xE704; &#xE705; &#xE706; &#xE707;
+E708  &#xE708; &#xE709; &#xE70A; &#xE70B; &#xE70C; &#xE70D; &#xE70E; &#xE70F;
+E710  &#xE710; &#xE711; &#xE712; &#xE713; &#xE714; &#xE715; &#xE716; &#xE717;
+E718  &#xE718; &#xE719; &#xE71A; &#xE71B; &#xE71C; &#xE71D; &#xE71E; &#xE71F;
+E720  &#xE720; &#xE721; &#xE722; &#xE723; &#xE724; &#xE725; &#xE726; &#xE727;
+E740  &#xE740; &#xE741; &#xE742; &#xE743; &#xE744; &#xE745; &#xE746; &#xE747;
+E750  &#xE750; &#xE751; &#xE752; &#xE753; &#xE756; &#xE757; &#xE758; &#xE759;
+E760  &#xE760; &#xE761; &#xE762; &#xE763; &#xE764; &#xE765; &#xE766; &#xE767;
+E770  &#xE770; &#xE771; &#xE772; &#xE773; &#xE774; &#xE775; &#xE776; &#xE777;
+E780  &#xE780; &#xE781; &#xE782; &#xE783; &#xE784; &#xE785; &#xE786; &#xE787;
+E790  &#xE790; &#xE791; &#xE792; &#xE793; &#xE794; &#xE795; &#xE796; &#xE797;
+E7A0  &#xE7A0; &#xE7A1; &#xE7A2; &#xE7A3; &#xE7A4; &#xE7A5; &#xE7A6; &#xE7A7;
+E7B0  &#xE7B0; &#xE7B1; &#xE7B2; &#xE7B3; &#xE7B4; &#xE7B5; &#xE7B6; &#xE7B7;
+E7C0  &#xE7C0; &#xE7C1; &#xE7C2; &#xE7C3; &#xE7C4; &#xE7C5; &#xE7C6; &#xE7C7;
+E7D0  &#xE7D0; &#xE7D1; &#xE7D2; &#xE7D3; &#xE7D4; &#xE7D5; &#xE7D6; &#xE7D7;
+E7E0  &#xE7E0; &#xE7E1; &#xE7E2; &#xE7E3; &#xE7E4; &#xE7E5; &#xE7E6; &#xE7E7;</div>
+  </div>
+</div>
+
+<!-- 12.3 Codicons -->
+<h3 style="color:#89dceb;margin-top:1.6em;margin-bottom:0.2em">12.3 Codicons VS Code 圖示 (EA60–EBEB)</h3>
+<div class="compare-grid">
+  <div class="compare-card">
+    <div class="compare-title">Nerd Lite ── 應顯示 VS Code 圖示</div>
+    <div class="compare-line compare-merged">EA60  &#xEA60; &#xEA61; &#xEA62; &#xEA63; &#xEA64; &#xEA65; &#xEA66; &#xEA67;
+EA68  &#xEA68; &#xEA69; &#xEA6A; &#xEA6B; &#xEA6C; &#xEA6D; &#xEA6E; &#xEA6F;
+EA70  &#xEA70; &#xEA71; &#xEA72; &#xEA73; &#xEA74; &#xEA75; &#xEA76; &#xEA77;
+EA78  &#xEA78; &#xEA79; &#xEA7A; &#xEA7B; &#xEA7C; &#xEA7D; &#xEA7E; &#xEA7F;
+EA80  &#xEA80; &#xEA81; &#xEA82; &#xEA83; &#xEA84; &#xEA85; &#xEA86; &#xEA87;
+EA90  &#xEA90; &#xEA91; &#xEA92; &#xEA93; &#xEA94; &#xEA95; &#xEA96; &#xEA97;
+EAA0  &#xEAA0; &#xEAA1; &#xEAA2; &#xEAA3; &#xEAA4; &#xEAA5; &#xEAA6; &#xEAA7;
+EAB0  &#xEAB0; &#xEAB1; &#xEAB2; &#xEAB3; &#xEAB4; &#xEAB5; &#xEAB6; &#xEAB7;
+EAC0  &#xEAC0; &#xEAC1; &#xEAC2; &#xEAC3; &#xEAC4; &#xEAC5; &#xEAC6; &#xEAC7;
+EAD0  &#xEAD0; &#xEAD1; &#xEAD2; &#xEAD3; &#xEAD4; &#xEAD5; &#xEAD6; &#xEAD7;
+EAD8  &#xEAD8; &#xEAD9; &#xEADA; &#xEADB; &#xEADC; &#xEADD; &#xEADE; &#xEADF;
+EAE0  &#xEAE0; &#xEAE1; &#xEAE2; &#xEAE3; &#xEAE4; &#xEAE5; &#xEAE6; &#xEAE7;
+EAF0  &#xEAF0; &#xEAF1; &#xEAF2; &#xEAF3; &#xEAF4; &#xEAF5; &#xEAF6; &#xEAF7;
+EB00  &#xEB00; &#xEB01; &#xEB02; &#xEB03; &#xEB04; &#xEB05; &#xEB06; &#xEB07;
+EB08  &#xEB08; &#xEB09; &#xEB0A; &#xEB0B; &#xEB0C; &#xEB0D; &#xEB0E; &#xEB0F;
+EB10  &#xEB10; &#xEB11; &#xEB12; &#xEB13; &#xEB14; &#xEB15; &#xEB16; &#xEB17;</div>
+  </div>
+  <div class="compare-card">
+    <div class="compare-title">Lite 對照 ── 應為 □ 缺字</div>
+    <div class="compare-line compare-lite">EA60  &#xEA60; &#xEA61; &#xEA62; &#xEA63; &#xEA64; &#xEA65; &#xEA66; &#xEA67;
+EA68  &#xEA68; &#xEA69; &#xEA6A; &#xEA6B; &#xEA6C; &#xEA6D; &#xEA6E; &#xEA6F;
+EA70  &#xEA70; &#xEA71; &#xEA72; &#xEA73; &#xEA74; &#xEA75; &#xEA76; &#xEA77;
+EA78  &#xEA78; &#xEA79; &#xEA7A; &#xEA7B; &#xEA7C; &#xEA7D; &#xEA7E; &#xEA7F;
+EA80  &#xEA80; &#xEA81; &#xEA82; &#xEA83; &#xEA84; &#xEA85; &#xEA86; &#xEA87;
+EA90  &#xEA90; &#xEA91; &#xEA92; &#xEA93; &#xEA94; &#xEA95; &#xEA96; &#xEA97;
+EAA0  &#xEAA0; &#xEAA1; &#xEAA2; &#xEAA3; &#xEAA4; &#xEAA5; &#xEAA6; &#xEAA7;
+EAB0  &#xEAB0; &#xEAB1; &#xEAB2; &#xEAB3; &#xEAB4; &#xEAB5; &#xEAB6; &#xEAB7;
+EAC0  &#xEAC0; &#xEAC1; &#xEAC2; &#xEAC3; &#xEAC4; &#xEAC5; &#xEAC6; &#xEAC7;
+EAD0  &#xEAD0; &#xEAD1; &#xEAD2; &#xEAD3; &#xEAD4; &#xEAD5; &#xEAD6; &#xEAD7;
+EAD8  &#xEAD8; &#xEAD9; &#xEADA; &#xEADB; &#xEADC; &#xEADD; &#xEADE; &#xEADF;
+EAE0  &#xEAE0; &#xEAE1; &#xEAE2; &#xEAE3; &#xEAE4; &#xEAE5; &#xEAE6; &#xEAE7;
+EAF0  &#xEAF0; &#xEAF1; &#xEAF2; &#xEAF3; &#xEAF4; &#xEAF5; &#xEAF6; &#xEAF7;
+EB00  &#xEB00; &#xEB01; &#xEB02; &#xEB03; &#xEB04; &#xEB05; &#xEB06; &#xEB07;
+EB08  &#xEB08; &#xEB09; &#xEB0A; &#xEB0B; &#xEB0C; &#xEB0D; &#xEB0E; &#xEB0F;
+EB10  &#xEB10; &#xEB11; &#xEB12; &#xEB13; &#xEB14; &#xEB15; &#xEB16; &#xEB17;</div>
+  </div>
+</div>
+
+<!-- 12.4 Octicons -->
+<h3 style="color:#89dceb;margin-top:1.6em;margin-bottom:0.2em">12.4 Octicons GitHub 圖示 (F400–F4FF)</h3>
+<div class="compare-grid">
+  <div class="compare-card">
+    <div class="compare-title">Nerd Lite ── 應顯示 GitHub 圖示</div>
+    <div class="compare-line compare-merged">F400  &#xF400; &#xF401; &#xF402; &#xF403; &#xF404; &#xF405; &#xF406; &#xF407;
+F408  &#xF408; &#xF409; &#xF40A; &#xF40B; &#xF40C; &#xF40D; &#xF40E; &#xF40F;
+F410  &#xF410; &#xF411; &#xF412; &#xF413; &#xF414; &#xF415; &#xF416; &#xF417;
+F418  &#xF418; &#xF419; &#xF41A; &#xF41B; &#xF41C; &#xF41D; &#xF41E; &#xF41F;
+F430  &#xF430; &#xF431; &#xF432; &#xF433; &#xF434; &#xF435; &#xF436; &#xF437;
+F440  &#xF440; &#xF441; &#xF442; &#xF443; &#xF444; &#xF445; &#xF446; &#xF447;
+F448  &#xF448; &#xF449; &#xF44A; &#xF44B; &#xF44C; &#xF44D; &#xF44E; &#xF44F;
+F450  &#xF450; &#xF451; &#xF452; &#xF453; &#xF454; &#xF455; &#xF456; &#xF457;
+F458  &#xF458; &#xF459; &#xF45A; &#xF45B; &#xF45C; &#xF45D; &#xF45E; &#xF45F;
+F460  &#xF460; &#xF461; &#xF462; &#xF463; &#xF464; &#xF465; &#xF466; &#xF467;
+F468  &#xF468; &#xF469; &#xF46A; &#xF46B; &#xF46C; &#xF46D; &#xF46E; &#xF46F;
+F470  &#xF470; &#xF471; &#xF472; &#xF473; &#xF474; &#xF475; &#xF476; &#xF477;
+F478  &#xF478; &#xF479; &#xF47A; &#xF47B; &#xF47C; &#xF47D; &#xF47E; &#xF47F;
+F480  &#xF480; &#xF481; &#xF482; &#xF483; &#xF484; &#xF485; &#xF486; &#xF487;
+F488  &#xF488; &#xF489; &#xF48A; &#xF48B; &#xF48C; &#xF48D; &#xF48E; &#xF48F;
+F490  &#xF490; &#xF491; &#xF492; &#xF493; &#xF494; &#xF495; &#xF496; &#xF497;</div>
+  </div>
+  <div class="compare-card">
+    <div class="compare-title">Lite 對照 ── 應為 □ 缺字</div>
+    <div class="compare-line compare-lite">F400  &#xF400; &#xF401; &#xF402; &#xF403; &#xF404; &#xF405; &#xF406; &#xF407;
+F408  &#xF408; &#xF409; &#xF40A; &#xF40B; &#xF40C; &#xF40D; &#xF40E; &#xF40F;
+F410  &#xF410; &#xF411; &#xF412; &#xF413; &#xF414; &#xF415; &#xF416; &#xF417;
+F418  &#xF418; &#xF419; &#xF41A; &#xF41B; &#xF41C; &#xF41D; &#xF41E; &#xF41F;
+F430  &#xF430; &#xF431; &#xF432; &#xF433; &#xF434; &#xF435; &#xF436; &#xF437;
+F440  &#xF440; &#xF441; &#xF442; &#xF443; &#xF444; &#xF445; &#xF446; &#xF447;
+F448  &#xF448; &#xF449; &#xF44A; &#xF44B; &#xF44C; &#xF44D; &#xF44E; &#xF44F;
+F450  &#xF450; &#xF451; &#xF452; &#xF453; &#xF454; &#xF455; &#xF456; &#xF457;
+F458  &#xF458; &#xF459; &#xF45A; &#xF45B; &#xF45C; &#xF45D; &#xF45E; &#xF45F;
+F460  &#xF460; &#xF461; &#xF462; &#xF463; &#xF464; &#xF465; &#xF466; &#xF467;
+F468  &#xF468; &#xF469; &#xF46A; &#xF46B; &#xF46C; &#xF46D; &#xF46E; &#xF46F;
+F470  &#xF470; &#xF471; &#xF472; &#xF473; &#xF474; &#xF475; &#xF476; &#xF477;
+F478  &#xF478; &#xF479; &#xF47A; &#xF47B; &#xF47C; &#xF47D; &#xF47E; &#xF47F;
+F480  &#xF480; &#xF481; &#xF482; &#xF483; &#xF484; &#xF485; &#xF486; &#xF487;
+F488  &#xF488; &#xF489; &#xF48A; &#xF48B; &#xF48C; &#xF48D; &#xF48E; &#xF48F;
+F490  &#xF490; &#xF491; &#xF492; &#xF493; &#xF494; &#xF495; &#xF496; &#xF497;</div>
+  </div>
+</div>
+
+<!-- 12.5 Seti-UI -->
+<h3 style="color:#89dceb;margin-top:1.6em;margin-bottom:0.2em">12.5 Seti-UI 編輯器檔案類型 (E5FA–E6FF)</h3>
+<div class="compare-grid">
+  <div class="compare-card">
+    <div class="compare-title">Nerd Lite ── 應顯示 Seti-UI 圖示</div>
+    <div class="compare-line compare-merged">E5FA  &#xE5FA; &#xE5FB; &#xE5FC; &#xE5FD; &#xE5FE; &#xE5FF; &#xE600; &#xE601;
+E602  &#xE602; &#xE603; &#xE604; &#xE605; &#xE606; &#xE607; &#xE608; &#xE609;
+E60A  &#xE60A; &#xE60B; &#xE60C; &#xE60D; &#xE60E; &#xE60F; &#xE610; &#xE611;
+E612  &#xE612; &#xE613; &#xE614; &#xE615; &#xE616; &#xE617; &#xE618; &#xE619;
+E61A  &#xE61A; &#xE61B; &#xE61C; &#xE61D; &#xE61E; &#xE61F; &#xE620; &#xE621;
+E622  &#xE622; &#xE623; &#xE624; &#xE625; &#xE626; &#xE627; &#xE628; &#xE629;
+E62A  &#xE62A; &#xE62B; &#xE62C; &#xE62D; &#xE62E; &#xE62F; &#xE630; &#xE631;
+E632  &#xE632; &#xE633; &#xE634; &#xE635; &#xE636; &#xE637; &#xE638; &#xE639;
+E63A  &#xE63A; &#xE63B; &#xE63C; &#xE63D; &#xE63E; &#xE63F; &#xE640; &#xE641;
+E642  &#xE642; &#xE643; &#xE644; &#xE645; &#xE646; &#xE647; &#xE648; &#xE649;
+E64A  &#xE64A; &#xE64B; &#xE64C; &#xE64D; &#xE64E; &#xE64F; &#xE650; &#xE651;
+E652  &#xE652; &#xE653; &#xE654; &#xE655; &#xE656; &#xE657; &#xE658; &#xE659;
+E65A  &#xE65A; &#xE65B; &#xE65C; &#xE65D; &#xE65E; &#xE65F; &#xE660; &#xE661;</div>
+  </div>
+  <div class="compare-card">
+    <div class="compare-title">Lite 對照 ── 應為 □ 缺字</div>
+    <div class="compare-line compare-lite">E5FA  &#xE5FA; &#xE5FB; &#xE5FC; &#xE5FD; &#xE5FE; &#xE5FF; &#xE600; &#xE601;
+E602  &#xE602; &#xE603; &#xE604; &#xE605; &#xE606; &#xE607; &#xE608; &#xE609;
+E60A  &#xE60A; &#xE60B; &#xE60C; &#xE60D; &#xE60E; &#xE60F; &#xE610; &#xE611;
+E612  &#xE612; &#xE613; &#xE614; &#xE615; &#xE616; &#xE617; &#xE618; &#xE619;
+E61A  &#xE61A; &#xE61B; &#xE61C; &#xE61D; &#xE61E; &#xE61F; &#xE620; &#xE621;
+E622  &#xE622; &#xE623; &#xE624; &#xE625; &#xE626; &#xE627; &#xE628; &#xE629;
+E62A  &#xE62A; &#xE62B; &#xE62C; &#xE62D; &#xE62E; &#xE62F; &#xE630; &#xE631;
+E632  &#xE632; &#xE633; &#xE634; &#xE635; &#xE636; &#xE637; &#xE638; &#xE639;
+E63A  &#xE63A; &#xE63B; &#xE63C; &#xE63D; &#xE63E; &#xE63F; &#xE640; &#xE641;
+E642  &#xE642; &#xE643; &#xE644; &#xE645; &#xE646; &#xE647; &#xE648; &#xE649;
+E64A  &#xE64A; &#xE64B; &#xE64C; &#xE64D; &#xE64E; &#xE64F; &#xE650; &#xE651;
+E652  &#xE652; &#xE653; &#xE654; &#xE655; &#xE656; &#xE657; &#xE658; &#xE659;
+E65A  &#xE65A; &#xE65B; &#xE65C; &#xE65D; &#xE65E; &#xE65F; &#xE660; &#xE661;</div>
+  </div>
+</div>
+
+<!-- 12.6 寬度對齊測試 -->
+<h3 style="color:#89dceb;margin-top:1.6em;margin-bottom:0.2em">12.6 寬度對齊測試 — 每個 icon 應與 |A| 等寬（1 欄）</h3>
+<div class="compare-grid">
+  <div class="compare-card">
+    <div class="compare-title">Nerd Lite ── icon 應與 |A| 對齊</div>
+    <div class="compare-line compare-merged">參考  |A| |B| |C| |D| |一| |二| |三| |四|
+Power |&#xE0B0;| |&#xE0B2;| |&#xE0A0;| |&#xE0B4;| |&#xE0C0;| |&#xE0C4;| |&#xE0C8;| |&#xE0CA;|
+Devi  |&#xE700;| |&#xE710;| |&#xE724;| |&#xE750;| |&#xE762;| |&#xE765;| |&#xE7A8;| |&#xE7B5;|
+Codi  |&#xEA60;| |&#xEA7C;| |&#xEA96;| |&#xEAD5;| |&#xEAD6;| |&#xEAD9;| |&#xEADB;| |&#xEAF2;|
+Octi  |&#xF400;| |&#xF410;| |&#xF418;| |&#xF431;| |&#xF449;| |&#xF468;| |&#xF46D;| |&#xF46F;|
+Seti  |&#xE5FA;| |&#xE5FB;| |&#xE60C;| |&#xE612;| |&#xE628;| |&#xE63A;| |&#xE648;| |&#xE659;|</div>
+  </div>
+  <div class="compare-card">
+    <div class="compare-title">Lite 對照 ── 同樣格式，右欄無圖示</div>
+    <div class="compare-line compare-lite">參考  |A| |B| |C| |D| |一| |二| |三| |四|
+Power |&#xE0B0;| |&#xE0B2;| |&#xE0A0;| |&#xE0B4;| |&#xE0C0;| |&#xE0C4;| |&#xE0C8;| |&#xE0CA;|
+Devi  |&#xE700;| |&#xE710;| |&#xE724;| |&#xE750;| |&#xE762;| |&#xE765;| |&#xE7A8;| |&#xE7B5;|
+Codi  |&#xEA60;| |&#xEA7C;| |&#xEA96;| |&#xEAD5;| |&#xEAD6;| |&#xEAD9;| |&#xEADB;| |&#xEAF2;|
+Octi  |&#xF400;| |&#xF410;| |&#xF418;| |&#xF431;| |&#xF449;| |&#xF468;| |&#xF46D;| |&#xF46F;|
+Seti  |&#xE5FA;| |&#xE5FB;| |&#xE60C;| |&#xE612;| |&#xE628;| |&#xE63A;| |&#xE648;| |&#xE659;|</div>
+  </div>
+</div>
+
+<!-- 12.7 混排場景 -->
+<h3 style="color:#89dceb;margin-top:1.6em;margin-bottom:0.2em">12.7 混排 — icon 與 CJK / emoji / 英文並排</h3>
+<div class="compare-grid">
+  <div class="compare-card">
+    <div class="compare-title">Nerd Lite ── icon 不應壓到鄰字</div>
+    <div class="compare-line compare-merged">ZWJ emoji  👩‍💻 &#xE700; 👨‍💻 &#xE710; 👋🏻 &#xEA60;
+旗幟       🇹🇼 &#xE0B0; 🇺🇸 &#xF468; 🇯🇵 &#xEAD5;
+中文       一&#xE0B0;二三 四&#xE700;五 六&#xEA60;七
+英文       AB&#xE0B2;CD EF&#xE710;GH IJ&#xEADB;KL
+混合       [&#xE0A0; main] 👩‍💻 &#xF418; feat: 修正
+符號       ★&#xE0B0;★ ★&#xE700;★ ★&#xEA60;★ ★&#xF400;★
+間距       A &#xE0B0; A &#xE700; A &#xEA60; A &#xF418; A</div>
+  </div>
+  <div class="compare-card">
+    <div class="compare-title">Lite 對照 ── 右欄 PUA 為 □</div>
+    <div class="compare-line compare-lite">ZWJ emoji  👩‍💻 &#xE700; 👨‍💻 &#xE710; 👋🏻 &#xEA60;
+旗幟       🇹🇼 &#xE0B0; 🇺🇸 &#xF468; 🇯🇵 &#xEAD5;
+中文       一&#xE0B0;二三 四&#xE700;五 六&#xEA60;七
+英文       AB&#xE0B2;CD EF&#xE710;GH IJ&#xEADB;KL
+混合       [&#xE0A0; main] 👩‍💻 &#xF418; feat: 修正
+符號       ★&#xE0B0;★ ★&#xE700;★ ★&#xEA60;★ ★&#xF400;★
+間距       A &#xE0B0; A &#xE700; A &#xEA60; A &#xF418; A</div>
+  </div>
+</div>
+
+<!-- 12.8 Terminal Prompt 模擬 -->
+<h3 style="color:#89dceb;margin-top:1.6em;margin-bottom:0.2em">12.8 Terminal Prompt 模擬</h3>
+<div class="compare-grid">
+  <div class="compare-card">
+    <div class="compare-title">Nerd Lite ── Powerline / Starship / Neovim 風格</div>
+    <div class="compare-line compare-merged" style="font-size:18px"> user  ~/projects  &#xE0A0; main &#xE0B0;
+&#xE0B0; &#xE710;  src/main.py  &#xE0B0; &#xE0B0; 2s &#xE0B0;
+$ git &#xF468; status
+&#xF46D; Merge: feat/ui → main
+&#xF46F; PR #42 open · &#xF410; 0 issues
+
+ NvimTree          Buffers
+&#xE5FA; src/             &#xE7C4; main.js
+&#xEAB6;   index.py       &#xE700;   App.tsx
+&#xEAB6;   utils.py       &#xE7B5;   store.vue
+&#xF44D;   tests/         &#xEA96; preview
+&#xF44D;   docs/
+
+&#xEAD5; main &#xEAD6; a1b2c3 &#xEAD9; 2 &#xEADB; 1  &#xEA73; tests</div>
+  </div>
+  <div class="compare-card">
+    <div class="compare-title">Lite 對照 ── PUA 呈 □，其餘文字對齊</div>
+    <div class="compare-line compare-lite" style="font-size:18px"> user  ~/projects  &#xE0A0; main &#xE0B0;
+&#xE0B0; &#xE710;  src/main.py  &#xE0B0; &#xE0B0; 2s &#xE0B0;
+$ git &#xF468; status
+&#xF46D; Merge: feat/ui → main
+&#xF46F; PR #42 open · &#xF410; 0 issues
+
+ NvimTree          Buffers
+&#xE5FA; src/             &#xE7C4; main.js
+&#xEAB6;   index.py       &#xE700;   App.tsx
+&#xEAB6;   utils.py       &#xE7B5;   store.vue
+&#xF44D;   tests/         &#xEA96; preview
+&#xF44D;   docs/
+
+&#xEAD5; main &#xEAD6; a1b2c3 &#xEAD9; 2 &#xEADB; 1  &#xEA73; tests</div>
+  </div>
+</div>
+
+<div class="label" style="margin-top:12px">
+  ✓ 正常：各集合有圖示、icon 不壓鄰字、|icon| 與 |A| 等寬、prompt 模擬列對齊<br>
+  ✗ 異常：圖示缺字（□）、icon 溢出壓字、寬度不等、行列歪斜
+</div>
+</div>
+
 <script>
 const VARIANTS = {
   color: {
@@ -360,6 +738,38 @@ family 👨‍👩‍👧‍👦
 skin   👋🏻 ☝🏻   👍🏽
 flags  🇹🇼 🇯🇵 🇺🇸 🇨🇳 🇰🇷 🇸🇬 🇭🇰 🇹🇭 🇻🇳 🇵🇭 🇨🇦 🇦🇺 🇬🇧`,
   },
+  'nerd-lite': {
+    dir: 'output/fonts-nerd-lite',
+    fontFamily: 'SarasaMonoTCEmojiLiteNerd',
+    sourceFontFamily: 'NotoEmojiSource',
+    sourceFontFile: 'fonts/NotoEmoji[wght].ttf',
+    sourceFontLabel: 'NotoEmoji[wght].ttf',
+    badgeClass: 'badge-nerd-lite',
+    badgeText: 'Nerd Lite',
+    sequenceHint: 'Nerd Lite 繼承 Lite 的 sequence/旗幟能力，另在 BMP PUA 範圍加入 Nerd Fonts icon。',
+    sequenceCompareHint: '若 emoji sequence 正常、但 Section 12 的 PUA icon 缺字或寬度錯位，通常是 Nerd merge 後處理有問題。',
+    sequenceZwj: `woman technologist  👩‍💻
+man technologist    👨‍💻
+woman scientist     👩‍🔬
+family              👨‍👩‍👧‍👦
+women + girl        👩‍👩‍👧
+men + boy           👨‍👨‍👦`,
+    sequenceSkinTone: `light   👋🏻 👍🏻 🙌🏻 ☝🏻
+medium  👋🏽 👍🏽 🙌🏽 ☝🏽
+dark    👋🏿 👍🏿 🙌🏿 ☝🏿`,
+    sequenceFlag: `United States (US)  🇺🇸   Japan  (JP)  🇯🇵   Taiwan        (TW)  🇹🇼
+China         (CN)  🇨🇳   United Kingdom(GB)  🇬🇧   Canada       (CA)  🇨🇦
+Singapore     (SG)  🇸🇬   Australia   (AU)  🇦🇺   Thailand      (TH)  🇹🇭
+Philippines   (PH)  🇵🇭   Vietnam     (VN)  🇻🇳   New Zealand   (NZ)  🇳🇿
+South Korea   (KR)  🇰🇷   Hong Kong   (HK)  🇭🇰`,
+    sequenceMixed: `feat(ui): 加入 👩‍💻 / 👨‍💻 onboarding
+docs: 補齊 TW 🇹🇼 / JP 🇯🇵 / CN 🇨🇳 + Powerline 
+review: 手勢反應改成 👋🏻 👍🏽 🙌🏿，shell prompt 加上  `,
+    sequenceCompare: `tech   👩‍💻 👨‍💻 👩‍🔬
+family 👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦
+skin   👋🏻 👍🏻   👋🏽 👍🏽   👋🏿 👍🏿
+flags  🇺🇸 🇯🇵 🇹🇼 🇨🇳 🇬🇧 🇨🇦 🇸🇬 🇦🇺 🇹🇭 🇵🇭 🇻🇳 🇳🇿 🇰🇷 🇭🇰`,
+  },
 };
 
 function updateSequenceSamples() {
@@ -378,6 +788,46 @@ let currentVariant = 'color';
 let currentFontCacheKey = `${Date.now()}`;
 let currentMergedFontAlias = 'VerifyMergedFont';
 let currentSourceFontAlias = 'VerifySourceFont';
+
+async function loadLiteStyleFonts(manifest) {
+  const cfg = VARIANTS['lite'];
+  // Map style name → CSS column selector suffix
+  const styleColMap = {
+    'Regular': 'Regular',
+    'Italic': 'Italic',
+    'Bold': 'Bold',
+    'BoldItalic': 'BoldItalic',
+  };
+  for (const fontInfo of manifest.fonts) {
+    const colKey = styleColMap[fontInfo.style];
+    if (!colKey) continue;
+    const url = `${cfg.dir}/${fontInfo.filename}?v=${encodeURIComponent(currentFontCacheKey)}`;
+    const isBold = fontInfo.style.includes('Bold');
+    const isItalic = fontInfo.style.includes('Italic');
+    const alias = `VerifyLiteStyle-${fontInfo.style}-${currentFontCacheKey}`;
+    const face = new FontFace(alias, `url(${url})`, {
+      weight: isBold ? '700' : '400',
+      style: isItalic ? 'italic' : 'normal',
+    });
+    await face.load();
+    document.fonts.add(face);
+    document.querySelectorAll(`.lite-col-${colKey}`).forEach(el => {
+      el.style.fontFamily = `'${alias}', monospace`;
+    });
+  }
+}
+
+async function loadNerdLiteCompareFont() {
+  const alias = `VerifyNerdLiteCompare-${currentFontCacheKey}`;
+  const face = new FontFace(
+    alias,
+    `url(output/fonts-lite/SarasaMonoTCEmojiLite-Regular.ttf?v=${encodeURIComponent(currentFontCacheKey)})`,
+    { weight: '400', style: 'normal' }
+  );
+  await face.load();
+  document.fonts.add(face);
+  document.documentElement.style.setProperty('--nerd-lite-compare-font', `'${alias}', monospace`);
+}
 
 function updateFontFamily() {
   const family = currentMergedFontAlias;
@@ -416,13 +866,19 @@ async function loadFonts() {
   try {
     const resp = await fetch(`${cfg.dir}/fonts-manifest.json`, { cache: 'no-store' });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    manifest = await resp.json();
-    currentFontCacheKey = `${manifest.version}-${Date.now()}`;
+      manifest = await resp.json();
+      window._lastManifest = manifest;
+      currentFontCacheKey = `${manifest.version}-${Date.now()}`;
     currentMergedFontAlias = `VerifyMerged-${currentVariant}-${currentFontCacheKey}`;
     currentSourceFontAlias = `VerifySource-${currentVariant}-${currentFontCacheKey}`;
   } catch(e) {
+    const variantBuildFlag =
+      currentVariant === 'lite' ? ' --lite' :
+      currentVariant === 'colrv1' ? ' --colrv1' :
+      currentVariant === 'nerd-lite' ? ' --nerd-lite' :
+      '';
     statusEl.innerHTML =
-      `<span class="status err">✗ 找不到 ${cfg.dir}/fonts-manifest.json，請先執行 build.py${currentVariant === 'lite' ? ' --lite' : currentVariant === 'colrv1' ? ' --colrv1' : ''}</span>`;
+      `<span class="status err">✗ 找不到 ${cfg.dir}/fonts-manifest.json，請先執行 build.py${variantBuildFlag}</span>`;
     return;
   }
 
@@ -466,7 +922,7 @@ async function applyStyle() {
   await loadFont({ style: opt.value, filename: opt.dataset.file });
   const isBold = opt.value.includes('Bold');
   const isItalic = opt.value.includes('Italic');
-  document.querySelectorAll('.mono, .size-compare').forEach(el => {
+  document.querySelectorAll('.mono, .size-compare, .compare-merged').forEach(el => {
     el.style.fontWeight = isBold ? '700' : '400';
     el.style.fontStyle = isItalic ? 'italic' : 'normal';
   });
@@ -474,11 +930,25 @@ async function applyStyle() {
 
 async function switchVariant() {
   currentVariant = document.getElementById('variantSelect').value;
-  document.querySelectorAll('.mono, .size-compare').forEach(el => {
+  document.querySelectorAll('.mono, .size-compare, .compare-merged').forEach(el => {
     el.style.fontWeight = '';
     el.style.fontStyle = '';
   });
+  document.getElementById('liteFlagSection').style.display = 'none';
+  document.getElementById('nerdLiteSection').style.display = 'none';
   await loadFonts();
+  const isLite = currentVariant === 'lite';
+  const isNerdLite = currentVariant === 'nerd-lite';
+  document.getElementById('liteFlagSection').style.display = isLite ? '' : 'none';
+  if (isLite && window._lastManifest) await loadLiteStyleFonts(window._lastManifest);
+  document.getElementById('nerdLiteSection').style.display = isNerdLite ? '' : 'none';
+  if (isNerdLite) {
+    try {
+      await loadNerdLiteCompareFont();
+    } catch (e) {
+      console.warn('Lite compare font unavailable for Nerd Lite section:', e);
+    }
+  }
 }
 
 loadFonts();

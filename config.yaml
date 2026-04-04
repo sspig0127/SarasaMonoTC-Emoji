@@ -210,3 +210,27 @@ colrv1:
     - "U+1F1E8 U+1F1E6"         # 🇨🇦 Canada flag
     - "U+1F1E6 U+1F1FA"         # 🇦🇺 Australia flag
     - "U+1F1EC U+1F1E7"         # 🇬🇧 United Kingdom flag
+
+# Nerd Lite variant — Lite + Nerd Fonts PUA icons
+# Source: fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf (MIT)
+# UPM: 2048 → scaled to 1000 on merge
+nerd_lite:
+  family_name: "SarasaMonoTCEmojiLiteNerd"
+  nerd_font: "NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf"
+  output_dir: "output/fonts-nerd-lite"
+  description: "Sarasa Mono TC (更紗黑體繁中等寬) with embedded Noto Emoji + Nerd Fonts PUA icons"
+  # BMP PUA ranges to include. Format: [start, end] (inclusive, hex int).
+  icon_ranges:
+    - [0xE0A0, 0xE0D7]   # Powerline Symbols
+    - [0xE5FA, 0xE6FF]   # Seti-UI + Custom
+    - [0xE700, 0xE7FF]   # Devicons
+    - [0xEA60, 0xEBEB]   # Codicons
+    - [0xF400, 0xF4FF]   # Octicons
+  # Ranges that must stay single-column (advance = half_width = 500).
+  # All other ranges default to double-column (advance = full_width = 1000).
+  # Powerline prompt separators (E0B0 ►, E0B2 ◄, etc.) must be exactly 1 column
+  # to connect correctly with adjacent colour blocks in shell prompts and Neovim
+  # statuslines.  Devicons / Codicons / Octicons / Seti-UI are double-column so
+  # they appear visually proportional to emoji.
+  single_column_ranges:
+    - [0xE0A0, 0xE0D7]   # Powerline Symbols — keep 1-col for prompt alignment
