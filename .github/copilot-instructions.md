@@ -105,7 +105,7 @@ uv run python -m http.server 8765           # 視覺驗證（搭配 verify-emoji
 ### COLRv1 特有
 
 詳見 [`.github/colrv1-dev-notes.md`](./colrv1-dev-notes.md)。摘要：
-- greedy 預算 8,136 slots（Phase 1: force + priority codepoints；Phase 2: priority sequences；Phase 3: greedy 填充）
+- greedy 預算 8,450 slots（Phase 1: force + priority codepoints；Phase 2: priority sequences；Phase 3: skip-and-continue greedy 填充）
 - `_scale_colrv1_paint_coords()` 負責縮放 COLR paint tree 中的 font-unit 座標（UPM 轉換必要步驟）
 - geometry helper glyph 的 `hmtx` / `vmtx` 必須保留來源字體縮放後的 metrics，不能一律寫成 `(0, 0)`；
   否則 Chromium 會把高倍率 transform emoji（如 🟡 / 🟢）裁出 Clip 範圍，只剩 tiny fragment
