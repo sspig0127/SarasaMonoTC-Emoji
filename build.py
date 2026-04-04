@@ -432,6 +432,7 @@ Configuration priority: CLI args > config.yaml > defaults
         color_force_codepoints = None
         nerd_font_relative = None
         nerd_icon_ranges = None
+        nerd_single_column_ranges = None
     elif is_nerd_lite:
         family_name = (
             get_config_value(yaml_config, "nerd_lite", "family_name")
