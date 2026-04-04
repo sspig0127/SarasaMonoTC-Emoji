@@ -1,6 +1,6 @@
 # Copilot Instructions — SarasaMonoTC-Emoji
 
-> 目前版本：**v2.0.0**（2026-04-01）
+> 目前版本：**v2.1.0**（2026-04-04）
 > COLRv1 深度技術細節 → [`.github/colrv1-dev-notes.md`](./colrv1-dev-notes.md)（debug 時再 Read）
 
 ## 專案概述
@@ -116,9 +116,9 @@ uv run python -m http.server 8765           # 視覺驗證（搭配 verify-emoji
 ### Nerd Lite 特有
 
 - **來源字體**：`fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf`（Nerd Fonts Symbols Only, UPM 2048）
-- **UPM 縮放**：Nerd glyph merge 時統一做 `2048 → 1000` 縮放，沿用 `_scale_glyph()`
-- **字寬規則**：Nerd PUA icon 固定使用 `half_width`（1 欄），emoji 仍維持 Lite 的 2 欄
-- **設定來源**：`config.yaml` → `nerd_lite.nerd_font`、`nerd_lite.output_dir`、`nerd_lite.icon_ranges`
+- **UPM 縮放**：two-pass merge；Powerline 用 `scale=500/2048`，其他集合用 `scale=1000/2048`
+- **折衷方案欄寬**：Powerline（E0A0–E0D7）→ 1 欄（advance=500），其他集合 → 2 欄（advance=1000）
+- **設定來源**：`config.yaml` → `nerd_lite.nerd_font`、`nerd_lite.output_dir`、`nerd_lite.icon_ranges`、`nerd_lite.single_column_ranges`
 - **pipeline**：先完整跑 `merge_emoji_lite()`，再做 Nerd Fonts BMP PUA 後處理，避免複製 Lite 既有 sequence / flag 邏輯
 
 ---
