@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 路線圖
 
-> 最後更新：2026-04-01（v2.0 已發佈；release workflow 只剩 setup-uv warning 待追蹤）
+> 最後更新：2026-04-04（精簡 v2.0 規劃細節；歷史內容移至 roadmap-history.md）
 >
 > **歷史版本實作細節** → [`docs/roadmap-history.md`](./docs/roadmap-history.md)（需要查閱時再 Read）
 > **COLRv1 深度技術細節** → [`.github/colrv1-dev-notes.md`](./.github/colrv1-dev-notes.md)
@@ -27,7 +27,7 @@
 
 ## v2.0 — 完整 Emoji 支援（已發佈 / 維護中）
 
-v2.0.0 已補齊這個 sequence emoji 缺口；此段保留作為設計與維護背景。
+v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景。
 
 | 類型 | 範例 | 技術需求 |
 |------|------|---------|
@@ -37,97 +37,36 @@ v2.0.0 已補齊這個 sequence emoji 缺口；此段保留作為設計與維護
 | 性別 / 職業 | 👩‍💻 | ZWJ + U+2640/2642 |
 
 **技術方向**：解析來源 emoji 字體的 GSUB（LookupType 4），建立 ZWJ sequence → glyph 對應，
-再把 sequence 規則生成到 merged font。細部拆解見 [`docs/v2-sequence-implementation.md`](./docs/v2-sequence-implementation.md)。
+再把 sequence 規則生成到 merged font。細部設計見 [`docs/v2-sequence-implementation.md`](./docs/v2-sequence-implementation.md)。
 
-### 目前進度
+### 已完成
 
-- 已完成：
-  - `extract_emoji_sequences()` 與 shared `EmojiEntry` metadata
-  - `Color` / `Lite` / `COLRv1` 三條 merge pipeline 的 sequence-aware 輸入
-  - 三個變體的 GSUB sequence ligature 寫入
-  - source / unit / output tests
-  - `verify-emoji.html` 的 ZWJ / 膚色 / 旗幟驗證區
-- 已發佈：
-  - `v2.0.0` release
-  - release workflow 已更新為 `actions/checkout@v5` / `actions/cache@v5`
-- 已驗證代表樣本：
-  - `👩‍💻`
-  - `👋🏻`
-  - `🇺🇸`
-- 目前 COLRv1 採保守策略：
-  - 先做既有 single-codepoint greedy 選取
-  - 再用剩餘 glyph budget 選入 sequence
-  - `config.yaml` 的 `colrv1.priority_sequences` 可保證高價值 sequence 優先納入
+- Color / Lite / COLRv1 三條 merge pipeline 全串通 sequence emoji
+- Lite：所有 RI-pair 旗幟全域套用 2-column 自訂旗面（53 helper glyph，無白名單）
+- Release workflow：`actions/checkout@v5` / `actions/cache@v5`
+- 代表樣本已驗證：`👩‍💻` / `👋🏻` / `🇺🇸`
 
-### 後續仍待補強
+### 後續仍待補強（已歸入技術債）
 
-- 全 style 自動化驗證仍以 `Regular` 為主
-- COLRv1 sequence 仍不是全量納入，而是 budget 內的優先 / greedy 選取
-- release workflow 的最後一個 Node.js 20 warning 只剩 `astral-sh/setup-uv@v4`
+- 非 `Regular` style 的 output font 自動化斷言（Italic / Bold / BoldItalic）
+- COLRv1 sequence 仍為 budget-limited（priority + greedy，非全量）
+- Release workflow 最後一個 Node.js 20 warning：`astral-sh/setup-uv@v4`（等上游 node24 版）
 
-### 實作拆解建議
+### 下一步
 
-| Phase | 目標 | 主要輸出 |
-|------|------|---------|
-| P1 | 先支援單一來源字體已有的 sequence emoji 映射 | sequence → glyph 對照表、基本測試 | ✅ |
-| P2 | 將 sequence 產生為 Sarasa 端可用的 GSUB ligature | merged GSUB、cmap / glyph order 整合 | ✅ |
-| P3 | 先補齊高價值序列 | ZWJ 家庭、性別職業、膚色變體、旗幟 | ✅ MVP |
-| P4 | 補測試與驗證工具 | sequence regression tests、verify 頁增加 sequence 專區 | ✅ MVP |
-| P5 | 擴到所有 style 與 release 流程 | 全 style 驗證、版本 / 發佈整理 | ✅ |
+- 追蹤 `astral-sh/setup-uv` node24 版，屆時更新 release workflow
+- 視需要調整 `colrv1.priority_sequences`
+- 補非 Regular style 的 regression cases
 
-### 程式面需要新增的能力
-
-1. 解析來源字體 GSUB
-   - 讀出 ligature substitution（LookupType 4）
-   - 建立 `codepoint sequence -> source glyph name` 對照
-2. sequence-aware glyph 收集
-   - 目前 `get_emoji_cmap()` 只處理 `getBestCmap()` 的單一 codepoint
-   - v2.0 需要新增 sequence extractor，不能只靠 cmap
-3. merged font 的 GSUB 生成 / 合併
-   - 為 sequence 輸入建立 ligature 規則
-   - 讓 `👨 + ZWJ + 👩 + ZWJ + 👧 + ZWJ + 👦 -> family glyph`
-4. 變體一致性處理
-   - Color / Lite / COLRv1 都要能吃同一份 sequence metadata
-   - glyph 輪廓、bitmap、paint tree 各自複製，但 sequence 規則應盡量共用管線
-
-### 已完成的最小可行版本
-
-- 已選一小組高價值 sequence：
-  - `👩‍💻`
-  - `👨‍💻`
-  - `👩‍🔬`
-  - `👨‍👩‍👧‍👦`
-  - `👋🏻`
-  - `🇺🇸`
-- 已先在 `Regular` 跑通 end-to-end
-- 已擴到三變體：
-  - `Lite`
-  - `Color`
-  - `COLRv1`
-
-### 下一步建議
-
-- 補 `Italic / Bold / BoldItalic` 的 output font 自動化檢查
-- 決定 COLRv1 sequence 是否需要擴增 `priority_sequences`
-- 規劃版本號、release note、zip / manifest 更新策略
-- 追蹤 `astral-sh/setup-uv` 的 node24 版，並在可用時更新 release workflow
-
-### 測試需求（目前狀態）
-
-- 已完成：
-  - pure logic：sequence parser、GSUB rule builder
-  - source font：來源字體確實含對應 ligature / glyph
-  - output font：代表 sequence 在 merge 後能映射到正確 glyph
-  - visual：verify 頁已新增 ZWJ、膚色、旗幟三類樣本
-- 尚待補強：
-  - 非 `Regular` style 的 output assertions
-  - 更多 sequence 覆蓋樣本與回歸範圍
+> 規劃細節（實作拆解 / 各階段 MVP / 測試快照）→ [`docs/roadmap-history.md`](./docs/roadmap-history.md)
 
 ---
 
 ## v2.x — 評估第四變體：Emoji + Nerd Fonts PUA
 
-除了目前三個變體（Color / Lite / COLRv1），中期可評估新增一條「emoji + Nerd Fonts PUA」產品線，
+v2.0 已發佈，前置條件達成，可開始評估。
+
+除了目前三個變體（Color / Lite / COLRv1），中期可評估新增「emoji + Nerd Fonts PUA」產品線，
 暫名可為 `SarasaMonoTCEmojiNerd`。
 
 ### 需求定位
@@ -143,15 +82,10 @@ v2.0.0 已補齊這個 sequence emoji 缺口；此段保留作為設計與維護
 
 ### 可能技術路線
 
-建議順序：
-1. 先完成 v2.0 sequence emoji
-2. 再評估以 Nerd Fonts `font-patcher` 或等價流程，將 PUA glyph merge 進既有輸出字體
-3. 優先從 `Lite` 或 `COLRv1` 變體試做，再決定是否擴到 `Color`
+1. 以 Nerd Fonts `font-patcher` 或等價流程，將 PUA glyph merge 進既有輸出字體
+2. 優先從 `Lite` 或 `COLRv1` 變體試做，再決定是否擴到 `Color`
 
-原因：
-- v2.0 已經會引入新的 GSUB / sequence metadata 複雜度
-- Nerd Fonts PUA 屬另一條 glyph merge 管線，若同時開工，問題來源會很難切分
-- 先在較容易 debug 的變體試做，較容易看清 glyph order、name table、寬度與 PUA 對映問題
+原因：Nerd Fonts PUA 屬另一條 glyph merge 管線；先在較易 debug 的變體試做，問題來源較易切分。
 
 ### 主要風險
 
@@ -166,25 +100,16 @@ v2.0.0 已補齊這個 sequence emoji 缺口；此段保留作為設計與維護
 ### 建議驗證方式
 
 - 先做單一 style MVP：`Regular`
-- 先挑一小組高頻 icon：
-  - branch / git
-  - folder / file
-  - terminal / prompt
-  - dev language / tooling icon
-- 驗證項目：
-  - PUA codepoint 是否正確映射
-  - monospace 寬度是否穩定
-  - 與 emoji 共存時是否出現 glyph order / name collision
-  - 終端機、VS Code、瀏覽器 verify 頁是否都能正確顯示
+- 先挑一小組高頻 icon：branch/git、folder/file、terminal/prompt、dev language
+- 驗證項目：PUA mapping、monospace 寬度、glyph collision、終端機 / VS Code / verify 頁顯示
 
-### 暫時結論
+### 現況
 
-- 這個方向有產品價值，適合列入 `v2.x` 評估項目
-- 但不建議插隊到 `v2.0` 主線之前
-- 建議等 sequence emoji 先穩定後，再以獨立分支或獨立實驗腳本驗證
+- 有產品價值，列入 `v2.x` 評估項目
+- 建議以獨立分支或獨立實驗腳本驗證，不影響主線穩定性
+- 詳細評估（架構選項、PUA 分區分析、MVP 路線）→ [`docs/nerd-fonts-variant-eval.md`](./docs/nerd-fonts-variant-eval.md)
 
-參考：
-- [Nerd Fonts font-patcher](https://github.com/ryanoasis/nerd-fonts/blob/master/font-patcher)
+參考：[Nerd Fonts font-patcher](https://github.com/ryanoasis/nerd-fonts/blob/master/font-patcher)
 
 ---
 

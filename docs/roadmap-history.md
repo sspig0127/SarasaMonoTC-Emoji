@@ -1,8 +1,52 @@
 # SarasaMonoTC-Emoji 歷史版本實作細節
 
-> 從 `ROADMAP.md` 分離（2026-03-30）。僅在需要查閱特定版本技術決策時才 Read 此檔案。
+> 從 `ROADMAP.md` 分離（2026-03-30；v2.0 規劃細節於 2026-04-04 追加）。
+> 僅在需要查閱特定版本技術決策時才 Read 此檔案。
 > 版本概覽與未來規劃 → [`ROADMAP.md`](../ROADMAP.md)
 > COLRv1 深度技術細節 → [`.github/colrv1-dev-notes.md`](../.github/colrv1-dev-notes.md)
+
+---
+
+## v2.0 — 規劃與實作細節存檔 ✅
+
+> 歸檔自 ROADMAP.md（2026-04-04）。v2.0 已發佈，以下為規劃期記錄。
+> 實作設計全覽 → [`docs/v2-sequence-implementation.md`](../docs/v2-sequence-implementation.md)
+
+### 實作拆解（已全部完成）
+
+| Phase | 目標 | 主要輸出 | 狀態 |
+|------|------|---------|------|
+| P1 | 支援單一來源字體的 sequence emoji 映射 | sequence → glyph 對照表、基本測試 | ✅ |
+| P2 | 將 sequence 產生為 Sarasa 端可用的 GSUB ligature | merged GSUB、cmap / glyph order 整合 | ✅ |
+| P3 | 補齊高價值序列 | ZWJ 家庭、性別職業、膚色變體、旗幟 | ✅ |
+| P4 | 補測試與驗證工具 | sequence regression tests、verify 頁 sequence 專區 | ✅ |
+| P5 | 擴到所有 style 與 release 流程 | 全 style 驗證、版本 / 發佈整理 | ✅ |
+
+### 程式面新增能力（已實作）
+
+1. **GSUB 解析**：讀出 LookupType 4 ligature，建立 `codepoint sequence → source glyph name` 對照
+2. **sequence-aware glyph 收集**：`extract_emoji_sequences()` 補充 `get_emoji_cmap()` 的 single-codepoint 限制
+3. **merged font GSUB ligature 生成**：`👨 + ZWJ + 👩 + ZWJ + 👧 + ZWJ + 👦 → family glyph`
+4. **三變體共用 sequence metadata**：Color / Lite / COLRv1 各自複製 glyph，但 sequence 規則共用管線
+
+### MVP 初始驗證集（已擴增至全量 RI-pair）
+
+當時先選六個樣本跑通 end-to-end，再擴到三變體：
+`👩‍💻` `👨‍💻` `👩‍🔬` `👨‍👩‍👧‍👦` `👋🏻` `🇺🇸`
+
+Lite 旗幟後來改為全域套用，不再限於 MVP 清單。
+
+### 測試快照（v2.0 發佈時）
+
+已完成：
+- pure logic：sequence parser、GSUB rule builder
+- source font：來源字體確實含對應 ligature / glyph
+- output font：代表 sequence 在 merge 後能映射到正確 glyph
+- visual：verify 頁已新增 ZWJ、膚色、旗幟三類樣本
+
+仍待補強（已歸入技術債）：
+- 非 `Regular` style 的 output assertions
+- 更多 sequence 覆蓋樣本與回歸範圍
 
 ---
 

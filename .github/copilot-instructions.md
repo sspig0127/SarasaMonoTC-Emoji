@@ -6,13 +6,14 @@
 ## 專案概述
 
 **SarasaMonoTC-Emoji** 是一個 Python/fonttools 自動化字體建構工具，
-將 emoji 嵌入 Sarasa Mono TC（更紗黑體繁中等寬），產出三種變體：
+將 emoji 嵌入 Sarasa Mono TC（更紗黑體繁中等寬），產出四種變體：
 
 | 變體 | 字族名稱 | Emoji 格式 | 適用場景 |
 |------|----------|------------|----------|
 | **Color** | `SarasaMonoTCEmoji` | CBDT/CBLC 彩色點陣圖 | 日常終端機、編輯器 |
 | **Lite** | `SarasaMonoTCEmojiLite` | glyf TrueType outline（單色） | VHS 錄影、輕量部署 |
 | **COLRv1** | `SarasaMonoTCEmojiCOLRv1` | COLRv1 彩色向量 | Chrome/Chromium 終端機 |
+| **Nerd Lite** | `SarasaMonoTCEmojiLiteNerd` | glyf TrueType + Nerd PUA | 終端機 icon、VHS 錄影含 Nerd icon |
 
 ---
 
@@ -30,16 +31,17 @@
 
 ```
 SarasaMonoTC-Emoji/
-├── build.py                    # 主建構入口（--colrv1 / --lite / default Color）
+├── build.py                    # 主建構入口（--colrv1 / --lite / --nerd-lite / default Color）
 ├── config.yaml                 # 字體設定（字族名稱、樣式、路徑、emoji 選項）
 ├── src/
 │   ├── config.py               # 設定載入與驗證
-│   ├── emoji_merge.py          # 核心：emoji 嵌入邏輯（三種變體）
+│   ├── emoji_merge.py          # 核心：emoji / Nerd PUA 嵌入邏輯（四種變體）
 │   └── utils.py                # 工具函式（名稱更新、寬度驗證）
 ├── fonts/                      # 來源字體（.ttf，不納入版本控制）
 ├── output/                     # 建構輸出（不納入版本控制）
 │   ├── fonts/                  # Color 變體輸出
 │   ├── fonts-lite/             # Lite 變體輸出
+│   ├── fonts-nerd-lite/        # Nerd Lite 變體輸出
 │   └── fonts-colrv1/           # COLRv1 變體輸出
 ├── docs/
 │   └── colrv1-emoji-list.json  # COLRv1 greedy 選取清單（由 build.py --colrv1 自動產生）
@@ -60,6 +62,7 @@ uv sync --group dev                          # 安裝依賴
 
 uv run python build.py                       # Color 變體
 uv run python build.py --lite               # Lite 變體
+uv run python build.py --nerd-lite          # Nerd Lite 變體
 uv run python build.py --colrv1             # COLRv1 變體
 uv run python build.py --colrv1 --styles Regular  # 快速單樣式測試
 
@@ -75,7 +78,7 @@ uv run python -m http.server 8765           # 視覺驗證（搭配 verify-emoji
 ### 通用
 
 - **設定集中管理**：所有字體參數在 `config.yaml` 修改，程式碼不 hardcode 路徑或名稱
-- **三種 merge 函式**：`merge_emoji()`（Color）、`merge_emoji_lite()`（Lite）、`merge_emoji_colrv1()`（COLRv1）位於 `src/emoji_merge.py`
+- **四種 merge 入口**：`merge_emoji()`（Color）、`merge_emoji_lite()`（Lite）、`merge_emoji_lite_nerd()`（Nerd Lite）、`merge_emoji_colrv1()`（COLRv1）位於 `src/emoji_merge.py`
 - **Emoji 寬度**：`emoji_width_multiplier: 2`，即佔 2 個半寬欄位（與 CJK 全形字等寬）
 - **跳過已有字形**：`skip_existing: true`，保留 Sarasa 原有字形不覆蓋
 - **int16 保護**：`_scale_glyph()` 含 int16 範圍驗證（-32768 ~ 32767），超界時 raise `ValueError`
@@ -102,13 +105,21 @@ uv run python -m http.server 8765           # 視覺驗證（搭配 verify-emoji
 ### COLRv1 特有
 
 詳見 [`.github/colrv1-dev-notes.md`](./colrv1-dev-notes.md)。摘要：
-- greedy 預算 8,136 slots（Priority Phase 1 + Greedy Phase 2）
+- greedy 預算 8,136 slots（Phase 1: force + priority codepoints；Phase 2: priority sequences；Phase 3: greedy 填充）
 - `_scale_colrv1_paint_coords()` 負責縮放 COLR paint tree 中的 font-unit 座標（UPM 轉換必要步驟）
 - geometry helper glyph 的 `hmtx` / `vmtx` 必須保留來源字體縮放後的 metrics，不能一律寫成 `(0, 0)`；
   否則 Chromium 會把高倍率 transform emoji（如 🟡 / 🟢）裁出 Clip 範圍，只剩 tiny fragment
-- 可調整參數：`max_new_glyphs`、`priority_codepoints`、`force_colrv1_codepoints`
+- 可調整參數：`max_new_glyphs`、`priority_codepoints`、`priority_sequences`、`force_colrv1_codepoints`
 - `verify-emoji.html` 已有來源字體對照與「COLRv1 高風險樣本」區塊，COLRv1 改動後建議至少看一次
 - `tests/test_font_output.py` 已包含單點與全域 transformed-helper regression tests；調整 merge 規則後應跑完整 COLRv1 output tests
+
+### Nerd Lite 特有
+
+- **來源字體**：`fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf`（Nerd Fonts Symbols Only, UPM 2048）
+- **UPM 縮放**：Nerd glyph merge 時統一做 `2048 → 1000` 縮放，沿用 `_scale_glyph()`
+- **字寬規則**：Nerd PUA icon 固定使用 `half_width`（1 欄），emoji 仍維持 Lite 的 2 欄
+- **設定來源**：`config.yaml` → `nerd_lite.nerd_font`、`nerd_lite.output_dir`、`nerd_lite.icon_ranges`
+- **pipeline**：先完整跑 `merge_emoji_lite()`，再做 Nerd Fonts BMP PUA 後處理，避免複製 Lite 既有 sequence / flag 邏輯
 
 ---
 
@@ -131,7 +142,7 @@ uv run python -m http.server 8765           # 視覺驗證（搭配 verify-emoji
 
 1. **Claude Code → Copilot**：複雜修改後，列出「待 Copilot 跟進的事項」
 2. **Copilot → Claude Code**：字體渲染異常、font table 驗證失敗時整理現象後交回
-3. **共用知識庫**：`ROADMAP.md`、`copilot-instructions.md`、`PLAN-*.md` 變動後一律更新
+3. **共用知識庫**：`ROADMAP.md`、`copilot-instructions.md` 變動後一律更新
 
 ---
 

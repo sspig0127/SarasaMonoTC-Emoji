@@ -30,7 +30,14 @@ import yaml
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import FontConfig
-from src.emoji_merge import merge_emoji, merge_emoji_lite, merge_emoji_colrv1, detect_font_widths, _strip_mac_name_records
+from src.emoji_merge import (
+    merge_emoji,
+    merge_emoji_lite,
+    merge_emoji_lite_nerd,
+    merge_emoji_colrv1,
+    detect_font_widths,
+    _strip_mac_name_records,
+)
 from src.utils import update_font_names, verify_glyph_width
 
 
@@ -81,6 +88,46 @@ def get_config_int(
         print(f"Error: config.yaml '{key_path}' must be <= {max_val}, got {value}")
         sys.exit(1)
     return value
+
+
+def get_config_int_ranges(
+    yaml_config: Dict[str, Any],
+    *keys: str,
+) -> list[tuple[int, int]]:
+    """Load a config list of [start, end] integer pairs."""
+    value = get_config_value(yaml_config, *keys, default=[])
+    key_path = ".".join(keys)
+    if not isinstance(value, list):
+        print(
+            f"Error: config.yaml '{key_path}' must be a list of [start, end] integer pairs, "
+            f"got {value!r} ({type(value).__name__})"
+        )
+        sys.exit(1)
+
+    ranges: list[tuple[int, int]] = []
+    for index, item in enumerate(value):
+        if not isinstance(item, (list, tuple)) or len(item) != 2:
+            print(
+                f"Error: config.yaml '{key_path}[{index}]' must be a [start, end] pair, "
+                f"got {item!r}"
+            )
+            sys.exit(1)
+        start, end = item
+        if not isinstance(start, int) or not isinstance(end, int):
+            print(
+                f"Error: config.yaml '{key_path}[{index}]' values must be integers, "
+                f"got {item!r}"
+            )
+            sys.exit(1)
+        if start > end:
+            print(
+                f"Error: config.yaml '{key_path}[{index}]' start must be <= end, "
+                f"got {item!r}"
+            )
+            sys.exit(1)
+        ranges.append((start, end))
+
+    return ranges
 
 
 def _cleanup_partial_outputs(
@@ -135,6 +182,10 @@ def build_single_font(
     priority_codepoints: set[int] | None = None,
     priority_sequences: list[tuple[int, ...]] | None = None,
     force_codepoints: set[int] | None = None,
+    nerd_lite: bool = False,
+    nerd_font_path: Path | None = None,
+    icon_ranges: list[tuple[int, int]] | None = None,
+    single_column_ranges: list[tuple[int, int]] | None = None,
 ) -> tuple[str, list[dict]]:
     """Build a single font variant with emoji merged in.
 
@@ -165,7 +216,19 @@ def build_single_font(
 
     # Merge emoji into base font
     selection_records: list[dict] = []
-    if lite:
+    if nerd_lite:
+        if nerd_font_path is None or icon_ranges is None:
+            raise ValueError("nerd_lite build requires nerd_font_path and icon_ranges")
+        merged_font = merge_emoji_lite_nerd(
+            base_font_path=str(base_font_path),
+            emoji_font_path=str(emoji_font_path),
+            nerd_font_path=str(nerd_font_path),
+            config=config,
+            icon_ranges=icon_ranges,
+            single_column_ranges=single_column_ranges or None,
+            force_codepoints=force_codepoints,
+        )
+    elif lite:
         merged_font = merge_emoji_lite(
             base_font_path=str(base_font_path),
             emoji_font_path=str(emoji_font_path),
@@ -299,11 +362,14 @@ Configuration priority: CLI args > config.yaml > defaults
     parser.add_argument("--colrv1", action="store_true",
                         help="Build COLRv1 variant: color vector emoji (Chrome 98+, smaller than CBDT). "
                              "Requires Noto-COLRv1.ttf in fonts/ directory.")
+    parser.add_argument("--nerd-lite", action="store_true",
+                        help="Build Nerd Lite variant: Lite emoji + Nerd Fonts PUA icons. "
+                             "Requires NotoEmoji[wght].ttf and SymbolsNerdFontMono-Regular.ttf in fonts/.")
 
     args = parser.parse_args()
 
-    if args.lite and args.colrv1:
-        print("Error: --lite and --colrv1 are mutually exclusive")
+    if sum([args.lite, args.colrv1, args.nerd_lite]) > 1:
+        print("Error: --lite, --colrv1, and --nerd-lite are mutually exclusive")
         sys.exit(1)
 
     yaml_config = load_config(args.config)
@@ -327,6 +393,7 @@ Configuration priority: CLI args > config.yaml > defaults
 
     is_lite = args.lite
     is_colrv1 = args.colrv1
+    is_nerd_lite = args.nerd_lite
 
     # Determine family name, output dir, and emoji font override based on variant
     if is_colrv1:
@@ -363,6 +430,41 @@ Configuration priority: CLI args > config.yaml > defaults
             if _raw_force else None
         )
         color_force_codepoints = None
+        nerd_font_relative = None
+        nerd_icon_ranges = None
+    elif is_nerd_lite:
+        family_name = (
+            get_config_value(yaml_config, "nerd_lite", "family_name")
+            or (get_config_value(yaml_config, "font", "family_name") or "SarasaMonoTCEmoji") + "LiteNerd"
+        )
+        variant_emoji_font = (
+            get_config_value(yaml_config, "nerd_lite", "emoji_font")
+            or get_config_value(yaml_config, "lite", "emoji_font")
+            or "NotoEmoji[wght].ttf"
+        )
+        nerd_font_relative = get_config_value(yaml_config, "nerd_lite", "nerd_font")
+        if not nerd_font_relative:
+            print("Error: config.yaml 'nerd_lite.nerd_font' is required for --nerd-lite")
+            sys.exit(1)
+        nerd_icon_ranges = get_config_int_ranges(yaml_config, "nerd_lite", "icon_ranges")
+        if not nerd_icon_ranges:
+            print("Error: config.yaml 'nerd_lite.icon_ranges' must define at least one range")
+            sys.exit(1)
+        nerd_single_column_ranges = get_config_int_ranges(yaml_config, "nerd_lite", "single_column_ranges")
+        default_output_dir = (
+            get_config_value(yaml_config, "nerd_lite", "output_dir")
+            or "output/fonts-nerd-lite"
+        )
+        colrv1_max_new_glyphs = None
+        colrv1_emoji_list_path = None
+        colrv1_priority_codepoints = None
+        colrv1_priority_sequences = None
+        colrv1_force_codepoints = None
+        _raw_color_force = get_config_value(yaml_config, "emoji", "force_color_codepoints") or []
+        color_force_codepoints: set[int] | None = (
+            {int(s.replace("U+", "").replace("u+", ""), 16) for s in _raw_color_force}
+            if _raw_color_force else None
+        )
     elif is_lite:
         family_name = (
             get_config_value(yaml_config, "lite", "family_name")
@@ -380,6 +482,9 @@ Configuration priority: CLI args > config.yaml > defaults
             {int(s.replace("U+", "").replace("u+", ""), 16) for s in _raw_color_force}
             if _raw_color_force else None
         )
+        nerd_font_relative = None
+        nerd_icon_ranges = None
+        nerd_single_column_ranges = None
     else:
         family_name = get_config_value(yaml_config, "font", "family_name") or "SarasaMonoTCEmoji"
         variant_emoji_font = None
@@ -395,6 +500,9 @@ Configuration priority: CLI args > config.yaml > defaults
             {int(s.replace("U+", "").replace("u+", ""), 16) for s in _raw_color_force}
             if _raw_color_force else None
         )
+        nerd_font_relative = None
+        nerd_icon_ranges = None
+        nerd_single_column_ranges = None
 
     output_dir = args.output_dir or Path(default_output_dir)
 
@@ -404,6 +512,9 @@ Configuration priority: CLI args > config.yaml > defaults
         "author": get_config_value(yaml_config, "font", "author") or "",
         "copyright": get_config_value(yaml_config, "font", "copyright") or "",
         "description": (
+            get_config_value(yaml_config, "nerd_lite", "description")
+            if is_nerd_lite
+            else
             get_config_value(yaml_config, "colrv1", "description")
             if is_colrv1
             else get_config_value(yaml_config, "lite", "description")
@@ -449,6 +560,11 @@ Configuration priority: CLI args > config.yaml > defaults
 
         base_path = fonts_dir / base_font
         emoji_path = fonts_dir / emoji_font
+        nerd_font_path = (
+            fonts_dir / nerd_font_relative
+            if is_nerd_lite and nerd_font_relative is not None
+            else None
+        )
 
         if not base_path.exists():
             print(f"Error: Base font not found: {base_path}")
@@ -467,17 +583,24 @@ Configuration priority: CLI args > config.yaml > defaults
             else:
                 print(f"  Download from: https://github.com/googlefonts/noto-emoji/releases")
             sys.exit(1)
+        if nerd_font_path is not None and not nerd_font_path.exists():
+            print(f"Error: Nerd font not found: {nerd_font_path}")
+            print("  Expected source font: SymbolsNerdFontMono-Regular.ttf")
+            print("  Place it under fonts/NerdFontsSymbolsOnly/")
+            sys.exit(1)
 
         font_paths[style] = {
             "base_font_path": base_path,
             "emoji_font_path": emoji_path,
             "display_name": display_name,
+            "nerd_font_path": nerd_font_path,
         }
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
     variant_label = (
         "COLRv1 (color vector)" if is_colrv1
+        else "Nerd Lite (monochrome glyf + Nerd PUA)" if is_nerd_lite
         else "Lite (monochrome glyf)" if is_lite
         else "Color (CBDT/CBLC)"
     )
@@ -491,7 +614,10 @@ Configuration priority: CLI args > config.yaml > defaults
     print("Font mapping:")
     for style in styles:
         p = font_paths[style]
-        print(f"  {style}: {p['base_font_path'].name} + {p['emoji_font_path'].name}")
+        mapping = f"  {style}: {p['base_font_path'].name} + {p['emoji_font_path'].name}"
+        if is_nerd_lite and p["nerd_font_path"] is not None:
+            mapping += f" + {p['nerd_font_path'].name}"
+        print(mapping)
 
     build_start = time.monotonic()
     colrv1_selection_records: list[dict] = []
@@ -513,6 +639,10 @@ Configuration priority: CLI args > config.yaml > defaults
                 priority_codepoints=colrv1_priority_codepoints,
                 priority_sequences=colrv1_priority_sequences,
                 force_codepoints=effective_force_codepoints,
+                nerd_lite=is_nerd_lite,
+                nerd_font_path=p["nerd_font_path"],
+                icon_ranges=nerd_icon_ranges,
+                single_column_ranges=nerd_single_column_ranges,
             )
             if records and not colrv1_selection_records:
                 colrv1_selection_records = records
@@ -531,6 +661,10 @@ Configuration priority: CLI args > config.yaml > defaults
                         colrv1_priority_codepoints,
                         colrv1_priority_sequences,
                         effective_force_codepoints,
+                        is_nerd_lite,
+                        p["nerd_font_path"],
+                        nerd_icon_ranges,
+                        nerd_single_column_ranges,
                     )
                     futures[future] = style
 

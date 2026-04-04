@@ -3,7 +3,7 @@
 [![Tests](https://github.com/sspig0127/SarasaMonoTC-Emoji/actions/workflows/test.yml/badge.svg)](https://github.com/sspig0127/SarasaMonoTC-Emoji/actions/workflows/test.yml)
 [![Release](https://github.com/sspig0127/SarasaMonoTC-Emoji/actions/workflows/release.yml/badge.svg)](https://github.com/sspig0127/SarasaMonoTC-Emoji/actions/workflows/release.yml)
 
-**Sarasa Mono TC（更紗黑體繁中等寬）+ Emoji — 嵌入式 emoji，支援三種變體**
+**Sarasa Mono TC（更紗黑體繁中等寬）+ Emoji — 嵌入式 emoji，支援四種變體**
 
 ## v2.0 重點
 
@@ -11,7 +11,7 @@
   - ZWJ
   - 膚色變體
   - 旗幟
-- `Color` / `Lite` / `COLRv1` 三個變體都已接上 sequence-aware GSUB
+- `Color` / `Lite` / `COLRv1` / `Nerd Lite` 四個變體都已接上 sequence-aware GSUB（Nerd Lite 繼承 Lite pipeline）
 - 已驗證代表樣本：
   - `👩‍💻`
   - `👋🏻`
@@ -31,8 +31,9 @@
 | **Color**（彩色） | `SarasaMonoTCEmoji` | CBDT/CBLC 彩色點陣圖 | ~35 MB | 日常終端機、編輯器 |
 | **Lite**（單色） | `SarasaMonoTCEmojiLite` | glyf TrueType outline | ~25 MB | VHS 錄影、輕量部署 |
 | **COLRv1**（彩色向量） | `SarasaMonoTCEmojiCOLRv1` | COLRv1 向量 paint tree | ~26 MB | Chrome/Chromium 終端機 |
+| **Nerd Lite**（單色 + PUA icon） | `SarasaMonoTCEmojiLiteNerd` | glyf TrueType outline + Nerd Fonts BMP PUA | ~26 MB | 終端機 icon、VHS 錄影、單字體部署 |
 
-三個變體可同時安裝，不互相衝突。
+四個變體可同時安裝，不互相衝突。
 
 ---
 
@@ -68,6 +69,14 @@
 | `SarasaMonoTCEmojiCOLRv1-Italic.ttf` | 斜體 |
 | `SarasaMonoTCEmojiCOLRv1-Bold.ttf` | 粗體 |
 | `SarasaMonoTCEmojiCOLRv1-BoldItalic.ttf` | 粗斜體 |
+
+### Nerd Lite 變體
+
+> 以 Lite 變體為底，再合併 Nerd Fonts BMP PUA icon，讓單一字體同時具備中文、emoji 與常用開發圖示
+
+| 檔案 | 說明 |
+|------|------|
+| `SarasaMonoTCEmojiLiteNerd-Regular.ttf` | 一般 |
 
 下載所需字重的 `.ttf` 檔案，雙擊安裝即可。
 
@@ -187,6 +196,14 @@ curl -L -o fonts/NotoEmoji\[wght\].ttf \
 Noto-COLRv1.ttf  →  放入 fonts/
 ```
 
+#### 5. Symbols Nerd Font Mono（Nerd Lite 變體用）
+
+將下列檔案放入 `fonts/NerdFontsSymbolsOnly/`：
+
+```
+fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf
+```
+
 ### 建構
 
 ```bash
@@ -202,10 +219,14 @@ uv run python build.py --lite
 # COLRv1 變體（彩色向量，Chrome 98+）
 uv run python build.py --colrv1
 
+# Nerd Lite 變體（Lite emoji + Nerd Fonts PUA icon）
+uv run python build.py --nerd-lite
+
 # 只建構 Regular（快速測試）
 uv run python build.py --styles Regular
 uv run python build.py --lite --styles Regular
 uv run python build.py --colrv1 --styles Regular
+uv run python build.py --nerd-lite --styles Regular
 ```
 
 ### 自動發佈 Workflow
@@ -220,7 +241,7 @@ GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workf
 | `release_tag` | 發佈標籤（如 `v2.0.0`） | 必填 |
 | `sarasa_version` | Sarasa Gothic 版本號 | `1.0.36` |
 
-**執行流程：** 下載來源字體 → 執行 105 個測試 → 建構三種變體 → 打包 zip → 上傳至指定 Release
+**執行流程：** 下載來源字體 → 執行 127 個測試 → 建構三種變體 → 打包 zip → 上傳至指定 Release
 
 - 若 Release 已存在：以 `--clobber` 覆蓋現有附件
 - 若 Release 不存在：建立 draft release，由維護者手動 publish
@@ -402,8 +423,8 @@ Set Height 2160
 
 ### COLRv1 變體
 - **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）
-- **Emoji 數量**：604 個 emoji（glyph 預算上限 8,136 slots），採兩階段選取：
-  1. **Priority 優先**：42 個 priority / forced emoji 先保證選入
+- **Emoji 數量**：597 個 emoji（codepoint 映射）+ 31 個 sequence ligatures（glyph 預算上限 8,136 slots），採兩階段選取：
+  1. **Priority 優先**：42 個 priority / forced emoji + 19 個 priority sequences 先保證選入
   2. **Greedy 填充**：剩餘預算依 codepoint 升序填入常用舊 emoji
   - 完整選取清單：[`docs/colrv1-emoji-list.json`](docs/colrv1-emoji-list.json)
   - 可透過 `config.yaml` 的 `colrv1.max_new_glyphs` 調整預算
@@ -417,7 +438,7 @@ Set Height 2160
   - ⚠️ ❌ ⭐ ➡️ ⚙️ 等 BMP 符號透過 `force_colrv1_codepoints` 單獨管理
   - Priority 清單選取標準：**在 GitHub README / Issues / PR / CI 表格中高頻出現**，且不在 Sarasa 原有 cmap 中
   - 涵蓋：工具類（🔧🔨🛠️）、安全類（🔒🔑🛡️）、狀態圓點（🔴🟡🟢🔵）、連結導覽（🔗🔍🔖）、動作類（🚀🎉🐛）等
-- **技術**：7,487 個 geometry helper glyphs（PaintGlyph 節點引用）+ 604 個空 glyf stub；paint tree 驅動彩色渲染
+- **技術**：7,507 個 geometry helper glyphs（PaintGlyph 節點引用）+ 629 個 glyf stub（含 31 個 sequence ligature）；paint tree 驅動彩色渲染
 - **Chromium 相容性重點**：除了縮放 COLR paint tree 的 font-unit 座標之外，geometry helper glyph 的 metrics 也必須保留來源字體縮放後的值；若 helper metrics 被清成 `(0, 0)`，🟡 / 🟢 這類高倍率 transform emoji 會只剩 tiny fragment
 - **檔案大小**：~26 MB（比 Color 小 26%；COLRv1 向量資料比 PNG 點陣圖精簡）
 - **支援環境**：Chrome/Chromium 98+、Firefox 107+；macOS 系統級支援需 macOS 13+

@@ -43,6 +43,17 @@ _LITE_POC_FLAGS = [
     ("KR", (0x1F1F0, 0x1F1F7)),
     ("HK", (0x1F1ED, 0x1F1F0)),
 ]
+_NERD_LITE_KEY_PUA = [
+    (0xE0A0, "\uE0A0"),
+    (0xE5FA, "\uE5FA"),
+    (0xE700, "\uE700"),
+    (0xEA60, "\uEA60"),
+    (0xF400, "\uF400"),
+]
+# Powerline (E0A0–E0D7): single-column (half_width = 500)
+_NERD_POWERLINE_SAMPLES = [(0xE0A0, "\uE0A0"), (0xE0B0, "\uE0B0"), (0xE0B2, "\uE0B2")]
+# Other sets: double-column (full_width = 1000)
+_NERD_DBLCOL_SAMPLES = [(0xE700, "\uE700"), (0xEA60, "\uEA60"), (0xF400, "\uF400"), (0xE5FA, "\uE5FA")]
 _REGIONAL_INDICATOR_START = 0x1F1E6
 _REGIONAL_INDICATOR_END = 0x1F1FF
 
@@ -455,6 +466,104 @@ class TestLiteOutput:
             assert _has_ligature_sequence(font, (0x1F1FA, 0x1F1F8))
         finally:
             font.close()
+
+
+# ---------------------------------------------------------------------------
+# Nerd Lite variant (Lite + Nerd Fonts PUA)
+# ---------------------------------------------------------------------------
+
+class TestNerdLiteOutput:
+    def test_has_glyf_no_cbdt(self, output_nerd_lite_regular):
+        """Nerd Lite variant must have glyf but must NOT have CBDT/CBLC."""
+        assert "glyf" in output_nerd_lite_regular, "Missing glyf table"
+        assert "CBDT" not in output_nerd_lite_regular, "Nerd Lite variant must not have CBDT"
+        assert "CBLC" not in output_nerd_lite_regular, "Nerd Lite variant must not have CBLC"
+
+    def test_family_name_contains_emoji_lite_nerd(self, output_nerd_lite_regular):
+        """Family name must clearly identify the Nerd Lite variant."""
+        family = output_nerd_lite_regular["name"].getBestFamilyName() or ""
+        assert "Emoji" in family and "Lite" in family and "Nerd" in family, (
+            f"Family name '{family}' does not indicate Nerd Lite variant"
+        )
+
+    def test_representative_pua_codepoints_present(self, output_nerd_lite_regular):
+        """Representative Nerd Fonts BMP PUA codepoints must be present in cmap."""
+        cmap = output_nerd_lite_regular["cmap"].getBestCmap() or {}
+        for cp, char in _NERD_LITE_KEY_PUA:
+            assert cp in cmap, f"Missing Nerd Lite PUA U+{cp:04X} {char}"
+
+    def test_pua_advance_width_by_column_type(self, output_nerd_lite_regular):
+        """Powerline (E0A0–E0D7) must be single-column; all other PUA sets double-column."""
+        cmap = output_nerd_lite_regular["cmap"].getBestCmap() or {}
+        hmtx = output_nerd_lite_regular["hmtx"]
+        half_width, _ = hmtx[cmap[0x0041]]
+        full_width = half_width * 2  # emoji_width_multiplier = 2
+
+        for cp, char in _NERD_POWERLINE_SAMPLES:
+            glyph_name = cmap[cp]
+            actual_width, _ = hmtx[glyph_name]
+            assert actual_width == half_width, (
+                f"Powerline U+{cp:04X} {char}: expected 1-col {half_width}, got {actual_width}"
+            )
+        for cp, char in _NERD_DBLCOL_SAMPLES:
+            glyph_name = cmap[cp]
+            actual_width, _ = hmtx[glyph_name]
+            assert actual_width == full_width, (
+                f"U+{cp:04X} {char}: expected 2-col {full_width}, got {actual_width}"
+            )
+
+    def test_pua_glyph_bbox_sane(self, output_nerd_lite_regular):
+        """Scaled Nerd PUA glyphs should stay within a sane 1000-UPM range."""
+        cmap = output_nerd_lite_regular["cmap"].getBestCmap() or {}
+        glyf = output_nerd_lite_regular["glyf"]
+        upm = output_nerd_lite_regular["head"].unitsPerEm
+        x_min_limit = -int(upm * 0.8)
+        x_max_limit = int(upm * 1.3)
+        y_min_limit = -int(upm * 0.8)
+        y_max_limit = int(upm * 1.3)
+
+        failures = []
+        for cp, char in _NERD_LITE_KEY_PUA:
+            glyph = glyf[cmap[cp]]
+            if glyph.numberOfContours == 0:
+                failures.append(f"U+{cp:04X} {char}: glyph is empty")
+                continue
+            glyph.recalcBounds(glyf)
+            if glyph.xMin < x_min_limit or glyph.xMax > x_max_limit:
+                failures.append(
+                    f"U+{cp:04X} {char}: x-range {glyph.xMin}..{glyph.xMax} outside "
+                    f"{x_min_limit}..{x_max_limit}"
+                )
+            if glyph.yMin < y_min_limit or glyph.yMax > y_max_limit:
+                failures.append(
+                    f"U+{cp:04X} {char}: y-range {glyph.yMin}..{glyph.yMax} outside "
+                    f"{y_min_limit}..{y_max_limit}"
+                )
+
+        assert not failures, "\n".join(failures)
+
+    def test_emoji_sequences_remain_available(self, output_nerd_lite_regular):
+        """Nerd PUA merge must not disturb Lite emoji sequence support."""
+        assert _has_ligature_sequence(output_nerd_lite_regular, (0x1F469, 0x200D, 0x1F4BB)), (
+            "Missing 👩‍💻 ZWJ ligature in Nerd Lite GSUB"
+        )
+        assert _has_ligature_sequence(output_nerd_lite_regular, (0x1F44B, 0x1F3FB)), (
+            "Missing 👋🏻 skin-tone ligature in Nerd Lite GSUB"
+        )
+        assert _has_ligature_sequence(output_nerd_lite_regular, (0x1F1FA, 0x1F1F8)), (
+            "Missing 🇺🇸 flag ligature in Nerd Lite GSUB"
+        )
+
+    def test_emoji_cmap_entries_not_replaced_by_pua_icons(self, output_nerd_lite_regular):
+        """Representative emoji codepoints must still map to non-PUA glyphs."""
+        cmap = output_nerd_lite_regular["cmap"].getBestCmap() or {}
+        nerd_glyph_names = {cmap[cp] for cp, _ in _NERD_LITE_KEY_PUA}
+        for cp, char in ((0x1F600, "😀"), (0x1F525, "🔥"), (0x1F469, "👩")):
+            glyph_name = cmap.get(cp)
+            assert glyph_name, f"Missing emoji codepoint U+{cp:04X} {char}"
+            assert glyph_name not in nerd_glyph_names, (
+                f"Emoji U+{cp:04X} {char} unexpectedly reuses a Nerd PUA glyph {glyph_name!r}"
+            )
 
 
 # ---------------------------------------------------------------------------

@@ -33,14 +33,17 @@
 - 範圍：
   - 追蹤 `astral-sh/setup-uv` 的 node24 版
   - 維持 Lite 旗幟可讀性與三變體一致性
-  - 視需要評估第四變體：emoji + Nerd Fonts PUA
+  - **第四變體 Nerd Lite MVP 已在 `feature/nerd-lite-mvp` 進行中**（build 成功、134 tests 全過）
+    - 評估文件：`docs/nerd-fonts-variant-eval.md`
+    - 實作計畫：`docs/nerd-lite-impl-plan.md`
 
 ## 下次開工建議先做
 
 1. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
-2. 檢查 Lite 旗幟新設計在 `Italic / Bold / BoldItalic` 的視覺一致性
-3. 視使用情境繼續調整 `colrv1.priority_sequences`
-4. 視需要補更多高價值 sequence regression cases
+2. ~~檢查 Lite 旗幟新設計在 `Italic / Bold / BoldItalic` 的視覺一致性~~ ✅ 2026-04-04 目視確認符合預期
+3. 補 `Italic / Bold / BoldItalic` 的 output font 自動化斷言（技術債）
+4. 視使用情境繼續調整 `colrv1.priority_sequences`
+5. 視需要補更多高價值 sequence regression cases
 
 ## 暫時不要重做的事
 
