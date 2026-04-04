@@ -1,9 +1,38 @@
 # SarasaMonoTC-Emoji 歷史版本實作細節
 
-> 從 `ROADMAP.md` 分離（2026-03-30；v2.0 規劃細節於 2026-04-04 追加）。
+> 從 `ROADMAP.md` 分離（2026-03-30；v2.0 規劃細節於 2026-04-04 追加；v2.1 於 2026-04-04 追加）。
 > 僅在需要查閱特定版本技術決策時才 Read 此檔案。
 > 版本概覽與未來規劃 → [`ROADMAP.md`](../ROADMAP.md)
 > COLRv1 深度技術細節 → [`.github/colrv1-dev-notes.md`](../.github/colrv1-dev-notes.md)
+
+---
+
+## v2.1 — Nerd Lite 第四變體實作細節存檔 ✅
+
+> 歸檔自 ROADMAP.md（2026-04-04）。v2.1.0 已發佈。
+> 架構評估 → [`docs/nerd-fonts-variant-eval.md`](./nerd-fonts-variant-eval.md)
+> 實作計畫 → [`docs/nerd-lite-impl-plan.md`](./nerd-lite-impl-plan.md)
+
+### 技術設計
+
+- **來源字體**：`SymbolsNerdFontMono-Regular.ttf`（Nerd Fonts 3.4.0，UPM=2048）
+- **PUA 集合**：Powerline（E0A0–E0D7）、Seti-UI（E5FA–E6FF）、Devicons（E700–E7FF）、Codicons（EA60–EBEB）、Octicons（F400–F4FF）
+- **折衷方案欄寬**：
+  - Powerline：1 欄（advance=500，scale=500/2048 ≈ 0.244）— prompt / statusline 精確對齊
+  - 其餘集合：2 欄（advance=1000，scale=1000/2048 ≈ 0.488）— 視覺比例與 emoji 一致
+- **`single_column_ranges`**：config.yaml 控制，可擴充
+
+### 實作摘要（已全部完成）
+
+| 檔案 | 新增內容 |
+|------|---------|
+| `src/emoji_merge.py` | `_load_nerd_pua_glyphs()`、`_merge_nerd_fonts_pua()`、`merge_emoji_lite_nerd()`（two-pass） |
+| `build.py` | `--nerd-lite` flag、`get_config_int_ranges()`、`single_column_ranges` 參數 |
+| `config.yaml` | `nerd_lite:` 區塊（family_name、nerd_font、icon_ranges、single_column_ranges） |
+| `tests/conftest.py` | `nerd_font`、`output_nerd_lite_regular` fixtures |
+| `tests/test_font_output.py` | `TestNerdLiteOutput`（7 tests；134 total） |
+| `verify-emoji.html` | Section 12（12.0 折衷說明 + 12.1–12.8 各集合；字重切換修正） |
+| `.github/workflows/release.yml` | `nerd_fonts_version` 參數、Nerd Fonts 下載、建構、打包、上傳 |
 
 ---
 
