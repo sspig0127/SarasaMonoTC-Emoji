@@ -5,7 +5,7 @@
 
 **Sarasa Mono TC（更紗黑體繁中等寬）+ Emoji — 嵌入式 emoji，支援四種變體**
 
-## v2.0 重點
+## v2.1 重點
 
 - 支援 sequence emoji：
   - ZWJ
@@ -242,8 +242,9 @@ GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workf
 
 | 輸入參數 | 說明 | 預設值 |
 |----------|------|--------|
-| `release_tag` | 發佈標籤（如 `v2.0.0`） | 必填 |
+| `release_tag` | 發佈標籤（如 `v2.1.0`） | 必填 |
 | `sarasa_version` | Sarasa Gothic 版本號 | `1.0.36` |
+| `nerd_fonts_version` | Nerd Fonts 版本號（Symbols Only） | `3.4.0` |
 
 **執行流程：** 下載來源字體 → 執行 134 個測試 → 建構四種變體 → 打包 zip → 上傳至指定 Release
 
