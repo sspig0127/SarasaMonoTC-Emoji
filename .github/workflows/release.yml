@@ -10,6 +10,10 @@ on:
         description: 'Sarasa Gothic 版本號'
         required: false
         default: '1.0.36'
+      nerd_fonts_version:
+        description: 'Nerd Fonts 版本號（Symbols Only）'
+        required: false
+        default: '3.4.0'
 
 jobs:
   release:
@@ -21,6 +25,7 @@ jobs:
     env:
       RELEASE_TAG: ${{ github.event.inputs.release_tag }}
       SARASA_VERSION: ${{ github.event.inputs.sarasa_version }}
+      NERD_FONTS_VERSION: ${{ github.event.inputs.nerd_fonts_version }}
 
     steps:
       - uses: actions/checkout@v5
@@ -33,7 +38,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: fonts/
-          key: fonts-sarasa-${{ github.event.inputs.sarasa_version }}
+          key: fonts-sarasa-${{ github.event.inputs.sarasa_version }}-nerd-${{ github.event.inputs.nerd_fonts_version }}
 
       - name: 下載來源字體（cache miss 時執行）
         if: steps.cache-fonts.outputs.cache-hit != 'true'
@@ -63,6 +68,14 @@ jobs:
           curl -L -o fonts/Noto-COLRv1.ttf \
             "https://github.com/googlefonts/noto-emoji/raw/main/fonts/Noto-COLRv1.ttf"
 
+          # Symbols Nerd Font Mono（Nerd Lite 變體）
+          mkdir -p fonts/NerdFontsSymbolsOnly
+          curl -fL -o /tmp/NerdFontsSymbolsOnly.zip \
+            "https://github.com/ryanoasis/nerd-fonts/releases/download/v${NERD_FONTS_VERSION}/NerdFontsSymbolsOnly.zip"
+          unzip -j /tmp/NerdFontsSymbolsOnly.zip "SymbolsNerdFontMono-Regular.ttf" \
+            -d fonts/NerdFontsSymbolsOnly/
+          rm -f /tmp/NerdFontsSymbolsOnly.zip
+
       - name: 確認字體檔案完整
         run: |
           for f in \
@@ -72,7 +85,8 @@ jobs:
             fonts/SarasaMonoTC-BoldItalic.ttf \
             fonts/NotoColorEmoji.ttf \
             "fonts/NotoEmoji[wght].ttf" \
-            fonts/Noto-COLRv1.ttf; do
+            fonts/Noto-COLRv1.ttf \
+            fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf; do
             if [ ! -f "$f" ]; then
               echo "ERROR: Missing font: $f" && exit 1
             fi
@@ -99,12 +113,16 @@ jobs:
       - name: 建構 COLRv1 變體
         run: uv run python build.py --colrv1
 
+      - name: 建構 Nerd Lite 變體
+        run: uv run python build.py --nerd-lite
+
       - name: 確認 manifest 版本號
         run: |
           for manifest in \
             output/fonts/fonts-manifest.json \
             output/fonts-lite/fonts-manifest.json \
-            output/fonts-colrv1/fonts-manifest.json; do
+            output/fonts-colrv1/fonts-manifest.json \
+            output/fonts-nerd-lite/fonts-manifest.json; do
             version=$(python3 -c "import json; print(json.load(open('${manifest}'))['version'])")
             echo "${manifest}: ${version}"
           done
@@ -112,9 +130,10 @@ jobs:
       - name: 打包 zip
         run: |
           cd output
-          zip -r "../SarasaMonoTCEmoji-${RELEASE_TAG}.zip"        fonts/
-          zip -r "../SarasaMonoTCEmojiLite-${RELEASE_TAG}.zip"    fonts-lite/
-          zip -r "../SarasaMonoTCEmojiCOLRv1-${RELEASE_TAG}.zip"  fonts-colrv1/
+          zip -r "../SarasaMonoTCEmoji-${RELEASE_TAG}.zip"            fonts/
+          zip -r "../SarasaMonoTCEmojiLite-${RELEASE_TAG}.zip"      fonts-lite/
+          zip -r "../SarasaMonoTCEmojiCOLRv1-${RELEASE_TAG}.zip"    fonts-colrv1/
+          zip -r "../SarasaMonoTCEmojiLiteNerd-${RELEASE_TAG}.zip"  fonts-nerd-lite/
           cd ..
           ls -lh SarasaMonoTCEmoji-*.zip
 
@@ -128,6 +147,7 @@ jobs:
               "SarasaMonoTCEmoji-${RELEASE_TAG}.zip" \
               "SarasaMonoTCEmojiLite-${RELEASE_TAG}.zip" \
               "SarasaMonoTCEmojiCOLRv1-${RELEASE_TAG}.zip" \
+              "SarasaMonoTCEmojiLiteNerd-${RELEASE_TAG}.zip" \
               --clobber
           else
             echo "Release ${RELEASE_TAG} 不存在，建立 draft release..."
@@ -135,5 +155,6 @@ jobs:
               --title "SarasaMonoTCEmoji ${RELEASE_TAG}" \
               "SarasaMonoTCEmoji-${RELEASE_TAG}.zip" \
               "SarasaMonoTCEmojiLite-${RELEASE_TAG}.zip" \
-              "SarasaMonoTCEmojiCOLRv1-${RELEASE_TAG}.zip"
+              "SarasaMonoTCEmojiCOLRv1-${RELEASE_TAG}.zip" \
+              "SarasaMonoTCEmojiLiteNerd-${RELEASE_TAG}.zip"
           fi
