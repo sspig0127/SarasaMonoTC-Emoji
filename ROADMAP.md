@@ -49,7 +49,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 
 ### 後續仍待補強（已歸入技術債）
 
-- 非 `Regular` style 的 output font 自動化斷言（Italic / Bold / BoldItalic）
+- 非 `Regular` style 的 output font 自動化測試（Italic / Bold / BoldItalic）
 - COLRv1 sequence 仍為 budget-limited（priority + greedy，非全量）
 - Release workflow 最後一個 Node.js 20 warning：`astral-sh/setup-uv@v4`（等上游 node24 版）
 
@@ -74,7 +74,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 
 - 追蹤 `astral-sh/setup-uv` node24 版，屆時更新 release workflow
 - 視需要調整 `colrv1.priority_sequences`
-- 補 Italic / Bold / BoldItalic output font 自動化斷言（四個變體共同技術債）
+- 補 Italic / Bold / BoldItalic output font 自動化測試（四個變體共同技術債）
 
 ---
 
@@ -94,7 +94,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 
 | 項目 | 說明 |
 |------|------|
-| **COLRv1 glyph budget 擴充** | Fedora / Qt 6.9 已全面切換 COLRv1，生態系成熟度提升。現行 budget（8136 slots）導致部分 emoji 截斷；可評估提高上限或重新設計 priority 策略 |
+| **COLRv1 glyph budget 擴充** | Fedora / Qt 6.9 已全面切換 COLRv1，生態系成熟度提升。可行方向：skip-and-continue greedy（高 ROI）、低成本 sequence 候選擴增、小幅提高 budget 上限；全量覆蓋不可行。評估細節 → [`docs/colrv1-budget-expansion-eval.md`](./docs/colrv1-budget-expansion-eval.md) |
 
 ### 長期觀察（高工作量 / 需外部條件）
 

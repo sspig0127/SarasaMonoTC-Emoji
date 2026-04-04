@@ -1,9 +1,9 @@
 {
-  "generated": "2026-04-04T04:49:55.823932+00:00",
-  "version": "2.0.0",
-  "max_new_glyphs": 8136,
-  "selected_count": 597,
-  "total_glyph_cost": 7913,
+  "generated": "2026-04-04T19:05:30.650212+00:00",
+  "version": "2.1.0",
+  "max_new_glyphs": 8450,
+  "selected_count": 540,
+  "total_glyph_cost": 7328,
   "emoji": [
     {
       "codepoint": "U+21A9",
@@ -141,6 +141,87 @@
       "priority": true
     },
     {
+      "codepoint": "U+1F4CF",
+      "char": "📏",
+      "glyph_name": "u1F4CF",
+      "unicode_name": "STRAIGHT RULER",
+      "geometry_deps_count": 16,
+      "new_glyph_cost": 17,
+      "priority": true
+    },
+    {
+      "codepoint": "U+1F4D0",
+      "char": "📐",
+      "glyph_name": "u1F4D0",
+      "unicode_name": "TRIANGULAR RULER",
+      "geometry_deps_count": 18,
+      "new_glyph_cost": 19,
+      "priority": true
+    },
+    {
+      "codepoint": "U+1F4D4",
+      "char": "📔",
+      "glyph_name": "u1F4D4",
+      "unicode_name": "NOTEBOOK WITH DECORATIVE COVER",
+      "geometry_deps_count": 11,
+      "new_glyph_cost": 12,
+      "priority": true
+    },
+    {
+      "codepoint": "U+1F4D5",
+      "char": "📕",
+      "glyph_name": "u1F4D5",
+      "unicode_name": "CLOSED BOOK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 1,
+      "priority": true
+    },
+    {
+      "codepoint": "U+1F4D7",
+      "char": "📗",
+      "glyph_name": "u1F4D7",
+      "unicode_name": "GREEN BOOK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 1,
+      "priority": true
+    },
+    {
+      "codepoint": "U+1F4D8",
+      "char": "📘",
+      "glyph_name": "u1F4D8",
+      "unicode_name": "BLUE BOOK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 1,
+      "priority": true
+    },
+    {
+      "codepoint": "U+1F4D9",
+      "char": "📙",
+      "glyph_name": "u1F4D9",
+      "unicode_name": "ORANGE BOOK",
+      "geometry_deps_count": 8,
+      "new_glyph_cost": 1,
+      "priority": true
+    },
+    {
+      "codepoint": "U+1F4DC",
+      "char": "📜",
+      "glyph_name": "u1F4DC",
+      "unicode_name": "SCROLL",
+      "geometry_deps_count": 22,
+      "new_glyph_cost": 23,
+      "priority": true
+    },
+    {
+      "codepoint": "U+1F4DD",
+      "char": "📝",
+      "glyph_name": "u1F4DD",
+      "unicode_name": "MEMO",
+      "geometry_deps_count": 25,
+      "new_glyph_cost": 26,
+      "priority": true
+    },
+    {
       "codepoint": "U+1F50D",
       "char": "🔍",
       "glyph_name": "u1F50D",
@@ -272,7 +353,16 @@
       "glyph_name": "u1F550",
       "unicode_name": "CLOCK FACE ONE OCLOCK",
       "geometry_deps_count": 5,
-      "new_glyph_cost": 5,
+      "new_glyph_cost": 4,
+      "priority": true
+    },
+    {
+      "codepoint": "U+1F551",
+      "char": "🕑",
+      "glyph_name": "u1F551",
+      "unicode_name": "CLOCK FACE TWO OCLOCK",
+      "geometry_deps_count": 5,
+      "new_glyph_cost": 1,
       "priority": true
     },
     {
@@ -956,7 +1046,7 @@
       "glyph_name": "uni270F",
       "unicode_name": "PENCIL",
       "geometry_deps_count": 13,
-      "new_glyph_cost": 14,
+      "new_glyph_cost": 12,
       "priority": false
     },
     {
@@ -2792,7 +2882,7 @@
       "glyph_name": "u1F3AC",
       "unicode_name": "CLAPPER BOARD",
       "geometry_deps_count": 14,
-      "new_glyph_cost": 13,
+      "new_glyph_cost": 12,
       "priority": false
     },
     {
@@ -4749,15 +4839,6 @@
       "priority": false
     },
     {
-      "codepoint": "U+1F489",
-      "char": "💉",
-      "glyph_name": "u1F489",
-      "unicode_name": "SYRINGE",
-      "geometry_deps_count": 12,
-      "new_glyph_cost": 13,
-      "priority": false
-    },
-    {
       "codepoint": "U+1F48A",
       "char": "💊",
       "glyph_name": "u1F48A",
@@ -4776,606 +4857,12 @@
       "priority": false
     },
     {
-      "codepoint": "U+1F48C",
-      "char": "💌",
-      "glyph_name": "u1F48C",
-      "unicode_name": "LOVE LETTER",
-      "geometry_deps_count": 6,
-      "new_glyph_cost": 5,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F48D",
-      "char": "💍",
-      "glyph_name": "u1F48D",
-      "unicode_name": "RING",
-      "geometry_deps_count": 13,
-      "new_glyph_cost": 14,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F48E",
-      "char": "💎",
-      "glyph_name": "u1F48E",
-      "unicode_name": "GEM STONE",
-      "geometry_deps_count": 7,
-      "new_glyph_cost": 4,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F48F",
-      "char": "💏",
-      "glyph_name": "u1F48F",
-      "unicode_name": "KISS",
-      "geometry_deps_count": 23,
-      "new_glyph_cost": 23,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F490",
-      "char": "💐",
-      "glyph_name": "u1F490",
-      "unicode_name": "BOUQUET",
-      "geometry_deps_count": 16,
-      "new_glyph_cost": 17,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F491",
-      "char": "💑",
-      "glyph_name": "u1F491",
-      "unicode_name": "COUPLE WITH HEART",
-      "geometry_deps_count": 48,
-      "new_glyph_cost": 42,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F492",
-      "char": "💒",
-      "glyph_name": "u1F492",
-      "unicode_name": "WEDDING",
-      "geometry_deps_count": 44,
-      "new_glyph_cost": 45,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F493",
-      "char": "💓",
-      "glyph_name": "u1F493",
-      "unicode_name": "BEATING HEART",
-      "geometry_deps_count": 11,
-      "new_glyph_cost": 12,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F494",
-      "char": "💔",
-      "glyph_name": "u1F494",
-      "unicode_name": "BROKEN HEART",
-      "geometry_deps_count": 6,
-      "new_glyph_cost": 6,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F495",
-      "char": "💕",
-      "glyph_name": "u1F495",
-      "unicode_name": "TWO HEARTS",
-      "geometry_deps_count": 10,
-      "new_glyph_cost": 10,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F496",
-      "char": "💖",
-      "glyph_name": "u1F496",
-      "unicode_name": "SPARKLING HEART",
-      "geometry_deps_count": 12,
-      "new_glyph_cost": 10,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F497",
-      "char": "💗",
-      "glyph_name": "u1F497",
-      "unicode_name": "GROWING HEART",
-      "geometry_deps_count": 11,
-      "new_glyph_cost": 11,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F498",
-      "char": "💘",
-      "glyph_name": "u1F498",
-      "unicode_name": "HEART WITH ARROW",
-      "geometry_deps_count": 13,
-      "new_glyph_cost": 13,
-      "priority": false
-    },
-    {
       "codepoint": "U+1F499",
       "char": "💙",
       "glyph_name": "u1F499",
       "unicode_name": "BLUE HEART",
       "geometry_deps_count": 5,
-      "new_glyph_cost": 2,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F49A",
-      "char": "💚",
-      "glyph_name": "u1F49A",
-      "unicode_name": "GREEN HEART",
-      "geometry_deps_count": 5,
-      "new_glyph_cost": 2,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F49B",
-      "char": "💛",
-      "glyph_name": "u1F49B",
-      "unicode_name": "YELLOW HEART",
-      "geometry_deps_count": 5,
-      "new_glyph_cost": 1,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F49C",
-      "char": "💜",
-      "glyph_name": "u1F49C",
-      "unicode_name": "PURPLE HEART",
-      "geometry_deps_count": 5,
-      "new_glyph_cost": 1,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F49D",
-      "char": "💝",
-      "glyph_name": "u1F49D",
-      "unicode_name": "HEART WITH RIBBON",
-      "geometry_deps_count": 19,
-      "new_glyph_cost": 18,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F49E",
-      "char": "💞",
-      "glyph_name": "u1F49E",
-      "unicode_name": "REVOLVING HEARTS",
-      "geometry_deps_count": 11,
-      "new_glyph_cost": 9,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F49F",
-      "char": "💟",
-      "glyph_name": "u1F49F",
-      "unicode_name": "HEART DECORATION",
-      "geometry_deps_count": 4,
-      "new_glyph_cost": 2,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4A0",
-      "char": "💠",
-      "glyph_name": "u1F4A0",
-      "unicode_name": "DIAMOND SHAPE WITH A DOT INSIDE",
-      "geometry_deps_count": 10,
-      "new_glyph_cost": 11,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4A1",
-      "char": "💡",
-      "glyph_name": "u1F4A1",
-      "unicode_name": "ELECTRIC LIGHT BULB",
-      "geometry_deps_count": 17,
-      "new_glyph_cost": 18,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4A2",
-      "char": "💢",
-      "glyph_name": "u1F4A2",
-      "unicode_name": "ANGER SYMBOL",
-      "geometry_deps_count": 2,
       "new_glyph_cost": 3,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4A3",
-      "char": "💣",
-      "glyph_name": "u1F4A3",
-      "unicode_name": "BOMB",
-      "geometry_deps_count": 11,
-      "new_glyph_cost": 11,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4A4",
-      "char": "💤",
-      "glyph_name": "u1F4A4",
-      "unicode_name": "SLEEPING SYMBOL",
-      "geometry_deps_count": 3,
-      "new_glyph_cost": 4,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4A5",
-      "char": "💥",
-      "glyph_name": "u1F4A5",
-      "unicode_name": "COLLISION SYMBOL",
-      "geometry_deps_count": 4,
-      "new_glyph_cost": 5,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4A6",
-      "char": "💦",
-      "glyph_name": "u1F4A6",
-      "unicode_name": "SPLASHING SWEAT SYMBOL",
-      "geometry_deps_count": 6,
-      "new_glyph_cost": 7,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4A7",
-      "char": "💧",
-      "glyph_name": "u1F4A7",
-      "unicode_name": "DROPLET",
-      "geometry_deps_count": 2,
-      "new_glyph_cost": 3,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4A8",
-      "char": "💨",
-      "glyph_name": "u1F4A8",
-      "unicode_name": "DASH SYMBOL",
-      "geometry_deps_count": 11,
-      "new_glyph_cost": 12,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4A9",
-      "char": "💩",
-      "glyph_name": "u1F4A9",
-      "unicode_name": "PILE OF POO",
-      "geometry_deps_count": 5,
-      "new_glyph_cost": 4,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4AA",
-      "char": "💪",
-      "glyph_name": "u1F4AA",
-      "unicode_name": "FLEXED BICEPS",
-      "geometry_deps_count": 8,
-      "new_glyph_cost": 9,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4AB",
-      "char": "💫",
-      "glyph_name": "u1F4AB",
-      "unicode_name": "DIZZY SYMBOL",
-      "geometry_deps_count": 5,
-      "new_glyph_cost": 6,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4AC",
-      "char": "💬",
-      "glyph_name": "u1F4AC",
-      "unicode_name": "SPEECH BALLOON",
-      "geometry_deps_count": 3,
-      "new_glyph_cost": 3,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4AD",
-      "char": "💭",
-      "glyph_name": "u1F4AD",
-      "unicode_name": "THOUGHT BALLOON",
-      "geometry_deps_count": 6,
-      "new_glyph_cost": 7,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4AE",
-      "char": "💮",
-      "glyph_name": "u1F4AE",
-      "unicode_name": "WHITE FLOWER",
-      "geometry_deps_count": 14,
-      "new_glyph_cost": 15,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4AF",
-      "char": "💯",
-      "glyph_name": "u1F4AF",
-      "unicode_name": "HUNDRED POINTS SYMBOL",
-      "geometry_deps_count": 7,
-      "new_glyph_cost": 8,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4B0",
-      "char": "💰",
-      "glyph_name": "u1F4B0",
-      "unicode_name": "MONEY BAG",
-      "geometry_deps_count": 8,
-      "new_glyph_cost": 9,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4B1",
-      "char": "💱",
-      "glyph_name": "u1F4B1",
-      "unicode_name": "CURRENCY EXCHANGE",
-      "geometry_deps_count": 17,
-      "new_glyph_cost": 17,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4B2",
-      "char": "💲",
-      "glyph_name": "u1F4B2",
-      "unicode_name": "HEAVY DOLLAR SIGN",
-      "geometry_deps_count": 8,
-      "new_glyph_cost": 9,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4B3",
-      "char": "💳",
-      "glyph_name": "u1F4B3",
-      "unicode_name": "CREDIT CARD",
-      "geometry_deps_count": 4,
-      "new_glyph_cost": 4,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4B4",
-      "char": "💴",
-      "glyph_name": "u1F4B4",
-      "unicode_name": "BANKNOTE WITH YEN SIGN",
-      "geometry_deps_count": 6,
-      "new_glyph_cost": 5,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4B5",
-      "char": "💵",
-      "glyph_name": "u1F4B5",
-      "unicode_name": "BANKNOTE WITH DOLLAR SIGN",
-      "geometry_deps_count": 7,
-      "new_glyph_cost": 3,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4B6",
-      "char": "💶",
-      "glyph_name": "u1F4B6",
-      "unicode_name": "BANKNOTE WITH EURO SIGN",
-      "geometry_deps_count": 6,
-      "new_glyph_cost": 2,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4B7",
-      "char": "💷",
-      "glyph_name": "u1F4B7",
-      "unicode_name": "BANKNOTE WITH POUND SIGN",
-      "geometry_deps_count": 6,
-      "new_glyph_cost": 2,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4B8",
-      "char": "💸",
-      "glyph_name": "u1F4B8",
-      "unicode_name": "MONEY WITH WINGS",
-      "geometry_deps_count": 16,
-      "new_glyph_cost": 16,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4B9",
-      "char": "💹",
-      "glyph_name": "u1F4B9",
-      "unicode_name": "CHART WITH UPWARDS TREND AND YEN SIGN",
-      "geometry_deps_count": 5,
-      "new_glyph_cost": 3,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4BA",
-      "char": "💺",
-      "glyph_name": "u1F4BA",
-      "unicode_name": "SEAT",
-      "geometry_deps_count": 17,
-      "new_glyph_cost": 18,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4BB",
-      "char": "💻",
-      "glyph_name": "u1F4BB",
-      "unicode_name": "PERSONAL COMPUTER",
-      "geometry_deps_count": 51,
-      "new_glyph_cost": 52,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4BC",
-      "char": "💼",
-      "glyph_name": "u1F4BC",
-      "unicode_name": "BRIEFCASE",
-      "geometry_deps_count": 17,
-      "new_glyph_cost": 17,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4BD",
-      "char": "💽",
-      "glyph_name": "u1F4BD",
-      "unicode_name": "MINIDISC",
-      "geometry_deps_count": 23,
-      "new_glyph_cost": 24,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4BE",
-      "char": "💾",
-      "glyph_name": "u1F4BE",
-      "unicode_name": "FLOPPY DISK",
-      "geometry_deps_count": 5,
-      "new_glyph_cost": 5,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4BF",
-      "char": "💿",
-      "glyph_name": "u1F4BF",
-      "unicode_name": "OPTICAL DISC",
-      "geometry_deps_count": 19,
-      "new_glyph_cost": 3,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4C0",
-      "char": "📀",
-      "glyph_name": "u1F4C0",
-      "unicode_name": "DVD",
-      "geometry_deps_count": 19,
-      "new_glyph_cost": 3,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4C1",
-      "char": "📁",
-      "glyph_name": "u1F4C1",
-      "unicode_name": "FILE FOLDER",
-      "geometry_deps_count": 3,
-      "new_glyph_cost": 4,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4C2",
-      "char": "📂",
-      "glyph_name": "u1F4C2",
-      "unicode_name": "OPEN FILE FOLDER",
-      "geometry_deps_count": 3,
-      "new_glyph_cost": 4,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4C3",
-      "char": "📃",
-      "glyph_name": "u1F4C3",
-      "unicode_name": "PAGE WITH CURL",
-      "geometry_deps_count": 4,
-      "new_glyph_cost": 5,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4C4",
-      "char": "📄",
-      "glyph_name": "u1F4C4",
-      "unicode_name": "PAGE FACING UP",
-      "geometry_deps_count": 4,
-      "new_glyph_cost": 3,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4C5",
-      "char": "📅",
-      "glyph_name": "u1F4C5",
-      "unicode_name": "CALENDAR",
-      "geometry_deps_count": 9,
-      "new_glyph_cost": 9,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4C6",
-      "char": "📆",
-      "glyph_name": "u1F4C6",
-      "unicode_name": "TEAR-OFF CALENDAR",
-      "geometry_deps_count": 17,
-      "new_glyph_cost": 11,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4C7",
-      "char": "📇",
-      "glyph_name": "u1F4C7",
-      "unicode_name": "CARD INDEX",
-      "geometry_deps_count": 26,
-      "new_glyph_cost": 27,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4C8",
-      "char": "📈",
-      "glyph_name": "u1F4C8",
-      "unicode_name": "CHART WITH UPWARDS TREND",
-      "geometry_deps_count": 4,
-      "new_glyph_cost": 3,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4C9",
-      "char": "📉",
-      "glyph_name": "u1F4C9",
-      "unicode_name": "CHART WITH DOWNWARDS TREND",
-      "geometry_deps_count": 4,
-      "new_glyph_cost": 2,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4CA",
-      "char": "📊",
-      "glyph_name": "u1F4CA",
-      "unicode_name": "BAR CHART",
-      "geometry_deps_count": 7,
-      "new_glyph_cost": 5,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4CB",
-      "char": "📋",
-      "glyph_name": "u1F4CB",
-      "unicode_name": "CLIPBOARD",
-      "geometry_deps_count": 10,
-      "new_glyph_cost": 11,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4CC",
-      "char": "📌",
-      "glyph_name": "u1F4CC",
-      "unicode_name": "PUSHPIN",
-      "geometry_deps_count": 9,
-      "new_glyph_cost": 10,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4CD",
-      "char": "📍",
-      "glyph_name": "u1F4CD",
-      "unicode_name": "ROUND PUSHPIN",
-      "geometry_deps_count": 4,
-      "new_glyph_cost": 5,
-      "priority": false
-    },
-    {
-      "codepoint": "U+1F4CE",
-      "char": "📎",
-      "glyph_name": "u1F4CE",
-      "unicode_name": "PAPERCLIP",
-      "geometry_deps_count": 8,
-      "new_glyph_cost": 9,
       "priority": false
     }
   ]

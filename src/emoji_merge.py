@@ -1621,12 +1621,16 @@ def _select_colrv1_emoji_greedy(
         if _select_one(cp, is_priority=True):
             priority_selected += 1
 
-    # Phase 2: greedy fill — codepoint ascending, stop at first over-budget
+    # Phase 2: greedy fill — codepoint ascending, skip over-budget emoji
+    # (skip-and-continue: do not stop at first over-budget item; only stop when
+    #  the remaining budget cannot possibly fit even a cost-1 emoji)
     for cp in sorted(emoji_cmap):
         if cp in selected_cmap:
             continue  # already selected in phase 1
+        if max_new_glyphs - total_cost <= 0:
+            break  # no budget left at all
         if not _select_one(cp, is_priority=False):
-            break  # greedy: stop at first over-budget emoji
+            continue  # skip this emoji, keep scanning for cheaper ones
 
     print(
         f"  Greedy selection: {len(selected_cmap)}/{len(emoji_cmap)} emoji selected "

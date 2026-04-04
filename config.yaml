@@ -108,8 +108,10 @@ colrv1:
   description: "Sarasa Mono TC (更紗黑體繁中等寬) with embedded Noto COLRv1 — color vector emoji for Chrome/Chromium terminals"
   # Greedy glyph budget: limits total new glyph slots (emoji stubs + geometry deps).
   # Noto-COLRv1 has ~1,400 single-codepoint emoji; the full set causes browser/OTS
-  # garbling due to oversized glyph tables.  8136 accommodates ~600 emoji (codepoint-sorted).
-  max_new_glyphs: 8136
+  # garbling due to oversized glyph tables.
+  # 8450 = safe upper bound (65535 − 56905 max-style glyphs − 180 buffer).
+  # Increased from 8136 (2026-04-05): +314 slots for priority emoji expansion.
+  max_new_glyphs: 8450
   # Path for the generated emoji selection list (committed to repo for reference).
   emoji_list_path: "docs/colrv1-emoji-list.json"
   # Priority codepoints: always selected before the greedy fill phase,
@@ -183,6 +185,17 @@ colrv1:
     # 常用通用 emoji
     - "U+1F525"  # 🔥 fire
     - "U+1F600"  # 😀 grinning face
+    # 文具 / 書本系列（2026-04-05 擴增）
+    - "U+1F4CF"  # 📏 straight ruler
+    - "U+1F4D0"  # 📐 triangular ruler
+    - "U+1F4DD"  # 📝 memo
+    - "U+1F4DC"  # 📜 scroll
+    - "U+1F4D5"  # 📕 closed book
+    - "U+1F4D7"  # 📗 green book
+    - "U+1F4D8"  # 📘 blue book
+    - "U+1F4D9"  # 📙 orange book
+    - "U+1F4D4"  # 📔 notebook with decorative cover
+    - "U+1F551"  # 🕑 clock face two o'clock
   # priority_sequences — high-value sequence emoji to attempt before the
   # remaining-budget greedy fill for COLRv1 sequence support.
   # Format: space-separated codepoint sequence.
@@ -210,6 +223,228 @@ colrv1:
     - "U+1F1E8 U+1F1E6"         # 🇨🇦 Canada flag
     - "U+1F1E6 U+1F1FA"         # 🇦🇺 Australia flag
     - "U+1F1EC U+1F1E7"         # 🇬🇧 United Kingdom flag
+    # 膚色變體 + ZWJ 低成本 sequence（2026-04-05 擴增，cost=1×220 + cost=2×1）
+    - "U+26F9 U+1F3FB"  # ⛹🏻 膚色變體
+    - "U+26F9 U+1F3FC"  # ⛹🏼 膚色變體
+    - "U+26F9 U+1F3FD"  # ⛹🏽 膚色變體
+    - "U+26F9 U+1F3FE"  # ⛹🏾 膚色變體
+    - "U+26F9 U+1F3FF"  # ⛹🏿 膚色變體
+    - "U+270A U+1F3FB"  # ✊🏻 膚色變體
+    - "U+270A U+1F3FC"  # ✊🏼 膚色變體
+    - "U+270A U+1F3FD"  # ✊🏽 膚色變體
+    - "U+270A U+1F3FE"  # ✊🏾 膚色變體
+    - "U+270A U+1F3FF"  # ✊🏿 膚色變體
+    - "U+270B U+1F3FB"  # ✋🏻 膚色變體
+    - "U+270B U+1F3FC"  # ✋🏼 膚色變體
+    - "U+270B U+1F3FD"  # ✋🏽 膚色變體
+    - "U+270B U+1F3FE"  # ✋🏾 膚色變體
+    - "U+270B U+1F3FF"  # ✋🏿 膚色變體
+    - "U+270C U+1F3FB"  # ✌🏻 膚色變體
+    - "U+270C U+1F3FC"  # ✌🏼 膚色變體
+    - "U+270C U+1F3FD"  # ✌🏽 膚色變體
+    - "U+270C U+1F3FE"  # ✌🏾 膚色變體
+    - "U+270C U+1F3FF"  # ✌🏿 膚色變體
+    - "U+270D U+1F3FB"  # ✍🏻 膚色變體
+    - "U+270D U+1F3FC"  # ✍🏼 膚色變體
+    - "U+270D U+1F3FD"  # ✍🏽 膚色變體
+    - "U+270D U+1F3FE"  # ✍🏾 膚色變體
+    - "U+270D U+1F3FF"  # ✍🏿 膚色變體
+    - "U+1F385 U+1F3FB"  # 🎅🏻 膚色變體
+    - "U+1F385 U+1F3FC"  # 🎅🏼 膚色變體
+    - "U+1F385 U+1F3FD"  # 🎅🏽 膚色變體
+    - "U+1F385 U+1F3FE"  # 🎅🏾 膚色變體
+    - "U+1F385 U+1F3FF"  # 🎅🏿 膚色變體
+    - "U+1F3C2 U+1F3FB"  # 🏂🏻 膚色變體
+    - "U+1F3C2 U+1F3FC"  # 🏂🏼 膚色變體
+    - "U+1F3C2 U+1F3FD"  # 🏂🏽 膚色變體
+    - "U+1F3C2 U+1F3FE"  # 🏂🏾 膚色變體
+    - "U+1F3C2 U+1F3FF"  # 🏂🏿 膚色變體
+    - "U+1F3C3 U+1F3FB"  # 🏃🏻 膚色變體
+    - "U+1F3C3 U+1F3FC"  # 🏃🏼 膚色變體
+    - "U+1F3C3 U+1F3FD"  # 🏃🏽 膚色變體
+    - "U+1F3C3 U+1F3FE"  # 🏃🏾 膚色變體
+    - "U+1F3C3 U+1F3FF"  # 🏃🏿 膚色變體
+    - "U+1F3C7 U+1F3FB"  # 🏇🏻 膚色變體
+    - "U+1F3C7 U+1F3FC"  # 🏇🏼 膚色變體
+    - "U+1F3C7 U+1F3FE"  # 🏇🏾 膚色變體
+    - "U+1F3C7 U+1F3FF"  # 🏇🏿 膚色變體
+    - "U+1F3CB U+1F3FB"  # 🏋🏻 膚色變體
+    - "U+1F3CB U+1F3FC"  # 🏋🏼 膚色變體
+    - "U+1F3CB U+1F3FD"  # 🏋🏽 膚色變體
+    - "U+1F3CB U+1F3FE"  # 🏋🏾 膚色變體
+    - "U+1F3CB U+1F3FF"  # 🏋🏿 膚色變體
+    - "U+1F3CC U+1F3FC"  # 🏌🏼 膚色變體
+    - "U+1F442 U+1F3FB"  # 👂🏻 膚色變體
+    - "U+1F442 U+1F3FC"  # 👂🏼 膚色變體
+    - "U+1F442 U+1F3FD"  # 👂🏽 膚色變體
+    - "U+1F442 U+1F3FE"  # 👂🏾 膚色變體
+    - "U+1F442 U+1F3FF"  # 👂🏿 膚色變體
+    - "U+1F443 U+1F3FB"  # 👃🏻 膚色變體
+    - "U+1F443 U+1F3FC"  # 👃🏼 膚色變體
+    - "U+1F443 U+1F3FD"  # 👃🏽 膚色變體
+    - "U+1F443 U+1F3FE"  # 👃🏾 膚色變體
+    - "U+1F443 U+1F3FF"  # 👃🏿 膚色變體
+    - "U+1F446 U+1F3FB"  # 👆🏻 膚色變體
+    - "U+1F446 U+1F3FC"  # 👆🏼 膚色變體
+    - "U+1F446 U+1F3FD"  # 👆🏽 膚色變體
+    - "U+1F446 U+1F3FE"  # 👆🏾 膚色變體
+    - "U+1F446 U+1F3FF"  # 👆🏿 膚色變體
+    - "U+1F447 U+1F3FB"  # 👇🏻 膚色變體
+    - "U+1F447 U+1F3FC"  # 👇🏼 膚色變體
+    - "U+1F447 U+1F3FD"  # 👇🏽 膚色變體
+    - "U+1F447 U+1F3FE"  # 👇🏾 膚色變體
+    - "U+1F447 U+1F3FF"  # 👇🏿 膚色變體
+    - "U+1F448 U+1F3FB"  # 👈🏻 膚色變體
+    - "U+1F448 U+1F3FC"  # 👈🏼 膚色變體
+    - "U+1F448 U+1F3FD"  # 👈🏽 膚色變體
+    - "U+1F448 U+1F3FE"  # 👈🏾 膚色變體
+    - "U+1F448 U+1F3FF"  # 👈🏿 膚色變體
+    - "U+1F449 U+1F3FB"  # 👉🏻 膚色變體
+    - "U+1F449 U+1F3FC"  # 👉🏼 膚色變體
+    - "U+1F449 U+1F3FD"  # 👉🏽 膚色變體
+    - "U+1F449 U+1F3FE"  # 👉🏾 膚色變體
+    - "U+1F449 U+1F3FF"  # 👉🏿 膚色變體
+    - "U+1F44A U+1F3FB"  # 👊🏻 膚色變體
+    - "U+1F44A U+1F3FC"  # 👊🏼 膚色變體
+    - "U+1F44A U+1F3FD"  # 👊🏽 膚色變體
+    - "U+1F44A U+1F3FE"  # 👊🏾 膚色變體
+    - "U+1F44A U+1F3FF"  # 👊🏿 膚色變體
+    - "U+1F44B U+1F3FB"  # 👋🏻 膚色變體
+    - "U+1F44B U+1F3FC"  # 👋🏼 膚色變體
+    - "U+1F44B U+1F3FD"  # 👋🏽 膚色變體
+    - "U+1F44B U+1F3FE"  # 👋🏾 膚色變體
+    - "U+1F44B U+1F3FF"  # 👋🏿 膚色變體
+    - "U+1F44C U+1F3FB"  # 👌🏻 膚色變體
+    - "U+1F44C U+1F3FC"  # 👌🏼 膚色變體
+    - "U+1F44C U+1F3FD"  # 👌🏽 膚色變體
+    - "U+1F44C U+1F3FE"  # 👌🏾 膚色變體
+    - "U+1F44C U+1F3FF"  # 👌🏿 膚色變體
+    - "U+1F44D U+1F3FB"  # 👍🏻 膚色變體
+    - "U+1F44D U+1F3FC"  # 👍🏼 膚色變體
+    - "U+1F44D U+1F3FD"  # 👍🏽 膚色變體
+    - "U+1F44D U+1F3FE"  # 👍🏾 膚色變體
+    - "U+1F44D U+1F3FF"  # 👍🏿 膚色變體
+    - "U+1F44E U+1F3FB"  # 👎🏻 膚色變體
+    - "U+1F44E U+1F3FC"  # 👎🏼 膚色變體
+    - "U+1F44E U+1F3FD"  # 👎🏽 膚色變體
+    - "U+1F44E U+1F3FE"  # 👎🏾 膚色變體
+    - "U+1F44E U+1F3FF"  # 👎🏿 膚色變體
+    - "U+1F44F U+1F3FB"  # 👏🏻 膚色變體
+    - "U+1F44F U+1F3FC"  # 👏🏼 膚色變體
+    - "U+1F44F U+1F3FD"  # 👏🏽 膚色變體
+    - "U+1F44F U+1F3FE"  # 👏🏾 膚色變體
+    - "U+1F44F U+1F3FF"  # 👏🏿 膚色變體
+    - "U+1F450 U+1F3FB"  # 👐🏻 膚色變體
+    - "U+1F450 U+1F3FC"  # 👐🏼 膚色變體
+    - "U+1F450 U+1F3FD"  # 👐🏽 膚色變體
+    - "U+1F450 U+1F3FE"  # 👐🏾 膚色變體
+    - "U+1F450 U+1F3FF"  # 👐🏿 膚色變體
+    - "U+1F466 U+1F3FB"  # 👦🏻 膚色變體
+    - "U+1F466 U+1F3FC"  # 👦🏼 膚色變體
+    - "U+1F466 U+1F3FD"  # 👦🏽 膚色變體
+    - "U+1F466 U+1F3FE"  # 👦🏾 膚色變體
+    - "U+1F466 U+1F3FF"  # 👦🏿 膚色變體
+    - "U+1F467 U+1F3FB"  # 👧🏻 膚色變體
+    - "U+1F467 U+1F3FC"  # 👧🏼 膚色變體
+    - "U+1F467 U+1F3FD"  # 👧🏽 膚色變體
+    - "U+1F467 U+1F3FE"  # 👧🏾 膚色變體
+    - "U+1F467 U+1F3FF"  # 👧🏿 膚色變體
+    - "U+1F468 U+200D U+1F468 U+200D U+1F466"  # 👨👨👦 ZWJ 序列
+    - "U+1F468 U+1F3FB"  # 👨🏻 膚色變體
+    - "U+1F469 U+1F3FB"  # 👩🏻 膚色變體
+    - "U+1F469 U+1F3FC"  # 👩🏼 膚色變體
+    - "U+1F469 U+1F3FD"  # 👩🏽 膚色變體
+    - "U+1F469 U+1F3FE"  # 👩🏾 膚色變體
+    - "U+1F469 U+1F3FF"  # 👩🏿 膚色變體
+    - "U+1F46B U+1F3FB"  # 👫🏻 膚色變體
+    - "U+1F46B U+1F3FC"  # 👫🏼 膚色變體
+    - "U+1F46B U+1F3FD"  # 👫🏽 膚色變體
+    - "U+1F46B U+1F3FE"  # 👫🏾 膚色變體
+    - "U+1F46B U+1F3FF"  # 👫🏿 膚色變體
+    - "U+1F46C U+1F3FB"  # 👬🏻 膚色變體
+    - "U+1F46C U+1F3FC"  # 👬🏼 膚色變體
+    - "U+1F46C U+1F3FD"  # 👬🏽 膚色變體
+    - "U+1F46C U+1F3FE"  # 👬🏾 膚色變體
+    - "U+1F46C U+1F3FF"  # 👬🏿 膚色變體
+    - "U+1F46D U+1F3FB"  # 👭🏻 膚色變體
+    - "U+1F46D U+1F3FC"  # 👭🏼 膚色變體
+    - "U+1F46D U+1F3FD"  # 👭🏽 膚色變體
+    - "U+1F46D U+1F3FE"  # 👭🏾 膚色變體
+    - "U+1F46D U+1F3FF"  # 👭🏿 膚色變體
+    - "U+1F46E U+1F3FB"  # 👮🏻 膚色變體
+    - "U+1F470 U+1F3FB"  # 👰🏻 膚色變體
+    - "U+1F470 U+1F3FC"  # 👰🏼 膚色變體
+    - "U+1F470 U+1F3FD"  # 👰🏽 膚色變體
+    - "U+1F470 U+1F3FE"  # 👰🏾 膚色變體
+    - "U+1F470 U+1F3FF"  # 👰🏿 膚色變體
+    - "U+1F471 U+1F3FB"  # 👱🏻 膚色變體
+    - "U+1F472 U+1F3FB"  # 👲🏻 膚色變體
+    - "U+1F472 U+1F3FC"  # 👲🏼 膚色變體
+    - "U+1F472 U+1F3FD"  # 👲🏽 膚色變體
+    - "U+1F472 U+1F3FE"  # 👲🏾 膚色變體
+    - "U+1F472 U+1F3FF"  # 👲🏿 膚色變體
+    - "U+1F474 U+1F3FB"  # 👴🏻 膚色變體
+    - "U+1F474 U+1F3FC"  # 👴🏼 膚色變體
+    - "U+1F474 U+1F3FD"  # 👴🏽 膚色變體
+    - "U+1F474 U+1F3FE"  # 👴🏾 膚色變體
+    - "U+1F474 U+1F3FF"  # 👴🏿 膚色變體
+    - "U+1F475 U+1F3FB"  # 👵🏻 膚色變體
+    - "U+1F475 U+1F3FC"  # 👵🏼 膚色變體
+    - "U+1F475 U+1F3FD"  # 👵🏽 膚色變體
+    - "U+1F475 U+1F3FE"  # 👵🏾 膚色變體
+    - "U+1F475 U+1F3FF"  # 👵🏿 膚色變體
+    - "U+1F476 U+1F3FB"  # 👶🏻 膚色變體
+    - "U+1F476 U+1F3FC"  # 👶🏼 膚色變體
+    - "U+1F476 U+1F3FD"  # 👶🏽 膚色變體
+    - "U+1F476 U+1F3FE"  # 👶🏾 膚色變體
+    - "U+1F476 U+1F3FF"  # 👶🏿 膚色變體
+    - "U+1F477 U+1F3FB"  # 👷🏻 膚色變體
+    - "U+1F478 U+1F3FB"  # 👸🏻 膚色變體
+    - "U+1F478 U+1F3FC"  # 👸🏼 膚色變體
+    - "U+1F478 U+1F3FD"  # 👸🏽 膚色變體
+    - "U+1F478 U+1F3FE"  # 👸🏾 膚色變體
+    - "U+1F478 U+1F3FF"  # 👸🏿 膚色變體
+    - "U+1F47C U+1F3FB"  # 👼🏻 膚色變體
+    - "U+1F47C U+1F3FC"  # 👼🏼 膚色變體
+    - "U+1F47C U+1F3FD"  # 👼🏽 膚色變體
+    - "U+1F47C U+1F3FE"  # 👼🏾 膚色變體
+    - "U+1F47C U+1F3FF"  # 👼🏿 膚色變體
+    - "U+1F481 U+1F3FB"  # 💁🏻 膚色變體
+    - "U+1F481 U+1F3FC"  # 💁🏼 膚色變體
+    - "U+1F481 U+1F3FD"  # 💁🏽 膚色變體
+    - "U+1F481 U+1F3FE"  # 💁🏾 膚色變體
+    - "U+1F481 U+1F3FF"  # 💁🏿 膚色變體
+    - "U+1F483 U+1F3FB"  # 💃🏻 膚色變體
+    - "U+1F483 U+1F3FC"  # 💃🏼 膚色變體
+    - "U+1F483 U+1F3FD"  # 💃🏽 膚色變體
+    - "U+1F483 U+1F3FE"  # 💃🏾 膚色變體
+    - "U+1F483 U+1F3FF"  # 💃🏿 膚色變體
+    - "U+1F487 U+1F3FB"  # 💇🏻 膚色變體
+    - "U+1F487 U+1F3FC"  # 💇🏼 膚色變體
+    - "U+1F487 U+1F3FD"  # 💇🏽 膚色變體
+    - "U+1F487 U+1F3FE"  # 💇🏾 膚色變體
+    - "U+1F487 U+1F3FF"  # 💇🏿 膚色變體
+    - "U+1F48F U+1F3FB"  # 💏🏻 膚色變體
+    - "U+1F48F U+1F3FC"  # 💏🏼 膚色變體
+    - "U+1F48F U+1F3FD"  # 💏🏽 膚色變體
+    - "U+1F48F U+1F3FE"  # 💏🏾 膚色變體
+    - "U+1F48F U+1F3FF"  # 💏🏿 膚色變體
+    - "U+1F4AA U+1F3FB"  # 💪🏻 膚色變體
+    - "U+1F4AA U+1F3FC"  # 💪🏼 膚色變體
+    - "U+1F4AA U+1F3FD"  # 💪🏽 膚色變體
+    - "U+1F4AA U+1F3FE"  # 💪🏾 膚色變體
+    - "U+1F4AA U+1F3FF"  # 💪🏿 膚色變體
+    - "U+1F64C U+1F3FB"  # 🙌🏻 膚色變體
+    - "U+1F64C U+1F3FC"  # 🙌🏼 膚色變體
+    - "U+1F64C U+1F3FD"  # 🙌🏽 膚色變體
+    - "U+1F64C U+1F3FE"  # 🙌🏾 膚色變體
+    - "U+1F64C U+1F3FF"  # 🙌🏿 膚色變體
+    - "U+1F91D U+1F3FB"  # 🤝🏻 膚色變體
+    - "U+1F91D U+1F3FC"  # 🤝🏼 膚色變體
+    - "U+1F91D U+1F3FD"  # 🤝🏽 膚色變體
+    - "U+1F91D U+1F3FE"  # 🤝🏾 膚色變體
+    - "U+1F91D U+1F3FF"  # 🤝🏿 膚色變體
+    - "U+1F468 U+1F3FC"  # 👨🏼 膚色變體
 
 # Nerd Lite variant — Lite + Nerd Fonts PUA icons
 # Source: fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf (MIT)

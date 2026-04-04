@@ -42,7 +42,7 @@
 
 1. Nerd Lite PR merge 回 main + Release workflow 加入 `--nerd-lite` 建構步驟
 2. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
-3. 補 `Italic / Bold / BoldItalic` 的 output font 自動化斷言（四個變體共同技術債）
+3. 補 `Italic / Bold / BoldItalic` 的 output font 自動化測試（四個變體共同技術債）
 4. 視使用情境繼續調整 `colrv1.priority_sequences`
 5. 視需要補更多高價值 sequence regression cases
 

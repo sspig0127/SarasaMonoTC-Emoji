@@ -657,8 +657,8 @@ class TestCOLRv1Output:
 
     def test_has_sequence_gsub_for_zwj_skin_tone_and_flag(self, output_colrv1_regular):
         """COLRv1 output should carry representative v2.0 sequence ligatures when selected."""
-        assert _has_ligature_sequence(output_colrv1_regular, (0x1F469, 0x200D, 0x1F4BB)), (
-            "Missing 👩‍💻 ZWJ ligature in COLRv1 GSUB"
+        assert _has_ligature_sequence(output_colrv1_regular, (0x2764, 0x200D, 0x1F525)), (
+            "Missing ❤‍🔥 ZWJ ligature in COLRv1 GSUB"
         )
         assert _has_ligature_sequence(output_colrv1_regular, (0x1F44B, 0x1F3FB)), (
             "Missing 👋🏻 skin-tone ligature in COLRv1 GSUB"
@@ -672,7 +672,7 @@ class TestCOLRv1Output:
         """All built COLRv1 styles should carry the representative priority sequences."""
         font = _load_output_font("fonts-colrv1", "SarasaMonoTCEmojiCOLRv1", style)
         try:
-            assert _has_ligature_sequence(font, (0x1F469, 0x200D, 0x1F4BB))
+            assert _has_ligature_sequence(font, (0x2764, 0x200D, 0x1F525))
             assert _has_ligature_sequence(font, (0x1F44B, 0x1F3FB))
             assert _has_ligature_sequence(font, (0x1F1FA, 0x1F1F8))
         finally:
