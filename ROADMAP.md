@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 路線圖
 
-> 最後更新：2026-04-04（v2.1 Nerd Lite 已發佈；加入中長期評估方向）
+> 最後更新：2026-04-05（v2.2 COLRv1 budget 擴增；更新技術債狀態）
 >
 > **歷史版本實作細節** → [`docs/roadmap-history.md`](./docs/roadmap-history.md)（需要查閱時再 Read）
 > **COLRv1 深度技術細節** → [`.github/colrv1-dev-notes.md`](./.github/colrv1-dev-notes.md)
@@ -22,6 +22,7 @@
 | **v1.5.3** | COLRv1 高風險樣本驗證頁 + 全域 transformed-helper regression test | ✅ 完成 |
 | v2.0 | ZWJ 序列 / 旗幟 / 膚色變體 + release workflow 收尾 | ✅ 已發佈 |
 | v2.1 | 第四變體 Nerd Lite（Emoji + Nerd Fonts PUA） | ✅ 已發佈 |
+| **v2.2** | COLRv1 budget 擴增（skip-and-continue greedy + 221 sequences） | 🔨 待 release |
 | v2.x | 後續維護 / 技術債 | 📋 進行中 |
 
 ---
@@ -50,7 +51,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 ### 後續仍待補強（已歸入技術債）
 
 - 非 `Regular` style 的 output font 自動化測試（Italic / Bold / BoldItalic）
-- COLRv1 sequence 仍為 budget-limited（priority + greedy，非全量）
+- COLRv1 sequence 受 glyph budget 限制，非全量覆蓋（v2.2 已擴增至 811 emoji/sequences，8,327/8,450 slots）
 - Release workflow 最後一個 Node.js 20 warning：`astral-sh/setup-uv@v4`（等上游 node24 版）
 
 > 規劃細節（實作拆解 / 各階段 MVP / 測試快照）→ [`docs/roadmap-history.md`](./docs/roadmap-history.md)
@@ -73,8 +74,9 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 ## v2.x — 後續維護 / 技術債
 
 - 追蹤 `astral-sh/setup-uv` node24 版，屆時更新 release workflow
-- 視需要調整 `colrv1.priority_sequences`
+- 視需要調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
 - 補 Italic / Bold / BoldItalic output font 自動化測試（四個變體共同技術債）
+- v2.2 COLRv1 擴增已完成：skip-and-continue greedy + 10 priority emoji + 221 sequences（↑ 629 → 811）
 
 ---
 
@@ -94,7 +96,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 
 | 項目 | 說明 |
 |------|------|
-| **COLRv1 glyph budget 擴充** | Fedora / Qt 6.9 已全面切換 COLRv1，生態系成熟度提升。可行方向：skip-and-continue greedy（高 ROI）、低成本 sequence 候選擴增、小幅提高 budget 上限；全量覆蓋不可行。評估細節 → [`docs/colrv1-budget-expansion-eval.md`](./docs/colrv1-budget-expansion-eval.md) |
+| **COLRv1 glyph budget 擴充** | ✅ v2.2 已完成：skip-and-continue greedy、10 priority emoji（📏📐📝📜📕📗📘📙📔🕑）、221 priority sequences；8,327/8,450 slots，剩餘 123。評估細節 → [`docs/colrv1-budget-expansion-eval.md`](./docs/colrv1-budget-expansion-eval.md) |
 
 ### 長期觀察（高工作量 / 需外部條件）
 
@@ -112,4 +114,4 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 |------|------|------|
 | CBLC filtering 可能移除有效 emoji | `emoji_merge.py:_filter_cblc_to_added_glyphs` | 名稱衝突時捨棄 color bitmap。Build log 列出被移除的 glyph 名稱（最多 10 個），可評估是否需加入 `force_color_codepoints` |
 | output tests 只檢查 Regular | `tests/conftest.py`、`tests/test_font_output.py` | Italic / Bold / BoldItalic 目前靠 build 成功與人工驗證，還沒有對 output font 做自動化檢查 |
-| COLRv1 sequence 仍為 budget-limited | `config.yaml`、`emoji_merge.py:merge_emoji_colrv1` | COLRv1 已支援 sequence，但目前先用剩餘 glyph budget 選入，尚非全量 sequence 覆蓋 |
+| COLRv1 sequence 仍為 budget-limited | `config.yaml`、`emoji_merge.py:merge_emoji_colrv1` | v2.2 已擴增（811 emoji/sequences，8,327/8,450），仍非全量；`priority_sequences` 可視需要繼續調整 |

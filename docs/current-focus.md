@@ -1,21 +1,16 @@
 # Current Focus
 
-> 最後更新：2026-04-04
+> 最後更新：2026-04-05
 
 ## 現在狀態
 
-- `v2.0` sequence emoji 已發佈，三個變體都已串通：
-  - Color
-  - Lite
-  - COLRv1
+- `v2.1` Nerd Lite 第四變體已發佈（四個變體：Color / Lite / COLRv1 / Nerd Lite）
+- `v2.2` COLRv1 budget 擴增已完成（skip-and-continue greedy + 10 priority emoji + 221 sequences；811 總計，8,327/8,450 slots）
 - `v1.5.3` 與 COLRv1 Chromium helper metrics 修復都已歸檔，後續不需要再重做那段排查
 - Release workflow 已完成 Node.js 20 警告縮減；目前只剩 `astral-sh/setup-uv@v4`，等上游有 node24 版再升級
 - `Lite` 應視為 VHS / xterm.js / fallback-sensitive 環境的主力版本
 - `COLRv1` 適合作為現代 renderer 的彩色加值版，不建議取代 Lite 的錄影主線
-- 已完成代表樣本：
-  - `👩‍💻`
-  - `👋🏻`
-  - `🇺🇸`
+- COLRv1 代表 ZWJ 測試樣本改為 `❤‍🔥`（原 `👩‍💻` 的 💻 不在 budget-limited 選單）
 - `verify-emoji.html` 已補上 ZWJ / 膚色 / 旗幟驗證區
 - Lite verify page 已改用較穩定的 text-presentation 樣本，降低 `FE0F` 觸發彩色 fallback 的干擾
 
@@ -40,11 +35,11 @@
 
 ## 下次開工建議先做
 
-1. Nerd Lite PR merge 回 main + Release workflow 加入 `--nerd-lite` 建構步驟
+1. 準備 v2.2 release（COLRv1 擴增），跑完整 build + 更新版本號
 2. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
 3. 補 `Italic / Bold / BoldItalic` 的 output font 自動化測試（四個變體共同技術債）
-4. 視使用情境繼續調整 `colrv1.priority_sequences`
-5. 視需要補更多高價值 sequence regression cases
+4. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
+5. 評估 Emoji 17.0 / Nerd Fonts 版本更新
 
 ## 暫時不要重做的事
 
