@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 路線圖
 
-> 最後更新：2026-04-04（v2.1 Nerd Lite 已發佈；實作細節移至 roadmap-history.md）
+> 最後更新：2026-04-04（v2.1 Nerd Lite 已發佈；加入中長期評估方向）
 >
 > **歷史版本實作細節** → [`docs/roadmap-history.md`](./docs/roadmap-history.md)（需要查閱時再 Read）
 > **COLRv1 深度技術細節** → [`.github/colrv1-dev-notes.md`](./.github/colrv1-dev-notes.md)
@@ -75,6 +75,34 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 - 追蹤 `astral-sh/setup-uv` node24 版，屆時更新 release workflow
 - 視需要調整 `colrv1.priority_sequences`
 - 補 Italic / Bold / BoldItalic output font 自動化斷言（四個變體共同技術債）
+
+---
+
+## 中長期評估方向
+
+> 來源：2026-04-04 社群趨勢調查。各項依優先度排列，非承諾清單。
+
+### 近期可評估（低工作量）
+
+| 項目 | 說明 |
+|------|------|
+| **Emoji 17.0 跟進** | Unicode 17.0（2025-09）新增 163 個 emoji，含新 ZWJ 序列與膚色組合。追蹤 Noto Emoji 上游，版本更新後重跑建構即可覆蓋 |
+| **Nerd Fonts 版本定期追蹤** | Nerd Fonts 3.x 持續更新；部分 icon（Material Design Icons）已遷移至新 PUA-A 段，舊 codepoint 棄用，建議每次 release 前確認基底版本 |
+| **Ghostty 相容性驗證** | Ghostty 為 2025 年最熱門新終端機，grapheme width 計算比 wcswidth 嚴格，建議在 Ghostty 跑 `verify-emoji.html` 確認無 cursor desync 或 emoji 寬度異常 |
+
+### 中期可評估（中工作量）
+
+| 項目 | 說明 |
+|------|------|
+| **COLRv1 glyph budget 擴充** | Fedora / Qt 6.9 已全面切換 COLRv1，生態系成熟度提升。現行 budget（8136 slots）導致部分 emoji 截斷；可評估提高上限或重新設計 priority 策略 |
+
+### 長期觀察（高工作量 / 需外部條件）
+
+| 項目 | 說明 |
+|------|------|
+| **CBDT 長期策略** | Android / Fedora 已遷移 COLRv1，CBDT 在非 Android 場景優先度持續下降。觀察生態系，評估未來是否降格 Color 變體為相容性備援 |
+| **Variable Font 探索** | 需依賴 Sarasa Gothic 上游提供 Variable 版本；目前條件不具備，列為長期觀察 |
+| **OpenMoji 替代 Lite glyph 源** | OpenMoji 黑白 SVG 風格一致，可能優於 Noto 彩色降色結果；需建立 SVG→glyf 轉換管線，工作量高 |
 
 ---
 
