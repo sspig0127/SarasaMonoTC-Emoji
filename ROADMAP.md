@@ -21,7 +21,7 @@
 | **v1.5.2** | COLRv1 paint 座標 + helper metrics 修復（🟡🟢 Chromium 渲染回歸） | ✅ 完成 |
 | **v1.5.3** | COLRv1 高風險樣本驗證頁 + 全域 transformed-helper regression test | ✅ 完成 |
 | v2.0 | ZWJ 序列 / 旗幟 / 膚色變體 + release workflow 收尾 | ✅ 已發佈 |
-| v2.x | 評估第四變體：Emoji + Nerd Fonts PUA | 🔍 評估中 |
+| v2.x | 第四變體 Nerd Lite（Emoji + Nerd Fonts PUA） | 🚧 MVP 完成，待 merge |
 
 ---
 
@@ -62,54 +62,33 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 
 ---
 
-## v2.x — 評估第四變體：Emoji + Nerd Fonts PUA
+## v2.x — 第四變體 Nerd Lite（Emoji + Nerd Fonts PUA）
 
-v2.0 已發佈，前置條件達成，可開始評估。
+以 Lite 為底，合併 Nerd Fonts BMP PUA icon，讓單一字體同時具備中文、emoji 與常用開發圖示。
 
-除了目前三個變體（Color / Lite / COLRv1），中期可評估新增「emoji + Nerd Fonts PUA」產品線，
-暫名可為 `SarasaMonoTCEmojiNerd`。
+字族名稱：`SarasaMonoTCEmojiLiteNerd`；建構指令：`uv run python build.py --nerd-lite`
 
-### 需求定位
+### 已完成（feature/nerd-lite-mvp，134 tests 全過）
 
-目標使用者：
-- 終端機 / shell prompt / editor 需要 Nerd Fonts icon 的使用者
-- 同時希望保留本專案既有 emoji merge 能力的使用者
+- `src/emoji_merge.py`：`_load_nerd_pua_glyphs()`、`_merge_nerd_fonts_pua()`、`merge_emoji_lite_nerd()`
+- `build.py`：`--nerd-lite` flag、`get_config_int_ranges()`
+- `config.yaml`：`nerd_lite` 區塊（family_name、nerd_font、icon_ranges、single_column_ranges）
+- **折衷方案（PUA 欄寬設計）**：
+  - Powerline（E0A0–E0D7）：1 欄（scale=500/2048），確保 prompt / statusline 對齊
+  - Devicons / Codicons / Octicons / Seti-UI（其餘集合）：2 欄（scale=1000/2048），視覺比例與 emoji 一致
+- `tests/test_font_output.py`：`TestNerdLiteOutput`（7 tests）
+- `verify-emoji.html`：Section 12（12.0 折衷方案說明 + 12.1–12.8 各集合驗證）
 
-目標效果：
-- 保留 Sarasa Mono TC 的中文字寬與可讀性
-- 同時具備 emoji 與 Nerd Fonts PUA icon
-- 減少使用者自行 patch 字體的額外步驟
+### 待辦
 
-### 可能技術路線
+- PR / merge 回 main
+- Release workflow 加入 `--nerd-lite` 建構步驟
+- 補 Italic / Bold / BoldItalic output 斷言（與其他變體共同技術債）
 
-1. 以 Nerd Fonts `font-patcher` 或等價流程，將 PUA glyph merge 進既有輸出字體
-2. 優先從 `Lite` 或 `COLRv1` 變體試做，再決定是否擴到 `Color`
+### 參考文件
 
-原因：Nerd Fonts PUA 屬另一條 glyph merge 管線；先在較易 debug 的變體試做，問題來源較易切分。
-
-### 主要風險
-
-| 風險 | 說明 |
-|------|------|
-| 檔案大小再增加 | 已有 emoji merge 後，若再加入 Nerd Fonts PUA，四個 style 的發布包體積會再上升 |
-| PUA 碼位衝突 | 需確認 Nerd Fonts 使用的 PUA 區段不會與現有字體或未來策略衝突 |
-| 字寬一致性 | Nerd icon 不一定天然符合 2 columns / monospace 預期，需要額外調整 hmtx |
-| glyph name / order 複雜化 | 目前已處理 emoji rename、COLRv1 helper glyph；再疊一層 PUA merge 會提高維護成本 |
-| 授權與上游同步 | 需確認 Nerd Fonts patch 流程、來源版本與後續升級策略 |
-
-### 建議驗證方式
-
-- 先做單一 style MVP：`Regular`
-- 先挑一小組高頻 icon：branch/git、folder/file、terminal/prompt、dev language
-- 驗證項目：PUA mapping、monospace 寬度、glyph collision、終端機 / VS Code / verify 頁顯示
-
-### 現況
-
-- 有產品價值，列入 `v2.x` 評估項目
-- 建議以獨立分支或獨立實驗腳本驗證，不影響主線穩定性
-- 詳細評估（架構選項、PUA 分區分析、MVP 路線）→ [`docs/nerd-fonts-variant-eval.md`](./docs/nerd-fonts-variant-eval.md)
-
-參考：[Nerd Fonts font-patcher](https://github.com/ryanoasis/nerd-fonts/blob/master/font-patcher)
+- 架構評估 → [`docs/nerd-fonts-variant-eval.md`](./docs/nerd-fonts-variant-eval.md)
+- 實作計畫 → [`docs/nerd-lite-impl-plan.md`](./docs/nerd-lite-impl-plan.md)
 
 ---
 

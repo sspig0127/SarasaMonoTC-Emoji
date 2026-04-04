@@ -72,11 +72,15 @@
 
 ### Nerd Lite 變體
 
-> 以 Lite 變體為底，再合併 Nerd Fonts BMP PUA icon，讓單一字體同時具備中文、emoji 與常用開發圖示
+> 以 Lite 變體為底，再合併 Nerd Fonts BMP PUA icon，讓單一字體同時具備中文、emoji 與常用開發圖示。
+> Powerline（E0A0–E0D7）1 欄，Devicons / Codicons / Octicons / Seti-UI 2 欄。
 
 | 檔案 | 說明 |
 |------|------|
 | `SarasaMonoTCEmojiLiteNerd-Regular.ttf` | 一般 |
+| `SarasaMonoTCEmojiLiteNerd-Italic.ttf` | 斜體 |
+| `SarasaMonoTCEmojiLiteNerd-Bold.ttf` | 粗體 |
+| `SarasaMonoTCEmojiLiteNerd-BoldItalic.ttf` | 粗斜體 |
 
 下載所需字重的 `.ttf` 檔案，雙擊安裝即可。
 
@@ -241,7 +245,7 @@ GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workf
 | `release_tag` | 發佈標籤（如 `v2.0.0`） | 必填 |
 | `sarasa_version` | Sarasa Gothic 版本號 | `1.0.36` |
 
-**執行流程：** 下載來源字體 → 執行 127 個測試 → 建構三種變體 → 打包 zip → 上傳至指定 Release
+**執行流程：** 下載來源字體 → 執行 134 個測試 → 建構四種變體 → 打包 zip → 上傳至指定 Release
 
 - 若 Release 已存在：以 `--clobber` 覆蓋現有附件
 - 若 Release 不存在：建立 draft release，由維護者手動 publish
@@ -264,11 +268,17 @@ output/
 │   ├── SarasaMonoTCEmojiLite-Bold.ttf
 │   ├── SarasaMonoTCEmojiLite-BoldItalic.ttf
 │   └── fonts-manifest.json
-└── fonts-colrv1/                        # COLRv1 變體
-    ├── SarasaMonoTCEmojiCOLRv1-Regular.ttf
-    ├── SarasaMonoTCEmojiCOLRv1-Italic.ttf
-    ├── SarasaMonoTCEmojiCOLRv1-Bold.ttf
-    ├── SarasaMonoTCEmojiCOLRv1-BoldItalic.ttf
+├── fonts-colrv1/                        # COLRv1 變體
+│   ├── SarasaMonoTCEmojiCOLRv1-Regular.ttf
+│   ├── SarasaMonoTCEmojiCOLRv1-Italic.ttf
+│   ├── SarasaMonoTCEmojiCOLRv1-Bold.ttf
+│   ├── SarasaMonoTCEmojiCOLRv1-BoldItalic.ttf
+│   └── fonts-manifest.json
+└── fonts-nerd-lite/                     # Nerd Lite 變體
+    ├── SarasaMonoTCEmojiLiteNerd-Regular.ttf
+    ├── SarasaMonoTCEmojiLiteNerd-Italic.ttf
+    ├── SarasaMonoTCEmojiLiteNerd-Bold.ttf
+    ├── SarasaMonoTCEmojiLiteNerd-BoldItalic.ttf
     └── fonts-manifest.json
 
 docs/

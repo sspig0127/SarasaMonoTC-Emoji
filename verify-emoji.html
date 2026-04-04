@@ -312,62 +312,57 @@ TW🇹🇼US🇺🇸JP🇯🇵</div></div>
 <h2>12. Nerd Lite PUA icon 驗證 <span class="variant-badge badge-nerd-lite">Nerd Lite only</span></h2>
 <div class="label">左欄：Nerd Lite 輸出（應顯示圖示）；右欄：Lite 對照（PUA 呈 □ 屬正常）。共 5 集合 + 寬度 / 混排 / prompt 驗證。</div>
 
-<!-- 12.0 1欄 vs 2欄 說明 -->
-<h3 style="color:#f9e2af;margin-top:1.6em;margin-bottom:0.2em">12.0 ⚠ 圖示大小說明 — 1 欄 vs 2 欄的差異</h3>
+<!-- 12.0 折衷方案說明 -->
+<h3 style="color:#f9e2af;margin-top:1.6em;margin-bottom:0.2em">12.0 設計說明 — 折衷方案：Powerline 1 欄 / 其他集合 2 欄</h3>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px">
-  <div style="background:#181825;padding:16px 20px;border-radius:8px;border:1px solid #45475a">
-    <div style="font-size:12px;color:#f38ba8;margin-bottom:8px;font-family:monospace">★ 目前：1 欄（scale = 500/2048 ≈ 0.244）</div>
-    <div style="font-family:var(--compare-merged-font);font-size:18px;line-height:2;white-space:pre">高度對比（1欄 icon 較小）：
+  <div style="background:#181825;padding:16px 20px;border-radius:8px;border:1px solid #89dceb">
+    <div style="font-size:12px;color:#89dceb;margin-bottom:8px;font-family:monospace">Powerline (E0A0–E0D7)：1 欄（scale = 500/2048 ≈ 0.244）</div>
+    <div style="font-family:var(--compare-merged-font);font-size:18px;line-height:2;white-space:pre">高度對比（Powerline icon 較小）：
 ABCD  ABCd
-&#xE0B0;&#xE700;&#xEA60;&#xF400;  (1 欄 icon)
+&#xE0B0;&#xE0B2;&#xE0A0;&#xE0A2;  (Powerline 1 欄)
 一二三四  一二三四
 
-寬度對比（每格應等寬）：
-|A| |A| |A| |A| |A|
-|&#xE0B0;| |&#xE700;| |&#xEA60;| |&#xF400;| |&#xE5FA;|
+寬度對比（每格 1 欄）：
+|A| |A| |A| |A|
+|&#xE0B0;| |&#xE0B2;| |&#xE0A0;| |&#xE0A2;|
 
-Prompt 範例：
+Prompt 範例（分隔符貼合）：
  user &#xE0B0; main &#xE0A0; &#xE0B0; ok
-        ↑1欄 分隔符緊接</div>
+       ↑1欄 分隔符緊接，✓ 排版正確</div>
   </div>
   <div style="background:#181825;padding:16px 20px;border-radius:8px;border:1px solid #a6e3a1">
-    <div style="font-size:12px;color:#a6e3a1;margin-bottom:8px;font-family:monospace">改成 2 欄後（scale = 1000/2048 ≈ 0.488）── 模擬預覽</div>
+    <div style="font-size:12px;color:#a6e3a1;margin-bottom:8px;font-family:monospace">Devicons / Codicons / Octicons / Seti-UI：2 欄（scale = 1000/2048 ≈ 0.488）</div>
     <div style="font-family:var(--compare-merged-font);font-size:18px;line-height:2;white-space:pre">高度對比（2欄 icon 與文字等高）：
 ABCD  ABCd
-<span style="font-size:36px;line-height:1;vertical-align:middle">&#xE0B0;&#xE700;&#xEA60;&#xF400;</span>  (2 欄 icon，font-size×2 模擬)
+&#xE700;&#xEA60;&#xF400;&#xE5FA;  (語言 logo 2 欄)
 一二三四  一二三四
 
-寬度對比（2欄 icon 佔 2 格）：
-|A| |A| |A| |A| |A|
-|<span style="font-size:36px;line-height:0.9;vertical-align:middle">&#xE0B0;</span>| |<span style="font-size:36px;line-height:0.9;vertical-align:middle">&#xE700;</span>| |<span style="font-size:36px;line-height:0.9;vertical-align:middle">&#xEA60;</span>| |<span style="font-size:36px;line-height:0.9;vertical-align:middle">&#xF400;</span>|
+寬度對比（每格 2 欄）：
+|A| |A| |A| |A|
+|&#xE700;| |&#xEA60;| |&#xF400;| |&#xE5FA;|
 
-Prompt 範例（問題在這）：
- user  &#xE0B0;&#xE0B0; main &#xE0A0;&#xE0A0; &#xE0B0;&#xE0B0; ok
-         ↑2欄 分隔符多出一格，破壞排版</span></div>
+語言 logo 混排：
+&#xE700; Python  &#xE710; Node  &#xE762; Rust  &#xE724; Go</div>
   </div>
 </div>
 <div style="background:#313244;border-radius:6px;padding:12px 16px;font-size:13px;line-height:1.7;margin-bottom:4px">
-  <b style="color:#f9e2af">1 欄 icon 的適用場景：</b><br>
+  <b style="color:#cba6f7">目前採用折衷方案：</b> Powerline 保持 1 欄，Devicons / Codicons / Octicons / Seti-UI 改為 2 欄<br>
+  <b style="color:#89dceb">Powerline 1 欄的理由：</b><br>
   · Powerline prompt（<code style="color:#89dceb">E0B0 ►</code> 必須剛好 1 欄，才能緊貼相鄰色塊）<br>
   · Neovim statusline（欄位對齊依賴 icon 精確佔 1 格）<br>
   · 任何需要字元計數對齊的 TUI 應用<br>
-  <b style="color:#a6e3a1">2 欄 icon 的適用場景：</b><br>
-  · VHS 錄影 / 視覺展示（icon 比例與 emoji 一致，看起來自然）<br>
-  · 一般終端機文字混排（不在意精確欄位對齊）<br>
-  · 語言 logo / 檔案類型 icon（Devicons / Codicons / Octicons）視覺上比 1 欄更易辨識<br>
-  <b style="color:#cba6f7">折衷方案（未來可考慮）：</b> Powerline 保持 1 欄，其他集合改 2 欄
+  <b style="color:#a6e3a1">其他集合 2 欄的理由：</b><br>
+  · 語言 logo / 檔案類型 icon（Devicons / Codicons / Octicons）視覺比例與 emoji 一致，更易辨識<br>
+  · VHS 錄影 / 視覺展示用途比例自然<br>
+  · 不需要精確欄位對齊
 </div>
 <div style="background:#181825;border-radius:6px;padding:12px 16px;font-size:13px;font-family:monospace;line-height:1.8;margin-bottom:16px">
-  <b style="color:#f38ba8">Powerline prompt 1 欄 vs 2 欄的具體差異：</b><br>
-  <span style="color:#a6e3a1">1 欄（正確）：</span><br>
+  <b style="color:#f38ba8">為何 Powerline 不能改 2 欄 — prompt 破版示範：</b><br>
+  <span style="color:#a6e3a1">目前（Powerline 1 欄，正確）：</span><br>
   <span style="font-family:var(--compare-merged-font);font-size:17px"> user  ~/proj  &#xE0B0; main &#xE0A0; &#xE0B0; ✓ 分隔符貼合</span><br>
   <br>
-  <span style="color:#f38ba8">2 欄（prompt 分隔符破版）：</span><br>
-  <span style="font-family:var(--compare-merged-font);font-size:17px"> user  ~/proj  <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE0B0;</span> main <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE0A0;</span> <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE0B0;</span> ✗ 分隔符佔2欄，錯位</span><br>
-  <br>
-  <span style="color:#a6e3a1">2 欄（語言 logo 比較）：</span><br>
-  <span style="font-family:var(--compare-merged-font);font-size:17px">1欄：&#xE700; Python  &#xE710; Node  &#xE762; Rust  &#xE724; Go</span><br>
-  <span style="font-family:var(--compare-merged-font);font-size:17px">2欄：<span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE700;</span> Python  <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE710;</span> Node  <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE762;</span> Rust  <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE724;</span> Go</span>
+  <span style="color:#f38ba8">若 Powerline 改 2 欄（prompt 分隔符破版）：</span><br>
+  <span style="font-family:var(--compare-merged-font);font-size:17px"> user  ~/proj  <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE0B0;</span> main <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE0A0;</span> <span style="font-size:34px;line-height:0.9;vertical-align:middle">&#xE0B0;</span> ✗ 分隔符佔2欄，錯位</span>
 </div>
 
 <!-- 12.1 Powerline -->
@@ -927,7 +922,7 @@ async function applyStyle() {
   await loadFont({ style: opt.value, filename: opt.dataset.file });
   const isBold = opt.value.includes('Bold');
   const isItalic = opt.value.includes('Italic');
-  document.querySelectorAll('.mono, .size-compare').forEach(el => {
+  document.querySelectorAll('.mono, .size-compare, .compare-merged').forEach(el => {
     el.style.fontWeight = isBold ? '700' : '400';
     el.style.fontStyle = isItalic ? 'italic' : 'normal';
   });
@@ -935,7 +930,7 @@ async function applyStyle() {
 
 async function switchVariant() {
   currentVariant = document.getElementById('variantSelect').value;
-  document.querySelectorAll('.mono, .size-compare').forEach(el => {
+  document.querySelectorAll('.mono, .size-compare, .compare-merged').forEach(el => {
     el.style.fontWeight = '';
     el.style.fontStyle = '';
   });
