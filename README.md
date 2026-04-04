@@ -239,7 +239,7 @@ GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workf
 
 | 輸入參數 | 說明 | 預設值 |
 |----------|------|--------|
-| `release_tag` | 發佈標籤（如 `v2.1.0`） | 必填 |
+| `release_tag` | 發佈標籤（如 `v2.2.0`） | 必填 |
 | `sarasa_version` | Sarasa Gothic 版本號 | `1.0.36` |
 | `nerd_fonts_version` | Nerd Fonts 版本號（Symbols Only） | `3.4.0` |
 
@@ -431,7 +431,7 @@ Set Height 2160
 
 ### COLRv1 變體
 - **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）
-- **Emoji 數量**：597 個 emoji（codepoint 映射）+ 31 個 sequence ligatures（glyph 預算上限 8,136 slots），採兩階段選取：
+- **Emoji 數量**：540 個 emoji（codepoint 映射）+ 271 個 sequence ligatures（glyph 預算上限 8,450 slots），採兩階段選取：
   1. **Priority 優先**：42 個 priority / forced emoji + 19 個 priority sequences 先保證選入
   2. **Greedy 填充**：剩餘預算依 codepoint 升序填入常用舊 emoji
   - 完整選取清單：[`docs/colrv1-emoji-list.json`](docs/colrv1-emoji-list.json)
@@ -446,7 +446,7 @@ Set Height 2160
   - ⚠️ ❌ ⭐ ➡️ ⚙️ 等 BMP 符號透過 `force_colrv1_codepoints` 單獨管理
   - Priority 清單選取標準：**在 GitHub README / Issues / PR / CI 表格中高頻出現**，且不在 Sarasa 原有 cmap 中
   - 涵蓋：工具類（🔧🔨🛠️）、安全類（🔒🔑🛡️）、狀態圓點（🔴🟡🟢🔵）、連結導覽（🔗🔍🔖）、動作類（🚀🎉🐛）等
-- **技術**：7,507 個 geometry helper glyphs（PaintGlyph 節點引用）+ 629 個 glyf stub（含 31 個 sequence ligature）；paint tree 驅動彩色渲染
+- **技術**：7,507 個 geometry helper glyphs（PaintGlyph 節點引用）+ 811 個 glyf stub（540 單碼 + 271 sequences）；paint tree 驅動彩色渲染
 - **Chromium 相容性重點**：除了縮放 COLR paint tree 的 font-unit 座標之外，geometry helper glyph 的 metrics 也必須保留來源字體縮放後的值；若 helper metrics 被清成 `(0, 0)`，🟡 / 🟢 這類高倍率 transform emoji 會只剩 tiny fragment
 - **檔案大小**：~26 MB（比 Color 小 26%；COLRv1 向量資料比 PNG 點陣圖精簡）
 - **支援環境**：Chrome/Chromium 98+、Firefox 107+；macOS 系統級支援需 macOS 13+

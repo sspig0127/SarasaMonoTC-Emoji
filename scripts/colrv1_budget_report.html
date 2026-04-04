@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>COLRv1 Budget Expansion Analysis</title>
+<style>
+  body { font-family: sans-serif; margin: 20px; background: #1e1e1e; color: #d4d4d4; }
+  h1 { color: #569cd6; }
+  h2 { color: #4ec9b0; border-bottom: 1px solid #444; padding-bottom: 6px; }
+  h3 { color: #dcdcaa; }
+  .summary { background: #252526; padding: 14px; border-radius: 6px; margin: 12px 0; line-height: 1.8; }
+  .budget-bar { background:#333; border-radius:4px; height:18px; margin:6px 0; position:relative; }
+  .budget-fill { background:#569cd6; border-radius:4px 0 0 4px; height:100%; }
+  .budget-extra { background:#4ec9b0; height:100%; }
+  .emoji-grid { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+  .ec { display:inline-flex; flex-direction:column; align-items:center;
+         background:#2d2d2d; border-radius:4px; padding:6px 8px; min-width:60px; }
+  .ec .glyph { font-size:2em; line-height:1.2; font-family:'SMTCE-COLRv1',monospace; }
+  .ec .info { font-size:0.6em; color:#888; text-align:center; max-width:80px; }
+  .cost1  { border:1px solid #4ec9b0; }
+  .cost-mid { border:1px solid #dcdcaa; }
+  .cost-hi  { border:1px solid #f44747; }
+  .category-group { margin:16px 0; }
+  .ec-wrap { display:inline-flex; flex-direction:column; align-items:center; max-width:120px; }
+  .rel-row { font-size:0.72em; color:#aaa; margin-top:3px; text-align:center; line-height:1.6; }
+  .rel-chip { font-family:'SMTCE-COLRv1',monospace; font-size:1.3em; cursor:default; margin:0 1px; }
+  .rel-new  { font-family:'SMTCE-COLRv1',monospace; font-size:1.3em; cursor:default;
+               margin:0 1px; color:#4ec9b0; }
+  .no-rel   { color:#555; font-style:italic; }
+  table { border-collapse:collapse; width:100%; margin:10px 0; font-size:0.9em; }
+  th, td { border:1px solid #444; padding:6px 10px; text-align:left; }
+  th { background:#2d2d2d; color:#569cd6; }
+  .seq-char { font-family:'SMTCE-COLRv1',monospace; font-size:1.8em; }
+  .tag { display:inline-block; padding:2px 6px; border-radius:3px; font-size:0.8em; }
+  .tag-skin { background:#4e3a2d; color:#dcdcaa; }
+  .tag-zwj  { background:#1e3a4e; color:#9cdcfe; }
+  small { color:#888; }
+  .note { background:#2a2a1e; border-left:3px solid #dcdcaa;
+           padding:8px 12px; margin:8px 0; font-size:0.88em; }
+</style>
+<script>
+async function loadFont() {
+  const p = '../output/fonts-colrv1/SarasaMonoTC-Emoji-COLRv1-Regular.ttf';
+  try {
+    const f = new FontFace('SMTCE-COLRv1', `url(${p})`);
+    await f.load();
+    document.fonts.add(f);
+    document.getElementById('fs').textContent = '✅ COLRv1 字體已載入（現行版本，方向一新增項目無法顯示）';
+  } catch(e) {
+    document.getElementById('fs').textContent =
+      '⚠️ 字體未載入 → 先執行：uv run python build.py --colrv1 --styles Regular';
+  }
+}
+window.onload = loadFont;
+</script>
+</head>
+<body>
+<h1>COLRv1 Budget Expansion Analysis</h1>
+<p id="fs">🔄 載入字體...</p>
+
+<div class="summary">
+  <strong>現狀</strong>：8,136 / 8,136 slots 已用盡（greedy 7,913 + sequence 223）<br>
+  <strong>前提</strong>：max_new_glyphs 提高至 8450（+314 slots）<br>
+  <br>
+  <strong>方向一</strong>（skip-and-continue greedy）模擬可新增：<strong>16 個 emoji 候選</strong><br>
+  <strong>方向二</strong>（低成本 sequence）：共 754 筆候選，cost=1 共 220 筆；
+  扣除方向一後剩餘 232 slots，可納入 <strong>220 個 sequence</strong><br>
+  <br>
+  <em>方向一與方向二共用 314 extra slots。使用 <code>--dir1-slots N --dir2-max-cost M</code> 調整情境。</em>
+</div>
+
+<div class="note">
+  💡 建議實作路線：先實作方向一（改 1 行程式碼 + 提高 max_new_glyphs），
+  再從方向二篩選高價值 sequence 加入 priority_sequences（佔用部分 extra budget）。
+</div>
+
+<h2>方向一：skip-and-continue 可新增的單碼 emoji</h2>
+<p>以現行 greedy 截止點以後的候選，在 +314 slots 內 skip-and-continue 可加入的 emoji。<br>
+顏色：<span style="color:#4ec9b0">綠框=cost 1</span>、
+<span style="color:#dcdcaa">黃框=cost 2–5</span>、
+<span style="color:#f44747">紅框=cost 6+</span></p>
+<div class="category-group"><h3>Objects (1)</h3><div class="emoji-grid">
+<div class="ec-wrap"><div class="ec cost1"><span class="glyph">🕑</span><span class="info">U+1F551<br>CLOCK FACE TWO OCLOCK<br>cost=1</span></div><div class="rel-row">已選相關：<span title="CLOCK FACE ONE OCLOCK" class="rel-chip">🕐</span></div></div>
+</div></div>
+<div class="category-group"><h3>People & Body (15)</h3><div class="emoji-grid">
+<div class="ec-wrap"><div class="ec cost-hi"><span class="glyph">📏</span><span class="info">U+1F4CF<br>STRAIGHT RULER<br>cost=17</span></div><div class="rel-row">同批新增：<span title="TRIANGULAR RULER" class="rel-chip rel-new">📐</span></div></div>
+<div class="ec-wrap"><div class="ec cost-hi"><span class="glyph">📐</span><span class="info">U+1F4D0<br>TRIANGULAR RULER<br>cost=19</span></div><div class="rel-row">同批新增：<span title="STRAIGHT RULER" class="rel-chip rel-new">📏</span></div></div>
+<div class="ec-wrap"><div class="ec cost-hi"><span class="glyph">📑</span><span class="info">U+1F4D1<br>BOOKMARK TABS<br>cost=13</span></div><div class="rel-row">已選相關：<span title="BOOKMARK" class="rel-chip">🔖</span></div></div>
+<div class="ec-wrap"><div class="ec cost-hi"><span class="glyph">📒</span><span class="info">U+1F4D2<br>LEDGER<br>cost=15</span></div><div class="rel-row"><span class="no-rel">（現行選單無相關）</span></div></div>
+<div class="ec-wrap"><div class="ec cost-hi"><span class="glyph">📓</span><span class="info">U+1F4D3<br>NOTEBOOK<br>cost=109</span></div><div class="rel-row">同批新增：<span title="NOTEBOOK WITH DECORATIVE COVER" class="rel-chip rel-new">📔</span></div></div>
+<div class="ec-wrap"><div class="ec cost-mid"><span class="glyph">📔</span><span class="info">U+1F4D4<br>NOTEBOOK WITH DECORATIVE COV<br>cost=4</span></div><div class="rel-row">同批新增：<span title="NOTEBOOK" class="rel-chip rel-new">📓</span></div></div>
+<div class="ec-wrap"><div class="ec cost1"><span class="glyph">📕</span><span class="info">U+1F4D5<br>CLOSED BOOK<br>cost=1</span></div><div class="rel-row">同批新增：<span title="OPEN BOOK" class="rel-chip rel-new">📖</span><span title="GREEN BOOK" class="rel-chip rel-new">📗</span><span title="BLUE BOOK" class="rel-chip rel-new">📘</span><span title="ORANGE BOOK" class="rel-chip rel-new">📙</span></div></div>
+<div class="ec-wrap"><div class="ec cost-hi"><span class="glyph">📖</span><span class="info">U+1F4D6<br>OPEN BOOK<br>cost=49</span></div><div class="rel-row">同批新增：<span title="CLOSED BOOK" class="rel-chip rel-new">📕</span><span title="GREEN BOOK" class="rel-chip rel-new">📗</span><span title="BLUE BOOK" class="rel-chip rel-new">📘</span><span title="ORANGE BOOK" class="rel-chip rel-new">📙</span></div></div>
+<div class="ec-wrap"><div class="ec cost1"><span class="glyph">📗</span><span class="info">U+1F4D7<br>GREEN BOOK<br>cost=1</span></div><div class="rel-row">同批新增：<span title="CLOSED BOOK" class="rel-chip rel-new">📕</span><span title="OPEN BOOK" class="rel-chip rel-new">📖</span><span title="BLUE BOOK" class="rel-chip rel-new">📘</span><span title="ORANGE BOOK" class="rel-chip rel-new">📙</span></div></div>
+<div class="ec-wrap"><div class="ec cost1"><span class="glyph">📘</span><span class="info">U+1F4D8<br>BLUE BOOK<br>cost=1</span></div><div class="rel-row">同批新增：<span title="CLOSED BOOK" class="rel-chip rel-new">📕</span><span title="OPEN BOOK" class="rel-chip rel-new">📖</span><span title="GREEN BOOK" class="rel-chip rel-new">📗</span><span title="ORANGE BOOK" class="rel-chip rel-new">📙</span></div></div>
+<div class="ec-wrap"><div class="ec cost1"><span class="glyph">📙</span><span class="info">U+1F4D9<br>ORANGE BOOK<br>cost=1</span></div><div class="rel-row">同批新增：<span title="CLOSED BOOK" class="rel-chip rel-new">📕</span><span title="OPEN BOOK" class="rel-chip rel-new">📖</span><span title="GREEN BOOK" class="rel-chip rel-new">📗</span><span title="BLUE BOOK" class="rel-chip rel-new">📘</span></div></div>
+<div class="ec-wrap"><div class="ec cost-hi"><span class="glyph">📚</span><span class="info">U+1F4DA<br>BOOKS<br>cost=25</span></div><div class="rel-row"><span class="no-rel">（現行選單無相關）</span></div></div>
+<div class="ec-wrap"><div class="ec cost-hi"><span class="glyph">📛</span><span class="info">U+1F4DB<br>NAME BADGE<br>cost=12</span></div><div class="rel-row"><span class="no-rel">（現行選單無相關）</span></div></div>
+<div class="ec-wrap"><div class="ec cost-hi"><span class="glyph">📜</span><span class="info">U+1F4DC<br>SCROLL<br>cost=22</span></div><div class="rel-row"><span class="no-rel">（現行選單無相關）</span></div></div>
+<div class="ec-wrap"><div class="ec cost-hi"><span class="glyph">📝</span><span class="info">U+1F4DD<br>MEMO<br>cost=24</span></div><div class="rel-row"><span class="no-rel">（現行選單無相關）</span></div></div>
+</div></div>
+
+<h2>方向二：低成本 sequence 候選（所有 component 已選入）</h2>
+<p>以下 sequence 的 base emoji 已在選單中；cost=1 表示不帶新 dep，最便宜。<br>
+視覺上 COLRv1 字體目前尚未包含這些 sequence，顯示可能為 fallback 字體。</p>
+
+<div class="summary">
+  篩選條件：cost ≤ 1　預算：Direction 1 占用後剩餘 232 slots<br>
+  <strong>可納入：220 個 sequence（消耗 220/232 slots，剩餘 12 slots）</strong><br>
+  超出或過濾：0 筆
+</div>
+
+<h3>✅ 可納入（220 筆）</h3>
+<details open><summary>膚色變體 219 筆</summary><table><thead><tr><th>Emoji</th><th>Codepoints</th><th>類型</th><th>Cost</th></tr></thead><tbody><tr><td class="seq-char">⛹🏻</td><td><code>U+26F9 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">⛹🏼</td><td><code>U+26F9 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">⛹🏽</td><td><code>U+26F9 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">⛹🏾</td><td><code>U+26F9 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">⛹🏿</td><td><code>U+26F9 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✊🏻</td><td><code>U+270A U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✊🏼</td><td><code>U+270A U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✊🏽</td><td><code>U+270A U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✊🏾</td><td><code>U+270A U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✊🏿</td><td><code>U+270A U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✋🏻</td><td><code>U+270B U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✋🏼</td><td><code>U+270B U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✋🏽</td><td><code>U+270B U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✋🏾</td><td><code>U+270B U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✋🏿</td><td><code>U+270B U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✌🏻</td><td><code>U+270C U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✌🏼</td><td><code>U+270C U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✌🏽</td><td><code>U+270C U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✌🏾</td><td><code>U+270C U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✌🏿</td><td><code>U+270C U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✍🏻</td><td><code>U+270D U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✍🏼</td><td><code>U+270D U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✍🏽</td><td><code>U+270D U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✍🏾</td><td><code>U+270D U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">✍🏿</td><td><code>U+270D U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🎅🏻</td><td><code>U+1F385 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🎅🏼</td><td><code>U+1F385 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🎅🏽</td><td><code>U+1F385 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🎅🏾</td><td><code>U+1F385 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🎅🏿</td><td><code>U+1F385 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏂🏻</td><td><code>U+1F3C2 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏂🏼</td><td><code>U+1F3C2 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏂🏽</td><td><code>U+1F3C2 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏂🏾</td><td><code>U+1F3C2 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏂🏿</td><td><code>U+1F3C2 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏃🏻</td><td><code>U+1F3C3 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏃🏼</td><td><code>U+1F3C3 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏃🏽</td><td><code>U+1F3C3 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏃🏾</td><td><code>U+1F3C3 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏃🏿</td><td><code>U+1F3C3 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏇🏻</td><td><code>U+1F3C7 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏇🏼</td><td><code>U+1F3C7 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏇🏾</td><td><code>U+1F3C7 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏇🏿</td><td><code>U+1F3C7 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏋🏻</td><td><code>U+1F3CB U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏋🏼</td><td><code>U+1F3CB U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏋🏽</td><td><code>U+1F3CB U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏋🏾</td><td><code>U+1F3CB U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏋🏿</td><td><code>U+1F3CB U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🏌🏼</td><td><code>U+1F3CC U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👂🏻</td><td><code>U+1F442 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👂🏼</td><td><code>U+1F442 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👂🏽</td><td><code>U+1F442 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👂🏾</td><td><code>U+1F442 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👂🏿</td><td><code>U+1F442 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👃🏻</td><td><code>U+1F443 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👃🏼</td><td><code>U+1F443 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👃🏽</td><td><code>U+1F443 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👃🏾</td><td><code>U+1F443 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👃🏿</td><td><code>U+1F443 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👆🏻</td><td><code>U+1F446 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👆🏼</td><td><code>U+1F446 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👆🏽</td><td><code>U+1F446 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👆🏾</td><td><code>U+1F446 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👆🏿</td><td><code>U+1F446 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👇🏻</td><td><code>U+1F447 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👇🏼</td><td><code>U+1F447 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👇🏽</td><td><code>U+1F447 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👇🏾</td><td><code>U+1F447 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👇🏿</td><td><code>U+1F447 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👈🏻</td><td><code>U+1F448 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👈🏼</td><td><code>U+1F448 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👈🏽</td><td><code>U+1F448 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👈🏾</td><td><code>U+1F448 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👈🏿</td><td><code>U+1F448 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👉🏻</td><td><code>U+1F449 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👉🏼</td><td><code>U+1F449 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👉🏽</td><td><code>U+1F449 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👉🏾</td><td><code>U+1F449 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👉🏿</td><td><code>U+1F449 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👊🏻</td><td><code>U+1F44A U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👊🏼</td><td><code>U+1F44A U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👊🏽</td><td><code>U+1F44A U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👊🏾</td><td><code>U+1F44A U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👊🏿</td><td><code>U+1F44A U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👋🏻</td><td><code>U+1F44B U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👋🏼</td><td><code>U+1F44B U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👋🏽</td><td><code>U+1F44B U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👋🏾</td><td><code>U+1F44B U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👋🏿</td><td><code>U+1F44B U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👌🏻</td><td><code>U+1F44C U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👌🏼</td><td><code>U+1F44C U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👌🏽</td><td><code>U+1F44C U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👌🏾</td><td><code>U+1F44C U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👌🏿</td><td><code>U+1F44C U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👍🏻</td><td><code>U+1F44D U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👍🏼</td><td><code>U+1F44D U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👍🏽</td><td><code>U+1F44D U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👍🏾</td><td><code>U+1F44D U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👍🏿</td><td><code>U+1F44D U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👎🏻</td><td><code>U+1F44E U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👎🏼</td><td><code>U+1F44E U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👎🏽</td><td><code>U+1F44E U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👎🏾</td><td><code>U+1F44E U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👎🏿</td><td><code>U+1F44E U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👏🏻</td><td><code>U+1F44F U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👏🏼</td><td><code>U+1F44F U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👏🏽</td><td><code>U+1F44F U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👏🏾</td><td><code>U+1F44F U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👏🏿</td><td><code>U+1F44F U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👐🏻</td><td><code>U+1F450 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👐🏼</td><td><code>U+1F450 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👐🏽</td><td><code>U+1F450 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👐🏾</td><td><code>U+1F450 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👐🏿</td><td><code>U+1F450 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👦🏻</td><td><code>U+1F466 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👦🏼</td><td><code>U+1F466 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👦🏽</td><td><code>U+1F466 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👦🏾</td><td><code>U+1F466 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👦🏿</td><td><code>U+1F466 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👧🏻</td><td><code>U+1F467 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👧🏼</td><td><code>U+1F467 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👧🏽</td><td><code>U+1F467 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👧🏾</td><td><code>U+1F467 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👧🏿</td><td><code>U+1F467 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👨🏻</td><td><code>U+1F468 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👩🏻</td><td><code>U+1F469 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👩🏼</td><td><code>U+1F469 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👩🏽</td><td><code>U+1F469 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👩🏾</td><td><code>U+1F469 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👩🏿</td><td><code>U+1F469 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👫🏻</td><td><code>U+1F46B U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👫🏼</td><td><code>U+1F46B U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👫🏽</td><td><code>U+1F46B U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👫🏾</td><td><code>U+1F46B U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👫🏿</td><td><code>U+1F46B U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👬🏻</td><td><code>U+1F46C U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👬🏼</td><td><code>U+1F46C U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👬🏽</td><td><code>U+1F46C U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👬🏾</td><td><code>U+1F46C U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👬🏿</td><td><code>U+1F46C U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👭🏻</td><td><code>U+1F46D U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👭🏼</td><td><code>U+1F46D U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👭🏽</td><td><code>U+1F46D U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👭🏾</td><td><code>U+1F46D U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👭🏿</td><td><code>U+1F46D U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👮🏻</td><td><code>U+1F46E U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👰🏻</td><td><code>U+1F470 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👰🏼</td><td><code>U+1F470 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👰🏽</td><td><code>U+1F470 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👰🏾</td><td><code>U+1F470 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👰🏿</td><td><code>U+1F470 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👱🏻</td><td><code>U+1F471 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👲🏻</td><td><code>U+1F472 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👲🏼</td><td><code>U+1F472 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👲🏽</td><td><code>U+1F472 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👲🏾</td><td><code>U+1F472 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👲🏿</td><td><code>U+1F472 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👴🏻</td><td><code>U+1F474 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👴🏼</td><td><code>U+1F474 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👴🏽</td><td><code>U+1F474 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👴🏾</td><td><code>U+1F474 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👴🏿</td><td><code>U+1F474 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👵🏻</td><td><code>U+1F475 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👵🏼</td><td><code>U+1F475 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👵🏽</td><td><code>U+1F475 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👵🏾</td><td><code>U+1F475 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👵🏿</td><td><code>U+1F475 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👶🏻</td><td><code>U+1F476 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👶🏼</td><td><code>U+1F476 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👶🏽</td><td><code>U+1F476 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👶🏾</td><td><code>U+1F476 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👶🏿</td><td><code>U+1F476 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👷🏻</td><td><code>U+1F477 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👸🏻</td><td><code>U+1F478 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👸🏼</td><td><code>U+1F478 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👸🏽</td><td><code>U+1F478 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👸🏾</td><td><code>U+1F478 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👸🏿</td><td><code>U+1F478 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👼🏻</td><td><code>U+1F47C U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👼🏼</td><td><code>U+1F47C U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👼🏽</td><td><code>U+1F47C U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👼🏾</td><td><code>U+1F47C U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">👼🏿</td><td><code>U+1F47C U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💁🏻</td><td><code>U+1F481 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💁🏼</td><td><code>U+1F481 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💁🏽</td><td><code>U+1F481 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💁🏾</td><td><code>U+1F481 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💁🏿</td><td><code>U+1F481 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💃🏻</td><td><code>U+1F483 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💃🏼</td><td><code>U+1F483 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💃🏽</td><td><code>U+1F483 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💃🏾</td><td><code>U+1F483 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💃🏿</td><td><code>U+1F483 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💇🏻</td><td><code>U+1F487 U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💇🏼</td><td><code>U+1F487 U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💇🏽</td><td><code>U+1F487 U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💇🏾</td><td><code>U+1F487 U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💇🏿</td><td><code>U+1F487 U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💏🏻</td><td><code>U+1F48F U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💏🏼</td><td><code>U+1F48F U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💏🏽</td><td><code>U+1F48F U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💏🏾</td><td><code>U+1F48F U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💏🏿</td><td><code>U+1F48F U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💪🏻</td><td><code>U+1F4AA U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💪🏼</td><td><code>U+1F4AA U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💪🏽</td><td><code>U+1F4AA U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💪🏾</td><td><code>U+1F4AA U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">💪🏿</td><td><code>U+1F4AA U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🙌🏻</td><td><code>U+1F64C U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🙌🏼</td><td><code>U+1F64C U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🙌🏽</td><td><code>U+1F64C U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🙌🏾</td><td><code>U+1F64C U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🙌🏿</td><td><code>U+1F64C U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🤝🏻</td><td><code>U+1F91D U+1F3FB</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🤝🏼</td><td><code>U+1F91D U+1F3FC</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🤝🏽</td><td><code>U+1F91D U+1F3FD</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🤝🏾</td><td><code>U+1F91D U+1F3FE</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr>
+<tr><td class="seq-char">🤝🏿</td><td><code>U+1F91D U+1F3FF</code></td><td><span class="tag tag-skin">膚色</span></td><td>1</td></tr></tbody></table></details>
+<details open><summary>ZWJ 序列 1 筆</summary><table><thead><tr><th>Emoji</th><th>Codepoints</th><th>類型</th><th>Cost</th></tr></thead><tbody><tr><td class="seq-char">👨👨👦</td><td><code>U+1F468 U+200D U+1F468 U+200D U+1F466</code></td><td><span class="tag tag-zwj">ZWJ</span></td><td>1</td></tr></tbody></table></details>
+
+<h3>❌ 超出預算或高於 cost 門檻（0 筆）</h3>
+<details><summary>膚色變體 0 筆</summary><p><em>（無）</em></p></details>
+<details><summary>ZWJ 序列 0 筆</summary><p><em>（無）</em></p></details>
+
+
+</body>
+</html>
