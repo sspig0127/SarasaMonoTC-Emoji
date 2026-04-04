@@ -432,8 +432,8 @@ Set Height 2160
 ### COLRv1 變體
 - **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）
 - **Emoji 數量**：540 個 emoji（codepoint 映射）+ 271 個 sequence ligatures（glyph 預算上限 8,450 slots），採兩階段選取：
-  1. **Priority 優先**：42 個 priority / forced emoji + 19 個 priority sequences 先保證選入
-  2. **Greedy 填充**：剩餘預算依 codepoint 升序填入常用舊 emoji
+  1. **Priority 優先**：52 個 priority / forced emoji + 221 個 priority sequences 先保證選入
+  2. **Greedy 填充**：剩餘預算依 codepoint 升序掃描，超預算者 skip 繼續（skip-and-continue）
   - 完整選取清單：[`docs/colrv1-emoji-list.json`](docs/colrv1-emoji-list.json)
   - 可透過 `config.yaml` 的 `colrv1.max_new_glyphs` 調整預算
   - 可透過 `config.yaml` 的 `colrv1.priority_codepoints` 自訂優先 emoji 清單
@@ -442,7 +442,7 @@ Set Height 2160
   強制使用 COLRv1 向量著色，取代 Sarasa 原有單色字形
 - **Sequence 支援**：已支援 sequence emoji，但目前採剩餘 glyph budget 內的 priority / greedy 選取，不是全量 sequence 覆蓋
 - **Priority 清單挑選依據**：
-  - Greedy 填充以 codepoint 升序排列，截止點約在 U+1F4FB，導致 U+1F500+ 的高頻 dev emoji 被排除
+  - Greedy 填充以 codepoint 升序掃描，超預算者跳過繼續尋找更便宜的候選（v2.2 起 skip-and-continue）
   - ⚠️ ❌ ⭐ ➡️ ⚙️ 等 BMP 符號透過 `force_colrv1_codepoints` 單獨管理
   - Priority 清單選取標準：**在 GitHub README / Issues / PR / CI 表格中高頻出現**，且不在 Sarasa 原有 cmap 中
   - 涵蓋：工具類（🔧🔨🛠️）、安全類（🔒🔑🛡️）、狀態圓點（🔴🟡🟢🔵）、連結導覽（🔗🔍🔖）、動作類（🚀🎉🐛）等
