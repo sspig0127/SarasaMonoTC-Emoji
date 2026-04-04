@@ -5,18 +5,15 @@
 
 **Sarasa Mono TC（更紗黑體繁中等寬）+ Emoji — 嵌入式 emoji，支援四種變體**
 
-## v2.1 重點
+## v2.2 重點
 
-- 支援 sequence emoji：
-  - ZWJ
-  - 膚色變體
-  - 旗幟
-- `Color` / `Lite` / `COLRv1` / `Nerd Lite` 四個變體都已接上 sequence-aware GSUB（Nerd Lite 繼承 Lite pipeline）
-- 已驗證代表樣本：
-  - `👩‍💻`
-  - `👋🏻`
-  - `🇺🇸`
-- `verify-emoji.html` 已新增 ZWJ / 膚色 / 旗幟驗證區
+- **COLRv1 budget 擴增**：收錄量由 629 提升到 **811**（540 單碼 emoji + 271 sequences）
+- `max_new_glyphs` 提高至 8,450；實際消耗 8,327（剩餘 123 slots 緩衝）
+- greedy 選取改為 **skip-and-continue**，不再在第一個超預算 emoji 停止
+- 新增 10 個 priority emoji：📏 📐 📝 📜 📕 📗 📘 📙 📔 🕑
+- 新增 221 個 priority sequences（膚色變體 / ZWJ / 旗幟）
+
+v2.1 起支援 sequence emoji（ZWJ / 膚色 / 旗幟），四個變體（`Color` / `Lite` / `COLRv1` / `Nerd Lite`）全部接通。
 
 相關技術文件：
 - [`ROADMAP.md`](ROADMAP.md) — 版本規劃與維護追蹤

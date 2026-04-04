@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 路線圖
 
-> 最後更新：2026-04-05（v2.2 COLRv1 budget 擴增；更新技術債狀態）
+> 最後更新：2026-04-05（v2.2.0 已發佈；COLRv1 budget 擴增）
 >
 > **歷史版本實作細節** → [`docs/roadmap-history.md`](./docs/roadmap-history.md)（需要查閱時再 Read）
 > **COLRv1 深度技術細節** → [`.github/colrv1-dev-notes.md`](./.github/colrv1-dev-notes.md)
@@ -22,7 +22,7 @@
 | **v1.5.3** | COLRv1 高風險樣本驗證頁 + 全域 transformed-helper regression test | ✅ 完成 |
 | v2.0 | ZWJ 序列 / 旗幟 / 膚色變體 + release workflow 收尾 | ✅ 已發佈 |
 | v2.1 | 第四變體 Nerd Lite（Emoji + Nerd Fonts PUA） | ✅ 已發佈 |
-| **v2.2** | COLRv1 budget 擴增（skip-and-continue greedy + 221 sequences） | 🔨 待 release |
+| **v2.2** | COLRv1 budget 擴增（skip-and-continue greedy + 221 sequences） | ✅ 已發佈 |
 | v2.x | 後續維護 / 技術債 | 📋 進行中 |
 
 ---

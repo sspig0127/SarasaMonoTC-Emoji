@@ -1,6 +1,6 @@
 # Copilot Instructions — SarasaMonoTC-Emoji
 
-> 目前版本：**v2.1.0**（2026-04-04）
+> 目前版本：**v2.2.0**（2026-04-05）
 > COLRv1 深度技術細節 → [`.github/colrv1-dev-notes.md`](./colrv1-dev-notes.md)（debug 時再 Read）
 
 ## 專案概述
