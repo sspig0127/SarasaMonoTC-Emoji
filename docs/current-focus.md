@@ -33,7 +33,7 @@
 ## 下次開工建議先做
 
 1. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
-2. 補 `Italic / Bold / BoldItalic` 的 output font 自動化測試（四個變體共同技術債）
+2. ~~補 `Italic / Bold / BoldItalic` 的 output font 自動化測試~~（✅ 已完成，198 tests）
 3. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
 4. 評估 Emoji 17.0 / Nerd Fonts 版本更新
 

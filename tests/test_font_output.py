@@ -25,6 +25,7 @@ _KEY_CODEPOINTS = [
 _MIN_COLOR_GLYPHS = 56_000
 # Sarasa + emoji outlines only: slightly more than Sarasa alone (~3 800 emoji)
 _MIN_LITE_GLYPHS = 5_000
+_MIN_ALL_STYLES_GLYPHS = 50_000
 _STYLE_MATRIX = ("Regular", "Italic", "Bold", "BoldItalic")
 _ROOT = Path(__file__).parent.parent
 _LITE_POC_FLAGS = [
@@ -280,6 +281,45 @@ class TestColorOutput:
         finally:
             font.close()
 
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_glyph_count_reasonable(self, style):
+        font = _load_output_font("fonts", "SarasaMonoTCEmoji", style)
+        try:
+            assert len(font.getGlyphOrder()) > _MIN_ALL_STYLES_GLYPHS
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_family_name_correct(self, style):
+        font = _load_output_font("fonts", "SarasaMonoTCEmoji", style)
+        try:
+            family = font["name"].getBestFamilyName() or ""
+            assert "Emoji" in family
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_key_codepoints_present(self, style):
+        font = _load_output_font("fonts", "SarasaMonoTCEmoji", style)
+        try:
+            cmap = font["cmap"].getBestCmap() or {}
+            assert 0x1F600 in cmap
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_emoji_width_is_double(self, style):
+        font = _load_output_font("fonts", "SarasaMonoTCEmoji", style)
+        try:
+            cmap = font["cmap"].getBestCmap() or {}
+            hmtx = font["hmtx"]
+            assert 0x0041 in cmap
+            half_width, _ = hmtx[cmap[0x0041]]
+            actual_width, _ = hmtx[cmap[0x1F600]]
+            assert actual_width == half_width * 2
+        finally:
+            font.close()
+
 
 # ---------------------------------------------------------------------------
 # Lite variant (glyf TrueType outlines)
@@ -467,6 +507,45 @@ class TestLiteOutput:
         finally:
             font.close()
 
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_glyph_count_reasonable(self, style):
+        font = _load_output_font("fonts-lite", "SarasaMonoTCEmojiLite", style)
+        try:
+            assert len(font.getGlyphOrder()) > _MIN_ALL_STYLES_GLYPHS
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_family_name_correct(self, style):
+        font = _load_output_font("fonts-lite", "SarasaMonoTCEmojiLite", style)
+        try:
+            family = font["name"].getBestFamilyName() or ""
+            assert "Lite" in family
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_key_codepoints_present(self, style):
+        font = _load_output_font("fonts-lite", "SarasaMonoTCEmojiLite", style)
+        try:
+            cmap = font["cmap"].getBestCmap() or {}
+            assert 0x1F600 in cmap
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_emoji_width_is_double(self, style):
+        font = _load_output_font("fonts-lite", "SarasaMonoTCEmojiLite", style)
+        try:
+            cmap = font["cmap"].getBestCmap() or {}
+            hmtx = font["hmtx"]
+            assert 0x0041 in cmap
+            half_width, _ = hmtx[cmap[0x0041]]
+            actual_width, _ = hmtx[cmap[0x1F600]]
+            assert actual_width == half_width * 2
+        finally:
+            font.close()
+
 
 # ---------------------------------------------------------------------------
 # Nerd Lite variant (Lite + Nerd Fonts PUA)
@@ -564,6 +643,45 @@ class TestNerdLiteOutput:
             assert glyph_name not in nerd_glyph_names, (
                 f"Emoji U+{cp:04X} {char} unexpectedly reuses a Nerd PUA glyph {glyph_name!r}"
             )
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_glyph_count_reasonable(self, style):
+        font = _load_output_font("fonts-nerd-lite", "SarasaMonoTCEmojiLiteNerd", style)
+        try:
+            assert len(font.getGlyphOrder()) > _MIN_ALL_STYLES_GLYPHS
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_family_name_correct(self, style):
+        font = _load_output_font("fonts-nerd-lite", "SarasaMonoTCEmojiLiteNerd", style)
+        try:
+            family = font["name"].getBestFamilyName() or ""
+            assert "Nerd" in family
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_key_codepoints_present(self, style):
+        font = _load_output_font("fonts-nerd-lite", "SarasaMonoTCEmojiLiteNerd", style)
+        try:
+            cmap = font["cmap"].getBestCmap() or {}
+            assert 0x1F600 in cmap
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_emoji_width_is_double(self, style):
+        font = _load_output_font("fonts-nerd-lite", "SarasaMonoTCEmojiLiteNerd", style)
+        try:
+            cmap = font["cmap"].getBestCmap() or {}
+            hmtx = font["hmtx"]
+            assert 0x0041 in cmap
+            half_width, _ = hmtx[cmap[0x0041]]
+            actual_width, _ = hmtx[cmap[0x1F600]]
+            assert actual_width == half_width * 2
+        finally:
+            font.close()
 
 
 # ---------------------------------------------------------------------------
@@ -675,6 +793,45 @@ class TestCOLRv1Output:
             assert _has_ligature_sequence(font, (0x2764, 0x200D, 0x1F525))
             assert _has_ligature_sequence(font, (0x1F44B, 0x1F3FB))
             assert _has_ligature_sequence(font, (0x1F1FA, 0x1F1F8))
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_glyph_count_reasonable(self, style):
+        font = _load_output_font("fonts-colrv1", "SarasaMonoTCEmojiCOLRv1", style)
+        try:
+            assert len(font.getGlyphOrder()) > _MIN_ALL_STYLES_GLYPHS
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_family_name_correct(self, style):
+        font = _load_output_font("fonts-colrv1", "SarasaMonoTCEmojiCOLRv1", style)
+        try:
+            family = font["name"].getBestFamilyName() or ""
+            assert "COLRv1" in family
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_key_codepoints_present(self, style):
+        font = _load_output_font("fonts-colrv1", "SarasaMonoTCEmojiCOLRv1", style)
+        try:
+            cmap = font["cmap"].getBestCmap() or {}
+            assert 0x1F600 in cmap
+        finally:
+            font.close()
+
+    @pytest.mark.parametrize("style", _STYLE_MATRIX)
+    def test_all_styles_emoji_width_is_double(self, style):
+        font = _load_output_font("fonts-colrv1", "SarasaMonoTCEmojiCOLRv1", style)
+        try:
+            cmap = font["cmap"].getBestCmap() or {}
+            hmtx = font["hmtx"]
+            assert 0x0041 in cmap
+            half_width, _ = hmtx[cmap[0x0041]]
+            actual_width, _ = hmtx[cmap[0x1F600]]
+            assert actual_width == half_width * 2
         finally:
             font.close()
 

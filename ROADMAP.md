@@ -77,7 +77,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 - 視需要調整 `colrv1.priority_sequences`
   - config 緩衝：`max_new_glyphs` 8,450 − 實際消耗 8,327 = **123 slots**（可繼續加 sequence）
   - TrueType 硬上限距離：65,535 − Italic 65,232 = **303 slots**（最壞情況，不可超越）
-- 補 Italic / Bold / BoldItalic output font 自動化測試（四個變體共同技術債）
+- ~~補 Italic / Bold / BoldItalic output font 自動化測試~~（✅ 已完成，198 tests）
 - 評估 Emoji 17.0 / Nerd Fonts 版本更新
 
 ---
@@ -115,5 +115,5 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 | 項目 | 位置 | 說明 |
 |------|------|------|
 | CBLC filtering 可能移除有效 emoji | `emoji_merge.py:_filter_cblc_to_added_glyphs` | 名稱衝突時捨棄 color bitmap。Build log 列出被移除的 glyph 名稱（最多 10 個），可評估是否需加入 `force_color_codepoints` |
-| output tests 只檢查 Regular | `tests/conftest.py`、`tests/test_font_output.py` | Italic / Bold / BoldItalic 目前靠 build 成功與人工驗證，還沒有對 output font 做自動化檢查 |
+| ~~output tests 只檢查 Regular~~ | ✅ 已解決（2026-04-05） | 四個變體 × 四種 style × 4 項檢查 = 64 個 all-styles 測試，共 198 tests |
 | COLRv1 sequence 仍為 budget-limited | `config.yaml`、`emoji_merge.py:merge_emoji_colrv1` | v2.2 已擴增（811 emoji/sequences，8,327/8,450），仍非全量；`priority_sequences` 可視需要繼續調整 |
