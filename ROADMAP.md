@@ -89,7 +89,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 | 項目 | 說明 |
 |------|------|
 | **Emoji 17.0 跟進** | Unicode 17.0（2025-09）新增 163 個 emoji，含新 ZWJ 序列與膚色組合。追蹤 Noto Emoji 上游，版本更新後重跑建構即可覆蓋 |
-| **Nerd Fonts 版本定期追蹤** | Nerd Fonts 3.x 持續更新；部分 icon（Material Design Icons）已遷移至新 PUA-A 段，舊 codepoint 棄用，建議每次 release 前確認基底版本 |
+| **Nerd Fonts 版本定期追蹤** | Nerd Fonts 3.x 持續更新；部分 icon（Material Design Icons）已遷移至新 PUA-A 段，舊 codepoint 棄用，建議每次 release 前確認基底版本。目前使用 v3.4.0；更新方式見 README「Nerd Fonts 版本對應」段落 |
 | **Ghostty 相容性驗證** | Ghostty 為 2025 年最熱門新終端機，grapheme width 計算比 wcswidth 嚴格，建議在 Ghostty 跑 `verify-emoji.html` 確認無 cursor desync 或 emoji 寬度異常 |
 
 ### 中期可評估（中工作量）

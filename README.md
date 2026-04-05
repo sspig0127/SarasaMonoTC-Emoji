@@ -150,6 +150,27 @@ Emoji 標準由 Unicode Consortium 維護（[UTS #51](https://unicode.org/report
 
 ---
 
+## Nerd Fonts 版本對應
+
+Nerd Fonts 由 [ryanoasis/nerd-fonts](https://github.com/ryanoasis/nerd-fonts) 維護，不定期發布新版本。
+本專案使用 **Symbols Only** 子集（僅含 PUA icon，無拉丁字元），授權 MIT。
+
+| Nerd Fonts 版本 | 說明 |
+|-----------------|------|
+| **3.4.0**（目前使用） | 目前建構預設版本；[下載 NerdFontsSymbolsOnly.zip](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/NerdFontsSymbolsOnly.zip) |
+| 3.x（持續更新） | 部分 icon codepoint 已遷移至新 PUA 段（如 Material Design Icons），建議每次 release 前確認 |
+
+**更新方式：**
+
+1. 前往 [Nerd Fonts Releases](https://github.com/ryanoasis/nerd-fonts/releases)，下載新版 `NerdFontsSymbolsOnly.zip`
+2. 解壓取出 `SymbolsNerdFontMono-Regular.ttf`，替換 `fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf`
+3. 更新 `config.yaml` 的備註版本號（或 release workflow 的 `nerd_fonts_version` 預設值）
+4. 重跑測試與 Nerd Lite 建構：`uv run pytest tests/ && uv run python build.py --nerd-lite`
+
+> ⚠️ Nerd Fonts 不保證 icon codepoint 穩定；升版後建議用 `verify-emoji.html` 目視確認 PUA icon 是否位移
+
+---
+
 ## 自行建構
 
 ### 下載源字體
@@ -199,11 +220,14 @@ Noto-COLRv1.ttf  →  放入 fonts/
 
 #### 5. Symbols Nerd Font Mono（Nerd Lite 變體用）
 
-將下列檔案放入 `fonts/NerdFontsSymbolsOnly/`：
+前往 [Nerd Fonts Releases](https://github.com/ryanoasis/nerd-fonts/releases)，下載 `NerdFontsSymbolsOnly.zip`，
+解壓後將以下檔案放入 `fonts/NerdFontsSymbolsOnly/`：
 
 ```
 fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf
 ```
+
+> 目前預設版本：[v3.4.0](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/NerdFontsSymbolsOnly.zip)（MIT 授權）
 
 ### 建構
 
