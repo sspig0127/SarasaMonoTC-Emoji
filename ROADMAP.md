@@ -74,7 +74,9 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 ## v2.x — 後續維護 / 技術債
 
 - 追蹤 `astral-sh/setup-uv` node24 版，屆時更新 release workflow
-- 視需要調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
+- 視需要調整 `colrv1.priority_sequences`
+  - config 緩衝：`max_new_glyphs` 8,450 − 實際消耗 8,327 = **123 slots**（可繼續加 sequence）
+  - TrueType 硬上限距離：65,535 − Italic 65,232 = **303 slots**（最壞情況，不可超越）
 - 補 Italic / Bold / BoldItalic output font 自動化測試（四個變體共同技術債）
 - 評估 Emoji 17.0 / Nerd Fonts 版本更新
 
