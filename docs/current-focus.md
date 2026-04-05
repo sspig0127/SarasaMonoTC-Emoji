@@ -24,22 +24,18 @@
 
 ## 後續主線
 
-- `v2.x`: Nerd Lite merge + 維護
+- `v2.x`: 維護、技術債清償、版本追蹤
 - 範圍：
-  - **Nerd Lite MVP 已完成**（feature/nerd-lite-mvp，134 tests 全過），待 PR merge 回 main
-    - 折衷方案：Powerline 1 欄，其他集合 2 欄
-    - 評估文件：`docs/nerd-fonts-variant-eval.md`
-    - 實作計畫：`docs/nerd-lite-impl-plan.md`
   - 追蹤 `astral-sh/setup-uv` 的 node24 版
   - 維持四變體一致性
+  - 評估 Emoji 17.0 / Nerd Fonts 版本更新
 
 ## 下次開工建議先做
 
-1. 準備 v2.2 release（COLRv1 擴增），跑完整 build + 更新版本號
-2. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
-3. 補 `Italic / Bold / BoldItalic` 的 output font 自動化測試（四個變體共同技術債）
-4. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
-5. 評估 Emoji 17.0 / Nerd Fonts 版本更新
+1. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
+2. 補 `Italic / Bold / BoldItalic` 的 output font 自動化測試（四個變體共同技術債）
+3. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
+4. 評估 Emoji 17.0 / Nerd Fonts 版本更新
 
 ## 暫時不要重做的事
 

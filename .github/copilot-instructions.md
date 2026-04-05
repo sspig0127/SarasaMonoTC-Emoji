@@ -44,7 +44,11 @@ SarasaMonoTC-Emoji/
 │   ├── fonts-nerd-lite/        # Nerd Lite 變體輸出
 │   └── fonts-colrv1/           # COLRv1 變體輸出
 ├── docs/
-│   └── colrv1-emoji-list.json  # COLRv1 greedy 選取清單（由 build.py --colrv1 自動產生）
+│   ├── colrv1-emoji-list.json        # COLRv1 greedy 選取清單（由 build.py --colrv1 自動產生）
+│   ├── current-focus.md              # 當前開發狀態與下次開工建議
+│   ├── colrv1-budget-expansion-eval.md  # COLRv1 budget 擴增可行性評估
+│   ├── nerd-fonts-variant-eval.md    # Nerd Lite 架構評估（歷史決策文件）
+│   └── release-notes-v*.md           # 各版本 release notes 草稿
 ├── tests/
 │   ├── conftest.py
 │   ├── test_config.py

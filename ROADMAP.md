@@ -76,7 +76,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 - 追蹤 `astral-sh/setup-uv` node24 版，屆時更新 release workflow
 - 視需要調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
 - 補 Italic / Bold / BoldItalic output font 自動化測試（四個變體共同技術債）
-- v2.2 COLRv1 擴增已完成：skip-and-continue greedy + 10 priority emoji + 221 sequences（↑ 629 → 811）
+- 評估 Emoji 17.0 / Nerd Fonts 版本更新
 
 ---
 

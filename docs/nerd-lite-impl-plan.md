@@ -1,7 +1,8 @@
 # Nerd Lite MVP — 實作計畫
 
 > 建立：2026-04-04
-> 分支：`feature/nerd-lite-mvp`
+> **✅ 已完成：feature/nerd-lite-mvp 已 merge，v2.1.0 發佈（2026-04-04）**
+> 分支：`feature/nerd-lite-mvp`（已 merge 至 main）
 > 評估背景：`docs/nerd-fonts-variant-eval.md`
 
 ## 目標
