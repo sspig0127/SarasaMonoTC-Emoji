@@ -248,6 +248,15 @@ GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workf
 - 若 Release 已存在：以 `--clobber` 覆蓋現有附件
 - 若 Release 不存在：建立 draft release，由維護者手動 publish
 
+**Draft release publish 方式（二擇一）：**
+
+```bash
+# CLI（推薦）
+gh release edit v2.2.0 --draft=false
+
+# 或至 GitHub 網頁：Releases → 找到該 draft → Edit → 取消 "Set as a pre-release" → Publish release
+```
+
 ---
 
 ### 輸出
