@@ -1,18 +1,24 @@
 # Current Focus
 
-> 最後更新：2026-04-05
+> 最後更新：2026-04-06
 
 ## 現在狀態
 
-- `v2.1` Nerd Lite 第四變體已發佈（四個變體：Color / Lite / COLRv1 / Nerd Lite）
+- `v2.3` 家庭 emoji 全人物渲染修復已發佈（Chromium TrueType composite bug 繞過，29 個字形）
 - `v2.2` COLRv1 budget 擴增已完成（skip-and-continue greedy + 10 priority emoji + 221 sequences；811 總計，8,327/8,450 slots）
-- `v1.5.3` 與 COLRv1 Chromium helper metrics 修復都已歸檔，後續不需要再重做那段排查
+- `v2.1` Nerd Lite 第四變體已發佈（四個變體：Color / Lite / COLRv1 / Nerd Lite）
 - Release workflow 已完成 Node.js 20 警告縮減；目前只剩 `astral-sh/setup-uv@v4`，等上游有 node24 版再升級
 - `Lite` 應視為 VHS / xterm.js / fallback-sensitive 環境的主力版本
 - `COLRv1` 適合作為現代 renderer 的彩色加值版，不建議取代 Lite 的錄影主線
-- COLRv1 代表 ZWJ 測試樣本改為 `❤‍🔥`（原 `👩‍💻` 的 💻 不在 budget-limited 選單）
 - `verify-emoji.html` 已補上 ZWJ / 膚色 / 旗幟驗證區
-- Lite verify page 已改用較穩定的 text-presentation 樣本，降低 `FE0F` 觸發彩色 fallback 的干擾
+- 200 tests，全通（Pure logic / Noto Emoji / Sarasa / output font 四組）
+
+### v2.3 Chromium composite 修復細節
+
+- **問題**：Chromium TrueType composite 解析 bug——同一 composite 中 component arg encoding 從 16-bit（|offset| > 127）切回 8-bit（|offset| ≤ 127）時，前面的 16-bit component 被靜默跳過
+- **觸發**：家庭 emoji（`👨‍👩‍👧‍👦` 等）的 component X offset 為 225 / 447 / -9 / -229，-9 觸發 8-bit，前兩個人物不渲染
+- **解法**：`emoji_merge.py` 尾端新增步驟，對含 |offset| > 127 的 composite 用 `Glyph.getCoordinates()` 遞迴展開為 simple glyph（29 個字形）
+- **不影響**：PoC 旗幟字形（小 offset composite）保持原始 composite 結構
 
 ### Lite 旗幟設計（已完成）
 
@@ -33,9 +39,8 @@
 ## 下次開工建議先做
 
 1. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
-2. ~~補 `Italic / Bold / BoldItalic` 的 output font 自動化測試~~（✅ 已完成，198 tests）
-3. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
-4. 評估 Emoji 17.0 / Nerd Fonts 版本更新
+2. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
+3. 評估 Emoji 17.0 / Nerd Fonts 版本更新
 
 ## 暫時不要重做的事
 
@@ -44,3 +49,4 @@
 - 不用再把 zip / png 驗證產物納入版本控制
 - 不用再重做 `extract_emoji_sequences()` / shared metadata 的基礎設計
 - 不用重建 Lite 旗幟白名單：現在已全域套用，不需要分批加入
+- 不用再重做 Chromium composite bug 排查：已在 v2.3 透過 decomposition 修復

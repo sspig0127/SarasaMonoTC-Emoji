@@ -5,7 +5,14 @@
 
 **Sarasa Mono TC（更紗黑體繁中等寬）+ Emoji — 嵌入式 emoji，支援四種變體**
 
-## v2.2 重點
+## v2.3 重點
+
+- **家庭 emoji 全人物渲染修復**：`👨‍👩‍👧‍👦` / `👨‍👩‍👧` / `👩‍👧‍👦` 等 29 個家庭 / 多人 ZWJ emoji 在 Chromium 系瀏覽器（含 VS Code webview、xterm.js、VHS）不再截斷
+- **根本原因**：Chromium TrueType composite 解析 bug（詳見下方「[技術細節 → Lite 變體](#lite-變體-1)」）
+- **修法**：build pipeline 自動將含大 offset（> 127 font units）的 composite 字形展開為 simple glyph，繞過 bug
+- 新增左邊界保護（xMin ≥ 120 font units），避免最左側人物在小字體尺寸下因 sub-pixel rounding 被截斷
+
+### v2.2 重點（存查）
 
 - **COLRv1 budget 擴增**：收錄量由 629 提升到 **811**（540 單碼 emoji + 271 sequences）
 - `max_new_glyphs` 提高至 8,450；實際消耗 8,327（剩餘 123 slots 緩衝）
@@ -298,11 +305,11 @@ GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workf
 
 | 輸入參數 | 說明 | 預設值 |
 |----------|------|--------|
-| `release_tag` | 發佈標籤（如 `v2.2.0`） | 必填 |
+| `release_tag` | 發佈標籤（如 `v2.3.0`） | 必填 |
 | `sarasa_version` | Sarasa Gothic 版本號 | `1.0.36` |
 | `nerd_fonts_version` | Nerd Fonts 版本號（Symbols Only） | `3.4.0` |
 
-**執行流程：** 下載來源字體 → 執行 134 個測試 → 建構四種變體 → 打包 zip → 上傳至指定 Release
+**執行流程：** 下載來源字體 → 執行 200 個測試 → 建構四種變體 → 打包 zip → 上傳至指定 Release
 
 - 若 Release 已存在：以 `--clobber` 覆蓋現有附件
 - 若 Release 不存在：建立 draft release，由維護者手動 publish
@@ -450,7 +457,7 @@ uv run pytest tests/test_emoji_merge.py::TestScaleGlyph -v
 | Noto Emoji 依賴測試（`get_emoji_cmap` / `collect_glyph_deps`） | `fonts/NotoEmoji[wght].ttf` | 本機 / CI（自動下載） |
 | Noto COLRv1 依賴測試（`TestCollectColrv1Deps`） | `fonts/Noto-COLRv1.ttf` | 僅本機 |
 | Sarasa 依賴測試（`TestDetectFontWidths`） | `fonts/SarasaMonoTC-Regular.ttf` | 僅本機 |
-| output font 驗證（Color / Lite / COLRv1） | 已建構的 `output/` 字體 | 僅本機 |
+| output font 驗證（Color / Lite / COLRv1 / Nerd Lite） | 已建構的 `output/` 字體 | 僅本機 |
 
 字體檔案不存在時，相關測試自動 skip（不算失敗）。
 
@@ -499,6 +506,7 @@ Set Height 2160
 - **定位**：目前最適合 VHS、終端機錄影、以及無法信任系統 fallback 行為的環境
 - **旗幟設計**：所有標準 Regional Indicator 雙碼旗幟序列一律套用 2-column 自訂旗面設計（共享旗面模板 + 壓縮字母組件），視覺上維持 2 columns 且提升辨識度
 - **已知限制**：Lite 旗幟以單色 outline 顯示，無法重現 Color / COLRv1 的彩色旗面。若需要彩色旗幟，應優先使用 Color / COLRv1 變體
+- **Chromium composite 修復（v2.3）**：Chromium 在解析 TrueType composite 字形時有一個已知 bug——當 component argument 的 encoding 在同一 composite 清單中從 16-bit（|offset| > 127）切換回 8-bit（|offset| ≤ 127），前方的 16-bit component 會被靜默跳過，造成 `👨‍👩‍👧‍👦` 等家庭 emoji 只渲染部分人物。v2.3 在 build pipeline 尾端自動偵測含大 offset component 的 composite 字形（家庭 / 多人 ZWJ 等 29 個），以 `Glyph.getCoordinates()` 遞迴展開為 single simple glyph，完全繞過此 bug。小 offset composite（PoC 旗幟字形）不受影響。
 
 ### COLRv1 變體
 - **Emoji 格式**：COLRv1 paint tree（OpenType Color Font Version 1）

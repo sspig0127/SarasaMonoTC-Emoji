@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: '發佈標籤（如 v1.4.2）'
+        description: '發佈標籤（如 v2.3.0）'
         required: true
       sarasa_version:
         description: 'Sarasa Gothic 版本號'

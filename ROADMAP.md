@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 路線圖
 
-> 最後更新：2026-04-05（v2.2.0 已發佈；COLRv1 budget 擴增）
+> 最後更新：2026-04-06（v2.3.0 已發佈；Chromium composite bug 修復）
 >
 > **歷史版本實作細節** → [`docs/roadmap-history.md`](./docs/roadmap-history.md)（需要查閱時再 Read）
 > **COLRv1 深度技術細節** → [`.github/colrv1-dev-notes.md`](./.github/colrv1-dev-notes.md)
@@ -23,7 +23,7 @@
 | v2.0 | ZWJ 序列 / 旗幟 / 膚色變體 + release workflow 收尾 | ✅ 已發佈 |
 | v2.1 | 第四變體 Nerd Lite（Emoji + Nerd Fonts PUA） | ✅ 已發佈 |
 | **v2.2** | COLRv1 budget 擴增（skip-and-continue greedy + 221 sequences） | ✅ 已發佈 |
-| **v2.3** | 家庭 emoji 全人物渲染修復（Chromium TrueType composite bug 繞過） | ✅ 已發佈 |
+| **v2.3** | 家庭 emoji 全人物渲染修復（Chromium TrueType composite bug 繞過）；200 tests | ✅ 已發佈 |
 | v2.x | 後續維護 / 技術債 | 📋 進行中 |
 
 ---
@@ -72,6 +72,21 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 
 ---
 
+## v2.3 — 家庭 emoji 全人物渲染修復（已發佈）
+
+**問題**：`👨‍👩‍👧‍👦` / `👨‍👩‍👧` / `👩‍👧‍👦` 等多人 ZWJ emoji 在 Chromium 系瀏覽器（VS Code webview / xterm.js / VHS）只顯示部分人物，最左側人物被截斷。
+
+**根本原因（Chromium TrueType composite bug）**：Chromium 解析 TrueType composite 字形時，若同一 composite 的 component 清單中 argument encoding 從 16-bit（|offset| > 127）切換為 8-bit（|offset| ≤ 127），前面的 16-bit component 會被靜默跳過。以 `👨‍👩‍👧‍👦` 為例，4 個 component 的 X offset 分別為 225 / 447 / **-9** / -229，offset -9 觸發 8-bit encoding，導致 offset 225 與 447 的 component 不被渲染。
+
+**解法**：`emoji_merge.py` 在所有後處理步驟完成後，自動偵測含有 |offset| > 127 component 的 composite 字形，以 `fontTools.Glyph.getCoordinates()` 遞迴展開所有 component，重建為 single simple glyph，消除 composite 結構。29 個家庭 / 多人組合受益；小 offset composite（PoC 旗幟字形）不受影響。
+
+**額外修正**：
+- 左邊界保護：scale-down 後 xMin < 120 font units 的字形自動右移，避免最左側人物在小字體下因 sub-pixel rounding 被剪裁
+- hmtx lsb 在所有調整後同步至實際 xMin
+- 新增回歸測試 `test_no_overflow_composite_ligatures`（200 tests 總計）
+
+---
+
 ## v2.x — 後續維護 / 技術債
 
 - 追蹤 `astral-sh/setup-uv` node24 版，屆時更新 release workflow
@@ -79,7 +94,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
   - config 緩衝：8,450 − 8,327 = **123 slots**（單碼 emoji 成本 10–100，實際空間極有限）
   - TrueType 硬上限距離：65,535 − Italic 65,232 = **303 slots**（絕對上限）
   - 若要再加，只適合 cost=1 的 sequence（components 已全部選入者）
-- ~~補 Italic / Bold / BoldItalic output font 自動化測試~~（✅ 已完成，198 tests）
+- ~~補 Italic / Bold / BoldItalic output font 自動化測試~~（✅ 已完成，200 tests）
 - 評估 Emoji 17.0 / Nerd Fonts 版本更新
 
 ---
@@ -117,5 +132,5 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 | 項目 | 位置 | 說明 |
 |------|------|------|
 | CBLC filtering 可能移除有效 emoji | `emoji_merge.py:_filter_cblc_to_added_glyphs` | 名稱衝突時捨棄 color bitmap。Build log 列出被移除的 glyph 名稱（最多 10 個），可評估是否需加入 `force_color_codepoints` |
-| ~~output tests 只檢查 Regular~~ | ✅ 已解決（2026-04-05） | 四個變體 × 四種 style × 4 項檢查 = 64 個 all-styles 測試，共 198 tests |
+| ~~output tests 只檢查 Regular~~ | ✅ 已解決（2026-04-05） | 四個變體 × 四種 style × 4 項檢查 = 64 個 all-styles 測試，共 200 tests |
 | COLRv1 sequence 仍為 budget-limited | `config.yaml`、`emoji_merge.py:merge_emoji_colrv1` | v2.2 已擴增至 811（8,327/8,450），config 剩餘 **123 slots**；單碼 emoji 成本通常 10–100 slots，實際上幾乎已滿，只夠加少量 cost=1 sequence |
