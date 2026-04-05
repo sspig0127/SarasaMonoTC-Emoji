@@ -74,9 +74,10 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 ## v2.x — 後續維護 / 技術債
 
 - 追蹤 `astral-sh/setup-uv` node24 版，屆時更新 release workflow
-- 視需要調整 `colrv1.priority_sequences`
-  - config 緩衝：`max_new_glyphs` 8,450 − 實際消耗 8,327 = **123 slots**（可繼續加 sequence）
-  - TrueType 硬上限距離：65,535 − Italic 65,232 = **303 slots**（最壞情況，不可超越）
+- COLRv1 budget 幾乎已滿，不建議再輕易擴增：
+  - config 緩衝：8,450 − 8,327 = **123 slots**（單碼 emoji 成本 10–100，實際空間極有限）
+  - TrueType 硬上限距離：65,535 − Italic 65,232 = **303 slots**（絕對上限）
+  - 若要再加，只適合 cost=1 的 sequence（components 已全部選入者）
 - ~~補 Italic / Bold / BoldItalic output font 自動化測試~~（✅ 已完成，198 tests）
 - 評估 Emoji 17.0 / Nerd Fonts 版本更新
 
@@ -92,7 +93,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 |------|------|
 | **Emoji 17.0 跟進** | Unicode 17.0（2025-09）新增 163 個 emoji，含新 ZWJ 序列與膚色組合。追蹤 Noto Emoji 上游，版本更新後重跑建構即可覆蓋 |
 | **Nerd Fonts 版本定期追蹤** | Nerd Fonts 3.x 持續更新；部分 icon（Material Design Icons）已遷移至新 PUA-A 段，舊 codepoint 棄用，建議每次 release 前確認基底版本。目前使用 v3.4.0；更新方式見 README「Nerd Fonts 版本對應」段落 |
-| **Ghostty 相容性驗證** | Ghostty 為 2025 年最熱門新終端機，grapheme width 計算比 wcswidth 嚴格，建議在 Ghostty 跑 `verify-emoji.html` 確認無 cursor desync 或 emoji 寬度異常 |
+| **Ghostty 相容性驗證** | Ghostty 為 2025 年最熱門新終端機，grapheme width 計算比 wcswidth 嚴格，建議在 ® 跑 `verify-emoji.html` 確認無 cursor desync 或 emoji 寬度異常 |
 
 ### 中期可評估（中工作量）
 
@@ -116,4 +117,4 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 |------|------|------|
 | CBLC filtering 可能移除有效 emoji | `emoji_merge.py:_filter_cblc_to_added_glyphs` | 名稱衝突時捨棄 color bitmap。Build log 列出被移除的 glyph 名稱（最多 10 個），可評估是否需加入 `force_color_codepoints` |
 | ~~output tests 只檢查 Regular~~ | ✅ 已解決（2026-04-05） | 四個變體 × 四種 style × 4 項檢查 = 64 個 all-styles 測試，共 198 tests |
-| COLRv1 sequence 仍為 budget-limited | `config.yaml`、`emoji_merge.py:merge_emoji_colrv1` | v2.2 已擴增（811 emoji/sequences，8,327/8,450），仍非全量；`priority_sequences` 可視需要繼續調整 |
+| COLRv1 sequence 仍為 budget-limited | `config.yaml`、`emoji_merge.py:merge_emoji_colrv1` | v2.2 已擴增至 811（8,327/8,450），config 剩餘 **123 slots**；單碼 emoji 成本通常 10–100 slots，實際上幾乎已滿，只夠加少量 cost=1 sequence |
