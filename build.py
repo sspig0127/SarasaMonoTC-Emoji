@@ -168,6 +168,21 @@ def _dedupe_codepoint_sequences(
     return ordered
 
 
+def find_font(fonts_dir: Path, filename: str) -> Path | None:
+    """Locate a font file in fonts_dir.
+
+    Checks fonts_dir/<filename> first (explicit placement), then searches
+    subdirectories recursively so users can drop unzipped archives directly
+    into fonts/ without manually extracting individual TTF files.
+    Returns the first match, or None if not found.
+    """
+    direct = fonts_dir / filename
+    if direct.exists():
+        return direct
+    matches = sorted(fonts_dir.glob(f"**/{filename}"))
+    return matches[0] if matches else None
+
+
 def build_single_font(
     style: str,
     base_font_path: Path,
@@ -559,35 +574,36 @@ Configuration priority: CLI args > config.yaml > defaults
             print(f"Error: Style '{style}' must have both 'base_font' and 'emoji_font'")
             sys.exit(1)
 
-        base_path = fonts_dir / base_font
-        emoji_path = fonts_dir / emoji_font
+        base_path = find_font(fonts_dir, base_font)
+        emoji_path = find_font(fonts_dir, emoji_font)
         nerd_font_path = (
-            fonts_dir / nerd_font_relative
+            find_font(fonts_dir, Path(nerd_font_relative).name)
             if is_nerd_lite and nerd_font_relative is not None
             else None
         )
 
-        if not base_path.exists():
-            print(f"Error: Base font not found: {base_path}")
+        if base_path is None:
+            print(f"Error: Base font '{base_font}' not found under {fonts_dir}/")
             print(f"  Download from: https://github.com/be5invis/Sarasa-Gothic/releases")
+            print(f"  Extract the .7z and place the TTF files (or the unzipped folder) under {fonts_dir}/")
             sys.exit(1)
-        if not emoji_path.exists():
-            print(f"Error: Emoji font not found: {emoji_path}")
+        if emoji_path is None:
+            print(f"Error: Emoji font '{emoji_font}' not found under {fonts_dir}/")
             if is_colrv1:
-                print(f"  Download Noto-COLRv1.ttf (COLRv1 color vector font) from:")
+                print(f"  Download Noto-COLRv1.ttf from:")
                 print(f"    https://github.com/googlefonts/noto-emoji/blob/main/fonts/Noto-COLRv1.ttf")
-                print(f"  Place it at: {emoji_path}")
             elif is_lite:
-                print(f"  Download NotoEmoji[wght].ttf (monochrome variable font) from:")
+                print(f"  Download NotoEmoji[wght].ttf from:")
                 print(f"    https://github.com/google/fonts/raw/main/ofl/notoemoji/NotoEmoji%5Bwght%5D.ttf")
-                print(f"  Place it at: {emoji_path}")
             else:
                 print(f"  Download from: https://github.com/googlefonts/noto-emoji/releases")
+            print(f"  Place the file (or its containing folder) under {fonts_dir}/")
             sys.exit(1)
-        if nerd_font_path is not None and not nerd_font_path.exists():
-            print(f"Error: Nerd font not found: {nerd_font_path}")
-            print("  Expected source font: SymbolsNerdFontMono-Regular.ttf")
-            print("  Place it under fonts/NerdFontsSymbolsOnly/")
+        if is_nerd_lite and nerd_font_relative is not None and nerd_font_path is None:
+            print(f"Error: Nerd font 'SymbolsNerdFontMono-Regular.ttf' not found under {fonts_dir}/")
+            print(f"  Download NerdFontsSymbolsOnly.zip from:")
+            print(f"    https://github.com/ryanoasis/nerd-fonts/releases")
+            print(f"  Extract and place the zip (or SymbolsNerdFontMono-Regular.ttf) under {fonts_dir}/")
             sys.exit(1)
 
         font_paths[style] = {
@@ -615,9 +631,12 @@ Configuration priority: CLI args > config.yaml > defaults
     print("Font mapping:")
     for style in styles:
         p = font_paths[style]
-        mapping = f"  {style}: {p['base_font_path'].name} + {p['emoji_font_path'].name}"
+        base_rel = p['base_font_path'].relative_to(fonts_dir)
+        emoji_rel = p['emoji_font_path'].relative_to(fonts_dir)
+        mapping = f"  {style}: {base_rel} + {emoji_rel}"
         if is_nerd_lite and p["nerd_font_path"] is not None:
-            mapping += f" + {p['nerd_font_path'].name}"
+            nerd_rel = p['nerd_font_path'].relative_to(fonts_dir)
+            mapping += f" + {nerd_rel}"
         print(mapping)
 
     build_start = time.monotonic()

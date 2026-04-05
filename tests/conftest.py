@@ -25,11 +25,14 @@ OUTPUT_LITE_DIR = _ROOT / "output" / "fonts-lite"
 OUTPUT_NERD_LITE_DIR = _ROOT / "output" / "fonts-nerd-lite"
 OUTPUT_COLRV1_DIR = _ROOT / "output" / "fonts-colrv1"
 
-_SARASA_REGULAR = FONTS_DIR / "SarasaMonoTC-Regular.ttf"
-_NOTO_COLOR_EMOJI = FONTS_DIR / "NotoColorEmoji.ttf"
-_NOTO_EMOJI = FONTS_DIR / "NotoEmoji[wght].ttf"
-_NOTO_COLRV1 = FONTS_DIR / "Noto-COLRv1.ttf"
-_NERD_FONT = FONTS_DIR / "NerdFontsSymbolsOnly" / "SymbolsNerdFontMono-Regular.ttf"
+sys.path.insert(0, str(_ROOT))
+from build import find_font  # noqa: E402
+
+_SARASA_REGULAR = find_font(FONTS_DIR, "SarasaMonoTC-Regular.ttf")
+_NOTO_COLOR_EMOJI = find_font(FONTS_DIR, "NotoColorEmoji.ttf")
+_NOTO_EMOJI = find_font(FONTS_DIR, "NotoEmoji[wght].ttf")
+_NOTO_COLRV1 = find_font(FONTS_DIR, "Noto-COLRv1.ttf")
+_NERD_FONT = find_font(FONTS_DIR, "SymbolsNerdFontMono-Regular.ttf")
 _OUTPUT_COLOR_REGULAR = OUTPUT_COLOR_DIR / "SarasaMonoTCEmoji-Regular.ttf"
 _OUTPUT_LITE_REGULAR = OUTPUT_LITE_DIR / "SarasaMonoTCEmojiLite-Regular.ttf"
 _OUTPUT_NERD_LITE_REGULAR = OUTPUT_NERD_LITE_DIR / "SarasaMonoTCEmojiLiteNerd-Regular.ttf"
@@ -50,8 +53,8 @@ def pytest_configure(config):
 
 @pytest.fixture(scope="session")
 def sarasa_font():
-    if not _SARASA_REGULAR.exists():
-        pytest.skip(f"Sarasa font not found: {_SARASA_REGULAR}")
+    if _SARASA_REGULAR is None:
+        pytest.skip("SarasaMonoTC-Regular.ttf not found under fonts/")
     from fontTools.ttLib import TTFont
     font = TTFont(str(_SARASA_REGULAR))
     yield font
@@ -60,8 +63,8 @@ def sarasa_font():
 
 @pytest.fixture(scope="session")
 def noto_color_emoji_font():
-    if not _NOTO_COLOR_EMOJI.exists():
-        pytest.skip(f"NotoColorEmoji not found: {_NOTO_COLOR_EMOJI}")
+    if _NOTO_COLOR_EMOJI is None:
+        pytest.skip("NotoColorEmoji.ttf not found under fonts/")
     from fontTools.ttLib import TTFont
     font = TTFont(str(_NOTO_COLOR_EMOJI))
     yield font
@@ -70,8 +73,8 @@ def noto_color_emoji_font():
 
 @pytest.fixture(scope="session")
 def noto_emoji_font():
-    if not _NOTO_EMOJI.exists():
-        pytest.skip(f"NotoEmoji[wght].ttf not found: {_NOTO_EMOJI}")
+    if _NOTO_EMOJI is None:
+        pytest.skip("NotoEmoji[wght].ttf not found under fonts/")
     from fontTools.ttLib import TTFont
     font = TTFont(str(_NOTO_EMOJI))
     yield font
@@ -90,8 +93,8 @@ def output_color_regular():
 
 @pytest.fixture(scope="session")
 def noto_colrv1_font():
-    if not _NOTO_COLRV1.exists():
-        pytest.skip(f"Noto-COLRv1.ttf not found: {_NOTO_COLRV1}")
+    if _NOTO_COLRV1 is None:
+        pytest.skip("Noto-COLRv1.ttf not found under fonts/")
     from fontTools.ttLib import TTFont
     font = TTFont(str(_NOTO_COLRV1))
     yield font
@@ -100,8 +103,8 @@ def noto_colrv1_font():
 
 @pytest.fixture(scope="session")
 def nerd_font():
-    if not _NERD_FONT.exists():
-        pytest.skip(f"SymbolsNerdFontMono-Regular.ttf not found: {_NERD_FONT}")
+    if _NERD_FONT is None:
+        pytest.skip("SymbolsNerdFontMono-Regular.ttf not found under fonts/")
     from fontTools.ttLib import TTFont
     font = TTFont(str(_NERD_FONT))
     yield font
