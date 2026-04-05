@@ -309,12 +309,15 @@ GitHub Actions 提供手動觸發的完整建構與發佈流程（`.github/workf
 
 **Draft release publish 方式（二擇一）：**
 
-```bash
-# CLI（推薦）
-gh release edit v2.2.0 --draft=false
+**方法1： CLI（推薦）**
 
-# 或至 GitHub 網頁：Releases → 找到該 draft → Edit → 取消 "Set as a pre-release" → Publish release
+```bash
+gh release edit <tag> --draft=false
 ```
+
+**方法2：GitHub 網頁**
+到 GitHub 網頁：Releases → 找到該 draft → Edit → 點擊 **Publish release**
+
 
 ---
 
