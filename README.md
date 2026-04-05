@@ -104,7 +104,9 @@ v2.1 起支援 sequence emoji（ZWJ / 膚色 / 旗幟），四個變體（`Color
 
 ## 字體來源與授權
 
-### Color 變體
+### 來源字體對應
+
+#### Color 變體
 
 | 字體 | 來源 | 授權 |
 |------|------|------|
@@ -112,7 +114,7 @@ v2.1 起支援 sequence emoji（ZWJ / 膚色 / 旗幟），四個變體（`Color
 | NotoColorEmoji | [googlefonts/noto-emoji](https://github.com/googlefonts/noto-emoji) | SIL OFL 1.1 |
 | **SarasaMonoTCEmoji（本專案）** | 衍生作品 | SIL OFL 1.1 |
 
-### Lite 變體
+#### Lite 變體
 
 | 字體 | 來源 | 授權 |
 |------|------|------|
@@ -120,7 +122,7 @@ v2.1 起支援 sequence emoji（ZWJ / 膚色 / 旗幟），四個變體（`Color
 | Noto Emoji（單色）| [google/fonts ofl/notoemoji](https://github.com/google/fonts/tree/main/ofl/notoemoji) | SIL OFL 1.1 |
 | **SarasaMonoTCEmojiLite（本專案）** | 衍生作品 | SIL OFL 1.1 |
 
-### COLRv1 變體
+#### COLRv1 變體
 
 | 字體 | 來源 | 授權 |
 |------|------|------|
@@ -128,7 +130,34 @@ v2.1 起支援 sequence emoji（ZWJ / 膚色 / 旗幟），四個變體（`Color
 | Noto COLRv1 | [googlefonts/noto-emoji](https://github.com/googlefonts/noto-emoji) | SIL OFL 1.1 |
 | **SarasaMonoTCEmojiCOLRv1（本專案）** | 衍生作品 | SIL OFL 1.1 |
 
-版權聲明：見 [LICENSE](LICENSE)
+#### Nerd Lite 變體
+
+| 字體 | 來源 | 授權 |
+|------|------|------|
+| Sarasa Mono TC | [be5invis/Sarasa-Gothic](https://github.com/be5invis/Sarasa-Gothic) | SIL OFL 1.1 |
+| Noto Emoji（單色）| [google/fonts ofl/notoemoji](https://github.com/google/fonts/tree/main/ofl/notoemoji) | SIL OFL 1.1 |
+| Nerd Fonts Symbols Only | [ryanoasis/nerd-fonts](https://github.com/ryanoasis/nerd-fonts) | MIT |
+| **SarasaMonoTCEmojiLiteNerd（本專案）** | 衍生作品 | SIL OFL 1.1 |
+
+### 授權說明
+
+本專案發行的字體檔案均為衍生作品，整體遵循 **SIL Open Font License 1.1**（[完整條文](LICENSE)）。Nerd Fonts 來源字體採 MIT 授權，合併後的衍生字體以 OFL 發行。
+
+#### SIL OFL 1.1 允許
+
+| 行為 | 說明 |
+|------|------|
+| ✅ 個人與商業使用 | 可用於任何用途，包含商業軟體、產品 |
+| ✅ 自由修改 | 可修改字形、字距、合併其他字體 |
+| ✅ 再發行 | 可重新發布原版或修改版，但須保留授權條文 |
+| ✅ 與軟體捆綁 | 可嵌入應用程式、IDE、終端機模擬器等一同發行 |
+
+#### SIL OFL 1.1 不允許
+
+| 行為 | 說明 |
+|------|------|
+| ❌ 單獨販售字體 | 不可將字體本身作為獨立商品出售（可作為軟體的一部分收費） |
+| ❌ 使用保留字型名稱 | 衍生作品不可使用原字體的保留名稱（本專案已使用不同名稱 `SarasaMonoTCEmoji`） |
 
 ---
 
@@ -499,9 +528,6 @@ Set Height 2160
 
 ---
 
-## 授權（SIL OFL 1.1）
+## 授權
 
-本字體為衍生作品，遵循 SIL Open Font License 1.1：
-- ✅ 可自由使用、修改、再發行
-- ✅ 可與軟體捆綁發行
-- ❌ 不可單獨販售
+→ 完整說明見上方「[字體來源與授權 → 授權說明](#授權說明)」章節，以及 [LICENSE](LICENSE) 條文。
