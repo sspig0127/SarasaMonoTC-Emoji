@@ -210,7 +210,7 @@ def _append_ligature_lookup_to_gsub(
             continue
         lookup_indexes = list(feature_record.Feature.LookupListIndex)
         if lookup_index not in lookup_indexes:
-            lookup_indexes.append(lookup_index)
+            lookup_indexes.insert(0, lookup_index)  # prepend: apply ZWJ ligatures first
             feature_record.Feature.LookupListIndex = lookup_indexes
             feature_record.Feature.LookupCount = len(lookup_indexes)
         attached = True
@@ -1097,6 +1097,203 @@ def merge_emoji_lite(
                 base_glyf[glyph_name] = empty
     print(f"  Copied {copied} glyph outlines from emoji font (scaled ×{upm_scale:.4f})")
 
+    # After all glyphs are inserted, recalculate bounding boxes for composite glyphs.
+    # _scale_glyph() only scales component offsets; the stored xMin/xMax header fields
+    # retain source-UPM values until recalcBounds() is called with the full glyph table.
+    base_hmtx = base_font["hmtx"]
+    if abs(upm_scale - 1.0) > 1e-6:
+        recalc_count = 0
+        for glyph_name in emoji_glyphs_to_add:
+            g = base_glyf.glyphs.get(glyph_name)
+            if g is not None and g.numberOfContours < 0 and hasattr(g, "recalcBounds"):
+                g.recalcBounds(base_glyf)
+                recalc_count += 1
+        if recalc_count:
+            print(f"  Recalculated bounds for {recalc_count} composite glyphs")
+
+        from fontTools.misc.roundTools import otRound
+
+        # Uniform scale-down: glyphs whose xMax exceeds emoji_width after UPM scaling
+        # are scaled proportionally in both X and Y so all content fits within the
+        # 2-column advance width while preserving correct aspect ratios.
+        # For composite glyphs a 2×2 scale matrix is applied to each component so
+        # every sub-glyph (including nested composites) shrinks uniformly.
+        # Run up to 4 passes to handle rounding drift across cascaded composites.
+        compress_total = 0
+        for _pass in range(4):
+            pass_count = 0
+            for glyph_name in emoji_glyphs_to_add:
+                g = base_glyf.glyphs.get(glyph_name)
+                if g is None or not hasattr(g, "xMax"):
+                    continue
+
+                nc = g.numberOfContours
+                if nc < 0:
+                    g.recalcBounds(base_glyf)  # refresh after sub-component changes
+
+                if g.xMax <= emoji_width:
+                    continue
+
+                if g.xMax <= 0:
+                    continue
+                s = emoji_width / g.xMax  # uniform scale factor
+
+                if nc > 0:
+                    # Simple glyph: scale all contour points uniformly from origin
+                    coords = g.coordinates
+                    new_coords = [(otRound(x * s), otRound(y * s)) for x, y in coords]
+                    g.coordinates = GlyphCoordinates(new_coords)
+                    bounds = g.coordinates.calcBounds()
+                    if bounds:
+                        g.xMin, g.yMin, g.xMax, g.yMax = (
+                            otRound(bounds[0]), otRound(bounds[1]),
+                            otRound(bounds[2]), otRound(bounds[3]),
+                        )
+                elif nc < 0 and hasattr(g, "components"):
+                    # Composite glyph: scale component offsets and add a uniform
+                    # scale transform so each sub-glyph is also rendered smaller.
+                    for comp in g.components:
+                        comp.x = otRound(comp.x * s)
+                        comp.y = otRound(comp.y * s)
+                        if hasattr(comp, "transform") and comp.transform is not None:
+                            t = comp.transform
+                            comp.transform = (
+                                (t[0][0] * s, t[0][1] * s),
+                                (t[1][0] * s, t[1][1] * s),
+                            )
+                        else:
+                            comp.transform = ((s, 0.0), (0.0, s))
+                    g.recalcBounds(base_glyf)
+                else:
+                    continue
+
+                pass_count += 1
+
+            compress_total += pass_count
+            if pass_count == 0:
+                break
+
+        if compress_total:
+            print(f"  Scaled down {compress_total} overflow glyphs to fit advance width")
+
+        # Post-compression: shift glyphs that were scaled down but ended up with
+        # xMin too close to the left edge.  At small pt sizes sub-pixel rounding
+        # clips the leftmost person.  Require ≥50 units of left clearance.
+        # If shifting would push xMax beyond advance, pre-compress slightly first
+        # so there is room on the right.  Always sync lsb in hmtx to new xMin.
+        min_left_margin = 120
+        shifted_count = 0
+        for glyph_name in emoji_glyphs_to_add:
+            g = base_glyf.glyphs.get(glyph_name)
+            if g is None or not hasattr(g, "xMin"):
+                continue
+            nc = g.numberOfContours
+            if nc < 0:
+                g.recalcBounds(base_glyf)
+            if g.xMin >= min_left_margin:
+                continue
+            desired_shift = min_left_margin - g.xMin
+            # If shifting would push xMax past advance, compress first to make room.
+            overflow = (g.xMax + desired_shift) - emoji_width
+            if overflow > 0 and g.xMax > 0:
+                # target_xMax_before_shift = emoji_width - desired_shift - 1 (rounding buffer)
+                target_pre = max(1, emoji_width - desired_shift - 3)
+                s = target_pre / g.xMax
+                if nc > 0:
+                    coords = g.coordinates
+                    new_coords = [(otRound(x * s), otRound(y * s)) for x, y in coords]
+                    g.coordinates = GlyphCoordinates(new_coords)
+                    bounds = g.coordinates.calcBounds()
+                    if bounds:
+                        g.xMin, g.yMin, g.xMax, g.yMax = (
+                            otRound(bounds[0]), otRound(bounds[1]),
+                            otRound(bounds[2]), otRound(bounds[3]),
+                        )
+                elif nc < 0 and hasattr(g, "components"):
+                    for comp in g.components:
+                        comp.x = otRound(comp.x * s)
+                        comp.y = otRound(comp.y * s)
+                        if hasattr(comp, "transform") and comp.transform is not None:
+                            t = comp.transform
+                            comp.transform = (
+                                (t[0][0] * s, t[0][1] * s),
+                                (t[1][0] * s, t[1][1] * s),
+                            )
+                        else:
+                            comp.transform = ((s, 0.0), (0.0, s))
+                    g.recalcBounds(base_glyf)
+                # Recalculate desired shift after compression
+                desired_shift = min_left_margin - g.xMin
+            shift = max(0, desired_shift)
+            if shift == 0:
+                continue
+            if nc > 0:
+                coords = g.coordinates
+                g.coordinates = GlyphCoordinates([(x + shift, y) for x, y in coords])
+                g.xMin += shift
+                g.xMax += shift
+            elif nc < 0 and hasattr(g, "components"):
+                for comp in g.components:
+                    comp.x += shift
+                g.recalcBounds(base_glyf)
+            else:
+                continue
+            # Sync lsb to actual xMin so renderer positions the glyph correctly.
+            old_adv, _ = base_hmtx.metrics.get(glyph_name, (emoji_width, 0))
+            base_hmtx.metrics[glyph_name] = (old_adv, g.xMin)
+            shifted_count += 1
+        if shifted_count:
+            print(f"  Left-margin correction: shifted {shifted_count} glyphs right by ≥{min_left_margin} units")
+
+        # Decompose composite emoji glyphs into simple glyphs.
+        # Chromium has a TrueType composite parsing bug: when component arg
+        # encoding switches from 16-bit to 8-bit mid-list, the earlier 16-bit
+        # components are silently skipped, so only part of the glyph renders.
+        # Glyph.getCoordinates() flattens all components recursively; we use
+        # that to rebuild each composite as a single simple outline.
+        # The Chromium bug only triggers when components mix 8-bit args
+        # (|offset| ≤ 127) and 16-bit args (|offset| > 127) in the same
+        # composite. Only those glyphs need flattening; small-offset composites
+        # (e.g. PoC flag glyphs with template+letter structure) are left intact.
+        _LARGE_OFFSET = 127
+        from array import array as _array
+        decomposed_count = 0
+        for glyph_name in list(emoji_glyphs_to_add):
+            g = base_glyf.glyphs.get(glyph_name)
+            if g is None or g.numberOfContours >= 0:
+                continue  # skip non-composites
+            if not hasattr(g, "components"):
+                continue
+            has_large_offset = any(
+                abs(comp.x) > _LARGE_OFFSET or abs(comp.y) > _LARGE_OFFSET
+                for comp in g.components
+            )
+            if not has_large_offset:
+                continue  # no Chromium bug risk
+            try:
+                coords, endPts, flags = g.getCoordinates(base_glyf)
+            except Exception as exc:
+                print(f"  Warning: could not decompose composite {glyph_name}: {exc}")
+                continue
+            if not endPts:
+                continue
+            new_g = TTGlyph()
+            new_g.numberOfContours = len(endPts)
+            new_g.coordinates = GlyphCoordinates(
+                [(otRound(x), otRound(y)) for x, y in coords]
+            )
+            new_g.endPtsOfContours = list(endPts)
+            new_g.flags = _array("B", [int(f) & 0xFF for f in flags])
+            new_g.program = Program()
+            new_g.program.fromBytecode(b"")
+            base_glyf.glyphs[glyph_name] = new_g
+            new_g.recalcBounds(base_glyf)
+            old_adv, _ = base_hmtx.metrics.get(glyph_name, (emoji_width, 0))
+            base_hmtx.metrics[glyph_name] = (old_adv, new_g.xMin)
+            decomposed_count += 1
+        if decomposed_count:
+            print(f"  Decomposed {decomposed_count} composite emoji glyphs to simple (Chromium compat)")
+
     # Scaling summary: collect bbox range across all copied glyphs so the caller
     # can verify the scale result relative to Sarasa's ascender/descender at a glance.
     if abs(upm_scale - 1.0) > 1e-6 and copied > 0:
@@ -1120,7 +1317,6 @@ def merge_emoji_lite(
     # vmtx.decompile() reads maxp.numGlyphs to compute expected byte count.
     # If maxp is updated first, fonttools expects more bytes than the raw data
     # provides (old count) and raises TTLibError.  Same ordering as merge_emoji().
-    base_hmtx = base_font["hmtx"]
     for glyph_name in emoji_glyphs_to_add:
         if glyph_name not in base_hmtx.metrics:
             base_hmtx.metrics[glyph_name] = (emoji_width, 0)

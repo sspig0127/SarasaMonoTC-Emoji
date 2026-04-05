@@ -158,6 +158,52 @@ def _load_output_font(variant_dir: str, family_prefix: str, style: str) -> TTFon
     return TTFont(str(path))
 
 
+def _collect_ligature_output_glyphs(font: TTFont) -> set[str]:
+    """Return glyph names emitted by GSUB ligature substitutions."""
+    if "GSUB" not in font:
+        return set()
+
+    outputs: set[str] = set()
+    for lookup in font["GSUB"].table.LookupList.Lookup:
+        if lookup.LookupType != 4:
+            continue
+        for subtable in lookup.SubTable:
+            ligatures = getattr(subtable, "ligatures", None) or {}
+            for lig_list in ligatures.values():
+                for ligature in lig_list:
+                    outputs.add(ligature.LigGlyph)
+    return outputs
+
+
+def _collect_overflow_composites(font: TTFont, glyph_names: set[str]) -> list[tuple[str, int, int]]:
+    """Return composite glyphs whose xMax still exceeds their advance width."""
+    glyf = font["glyf"]
+    hmtx = font["hmtx"].metrics
+    overflow: list[tuple[str, int, int]] = []
+
+    for glyph_name in sorted(glyph_names):
+        glyph = glyf.glyphs.get(glyph_name)
+        if glyph is None:
+            continue
+        glyph.expand(glyf)
+        if getattr(glyph, "numberOfContours", 0) < 0 and hasattr(glyph, "recalcBounds"):
+            glyph.recalcBounds(glyf)
+        if getattr(glyph, "numberOfContours", 0) >= 0 or not hasattr(glyph, "xMax"):
+            continue
+        advance, _ = hmtx.get(glyph_name, (0, 0))
+        if advance > 0 and glyph.xMax > advance:
+            overflow.append((glyph_name, advance, glyph.xMax))
+
+    return overflow
+
+
+_FAMILY_SEQUENCE_TARGETS = [
+    (0x1F468, 0x200D, 0x1F469, 0x200D, 0x1F467, 0x200D, 0x1F466),  # 👨‍👩‍👧‍👦
+    (0x1F469, 0x200D, 0x1F469, 0x200D, 0x1F467),                    # 👩‍👩‍👧
+    (0x1F468, 0x200D, 0x1F468, 0x200D, 0x1F466),                    # 👨‍👨‍👦
+]
+
+
 # ---------------------------------------------------------------------------
 # Color variant (CBDT/CBLC)
 # ---------------------------------------------------------------------------
@@ -389,6 +435,18 @@ class TestLiteOutput:
                 )
 
         assert not failures, "\n".join(failures)
+
+    def test_no_overflow_composite_ligatures(self, output_lite_regular):
+        """Representative family emoji ligatures must fit within their advance width."""
+        target_glyphs = {
+            lig
+            for seq in _FAMILY_SEQUENCE_TARGETS
+            if (lig := _resolve_ligature_output(output_lite_regular, seq)) is not None
+        }
+        overflow = _collect_overflow_composites(output_lite_regular, target_glyphs)
+        assert overflow == [], "\n".join(
+            f"{name}: advance={advance}, xMax={x_max}" for name, advance, x_max in overflow
+        )
 
     def test_glyph_count_reasonable(self, output_lite_regular):
         """Total glyph count must exceed the minimum after merge."""
@@ -643,6 +701,18 @@ class TestNerdLiteOutput:
             assert glyph_name not in nerd_glyph_names, (
                 f"Emoji U+{cp:04X} {char} unexpectedly reuses a Nerd PUA glyph {glyph_name!r}"
             )
+
+    def test_no_overflow_composite_ligatures(self, output_nerd_lite_regular):
+        """Representative family emoji ligatures must fit within their advance width."""
+        target_glyphs = {
+            lig
+            for seq in _FAMILY_SEQUENCE_TARGETS
+            if (lig := _resolve_ligature_output(output_nerd_lite_regular, seq)) is not None
+        }
+        overflow = _collect_overflow_composites(output_nerd_lite_regular, target_glyphs)
+        assert overflow == [], "\n".join(
+            f"{name}: advance={advance}, xMax={x_max}" for name, advance, x_max in overflow
+        )
 
     @pytest.mark.parametrize("style", _STYLE_MATRIX)
     def test_all_styles_glyph_count_reasonable(self, style):

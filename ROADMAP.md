@@ -23,6 +23,7 @@
 | v2.0 | ZWJ 序列 / 旗幟 / 膚色變體 + release workflow 收尾 | ✅ 已發佈 |
 | v2.1 | 第四變體 Nerd Lite（Emoji + Nerd Fonts PUA） | ✅ 已發佈 |
 | **v2.2** | COLRv1 budget 擴增（skip-and-continue greedy + 221 sequences） | ✅ 已發佈 |
+| **v2.3** | 家庭 emoji 全人物渲染修復（Chromium TrueType composite bug 繞過） | ✅ 已發佈 |
 | v2.x | 後續維護 / 技術債 | 📋 進行中 |
 
 ---

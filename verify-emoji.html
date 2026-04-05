@@ -819,11 +819,11 @@ async function loadLiteStyleFonts(manifest) {
 
 async function loadNerdLiteCompareFont() {
   const alias = `VerifyNerdLiteCompare-${currentFontCacheKey}`;
-  const face = new FontFace(
-    alias,
-    `url(output/fonts-lite/SarasaMonoTCEmojiLite-Regular.ttf?v=${encodeURIComponent(currentFontCacheKey)})`,
-    { weight: '400', style: 'normal' }
-  );
+  const url = `output/fonts-lite/SarasaMonoTCEmojiLite-Regular.ttf?v=${encodeURIComponent(currentFontCacheKey)}`;
+  const resp = await fetch(url, { cache: 'no-store' });
+  if (!resp.ok) throw new Error(`Failed to fetch compare font: HTTP ${resp.status}`);
+  const buffer = await resp.arrayBuffer();
+  const face = new FontFace(alias, buffer, { weight: '400', style: 'normal' });
   await face.load();
   document.fonts.add(face);
   document.documentElement.style.setProperty('--nerd-lite-compare-font', `'${alias}', monospace`);
@@ -849,7 +849,10 @@ function updateFontFamily() {
 async function loadSourceFont() {
   const cfg = VARIANTS[currentVariant];
   const url = `${cfg.sourceFontFile}?v=${encodeURIComponent(currentFontCacheKey)}`;
-  const face = new FontFace(currentSourceFontAlias, `url(${url})`, {
+  const resp = await fetch(url, { cache: 'no-store' });
+  if (!resp.ok) throw new Error(`Failed to fetch source font: HTTP ${resp.status}`);
+  const buffer = await resp.arrayBuffer();
+  const face = new FontFace(currentSourceFontAlias, buffer, {
     weight: '400',
     style: 'normal',
   });
@@ -908,7 +911,13 @@ async function loadFont(fontInfo) {
   const url = `${cfg.dir}/${fontInfo.filename}?v=${encodeURIComponent(currentFontCacheKey)}`;
   const isBold = fontInfo.style.includes('Bold');
   const isItalic = fontInfo.style.includes('Italic');
-  const face = new FontFace(currentMergedFontAlias, `url(${url})`, {
+  // Fetch with cache: 'no-store' to bypass browser HTTP cache for font files.
+  // FontFace API alone does not support cache control; pre-fetching the ArrayBuffer
+  // guarantees the latest build output is loaded on every page refresh.
+  const resp = await fetch(url, { cache: 'no-store' });
+  if (!resp.ok) throw new Error(`Failed to fetch font: HTTP ${resp.status}`);
+  const buffer = await resp.arrayBuffer();
+  const face = new FontFace(currentMergedFontAlias, buffer, {
     weight: isBold ? '700' : '400',
     style: isItalic ? 'italic' : 'normal',
   });
