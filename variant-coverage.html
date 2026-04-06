@@ -5,11 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SarasaMonoTCEmoji — 分類覆蓋率</title>
 <style>
+  /* ── Load from build output (output/ is gitignored; local dev only) ── */
+  @font-face {
+    font-family: 'OutColor';
+    src: url('output/fonts/SarasaMonoTCEmoji-Regular.ttf') format('truetype');
+    font-weight: normal; font-style: normal;
+  }
+  @font-face {
+    font-family: 'OutLite';
+    src: url('output/fonts-lite/SarasaMonoTCEmojiLite-Regular.ttf') format('truetype');
+    font-weight: normal; font-style: normal;
+  }
+  @font-face {
+    font-family: 'OutCOLRv1';
+    src: url('output/fonts-colrv1/SarasaMonoTCEmojiCOLRv1-Regular.ttf') format('truetype');
+    font-weight: normal; font-style: normal;
+  }
+  @font-face {
+    font-family: 'OutNerd';
+    src: url('output/fonts-nerd-lite/SarasaMonoTCEmojiLiteNerd-Regular.ttf') format('truetype');
+    font-weight: normal; font-style: normal;
+  }
+
   :root {
-    --color-font:  'SarasaMonoTCEmoji',         'Apple Color Emoji', sans-serif;
-    --lite-font:   'SarasaMonoTCEmojiLite',     'Sarasa Mono TC',    monospace;
-    --colrv1-font: 'SarasaMonoTCEmojiCOLRv1',   'Sarasa Mono TC',    monospace;
-    --nerd-font:   'SarasaMonoTCEmojiLiteNerd',  'Sarasa Mono TC',    monospace;
+    --color-font:  'OutColor',  monospace;
+    --lite-font:   'OutLite',   monospace;
+    --colrv1-font: 'OutCOLRv1', monospace;
+    --nerd-font:   'OutNerd',   monospace;
   }
   body { font-family: sans-serif; margin: 40px; background: #1e1e2e; color: #cdd6f4; }
   h1   { color: #cba6f7; }
@@ -94,6 +116,14 @@
   .ncol { background: #181825; border-radius: 8px; padding: 10px 14px; }
   .ncol-hd  { font-size: 12px; font-family: monospace; margin-bottom: 7px; }
   .range-info { font-size: 11px; color: #6c7086; font-family: monospace; margin-top: 4px; }
+
+  /* ── font status table ──────────────────────── */
+  table.fstatus { border-collapse: collapse; font-size: 13px; width: 100%; }
+  table.fstatus th { background: #252530; color: #9399b2; padding: 5px 10px; text-align: left; font-weight: normal; }
+  table.fstatus td { padding: 5px 10px; border-bottom: 1px solid #252530; font-family: monospace; }
+  .fs-ok  { color: #a6e3a1; }
+  .fs-err { color: #f38ba8; }
+  .fs-loading { color: #9399b2; }
 </style>
 </head>
 <body>
@@ -101,13 +131,16 @@
 <h1>SarasaMonoTCEmoji — Emoji 分類覆蓋率</h1>
 
 <div class="hint">
-  <b>需安裝字體才能正確渲染：</b><br>
-  <code>SarasaMonoTCEmoji</code>（Color）、<code>SarasaMonoTCEmojiLite</code>（Lite）、
-  <code>SarasaMonoTCEmojiCOLRv1</code>（COLRv1）、<code>SarasaMonoTCEmojiLiteNerd</code>（Nerd Lite）<br>
-  未安裝者將以系統字形備援。<br>
+  <b>字體直接從 <code>output/</code> 載入（免安裝，即時反映建構結果）。</b><br>
   <span class="warn">⚠ 此頁 emoji 為代表性樣本，非完整清單。
-  實際字體包含 Noto 全量 emoji（Color / Lite / Nerd Lite ~3,700+；COLRv1 向量彩色 540 個單碼字符，其餘單色備援）。</span>
+  實際字體包含 Noto 全量 emoji（Color / Lite / Nerd Lite ~3,700+；COLRv1 向量彩色 540 個單碼字符，其餘單色備援）。<br>
+  若字體欄位顯示方塊或系統字形，請先執行 <code>uv run python build.py</code> 產出對應變體。</span>
 </div>
+
+<table class="fstatus" id="font-status-table">
+  <thead><tr><th>變體</th><th>字體檔案</th><th>狀態</th></tr></thead>
+  <tbody id="font-status-body"></tbody>
+</table>
 
 <h2>統計摘要</h2>
 <div class="stats-wrap">
@@ -432,8 +465,64 @@ function setAll(open, group) {
     .forEach(d => { d.open = open; });
 }
 
+// ── Font status checker ───────────────────────────────────────────
+const FONT_DEFS = [
+  { family: 'OutColor',  label: 'Color',     badge: 'badge-color',
+    path: 'output/fonts/SarasaMonoTCEmoji-Regular.ttf' },
+  { family: 'OutLite',   label: 'Lite',      badge: 'badge-lite',
+    path: 'output/fonts-lite/SarasaMonoTCEmojiLite-Regular.ttf' },
+  { family: 'OutCOLRv1', label: 'COLRv1',    badge: 'badge-colrv1',
+    path: 'output/fonts-colrv1/SarasaMonoTCEmojiCOLRv1-Regular.ttf' },
+  { family: 'OutNerd',   label: 'Nerd Lite', badge: 'badge-nerd',
+    path: 'output/fonts-nerd-lite/SarasaMonoTCEmojiLiteNerd-Regular.ttf' },
+];
+
+async function buildFontStatus() {
+  const tbody = document.getElementById('font-status-body');
+
+  // Insert rows immediately (loading state)
+  const rows = FONT_DEFS.map(f => {
+    const row = document.createElement('tr');
+
+    const tdLabel = document.createElement('td');
+    const badge = makeEl('span', { cls: f.badge, text: '● ' + f.label });
+    tdLabel.appendChild(badge);
+    row.appendChild(tdLabel);
+
+    const tdPath = document.createElement('td');
+    tdPath.appendChild(makeEl('code', { text: f.path }));
+    row.appendChild(tdPath);
+
+    const tdStatus = makeEl('td', { cls: 'fs-loading', text: '確認中…' });
+    row.appendChild(tdStatus);
+
+    tbody.appendChild(row);
+    return { f, tdStatus };
+  });
+
+  // Wait for fonts, then update status
+  await document.fonts.ready;
+
+  for (const { f, tdStatus } of rows) {
+    try {
+      const loaded = await document.fonts.load('20px "' + f.family + '"');
+      if (loaded.length > 0) {
+        tdStatus.textContent = '✓ 已載入';
+        tdStatus.className = 'fs-ok';
+      } else {
+        tdStatus.textContent = '✗ 未找到（請先執行 build.py）';
+        tdStatus.className = 'fs-err';
+      }
+    } catch (e) {
+      tdStatus.textContent = '✗ 載入失敗：' + e.message;
+      tdStatus.className = 'fs-err';
+    }
+  }
+}
+
 // ── Main ──────────────────────────────────────────────────────────
 (async () => {
+  buildFontStatus();                // fire-and-forget: updates status independently
   const colrv1Set = await loadColrv1();
   buildStats(colrv1Set);
   buildCategories(colrv1Set);
