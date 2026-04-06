@@ -49,7 +49,7 @@ audience: maintainer
 ## 下次開工建議先做
 
 1. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
-2. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
+2. COLRv1 budget **幾乎已滿，不建議輕易擴增**（8,327/8,450，剩 123 slots；單碼 emoji 成本 10–100 slots，實際空間極有限；TrueType 硬上限距離僅 303 slots）。若要新增，只適合 cost=1 的 sequence（components 已全部選入者）
 
 ## 暫時不要重做的事
 
