@@ -8,7 +8,7 @@
 ## v2.3 重點
 
 - **家庭 emoji 全人物渲染修復**：`👨‍👩‍👧‍👦` / `👨‍👩‍👧` / `👩‍👧‍👦` 等 29 個家庭 / 多人 ZWJ emoji 在 Chromium 系瀏覽器（含 VS Code webview、xterm.js、VHS）不再截斷
-- **根本原因**：Chromium TrueType composite 解析 bug（詳見下方「[技術細節 → Lite 變體](#lite-變體-1)」）
+- **根本原因**：Chromium TrueType composite 解析 bug（詳見下方「[技術細節 → Lite 變體](#lite-變體-2)」）
 - **修法**：build pipeline 自動將含大 offset（> 127 font units）的 composite 字形展開為 simple glyph，繞過 bug
 - 新增左邊界保護（xMin ≥ 120 font units），避免最左側人物在小字體尺寸下因 sub-pixel rounding 被截斷
 
