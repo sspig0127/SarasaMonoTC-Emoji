@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SarasaMonoTCEmoji — 分類覆蓋率</title>
+<style>
+  :root {
+    --color-font:  'SarasaMonoTCEmoji',         'Apple Color Emoji', sans-serif;
+    --lite-font:   'SarasaMonoTCEmojiLite',     'Sarasa Mono TC',    monospace;
+    --colrv1-font: 'SarasaMonoTCEmojiCOLRv1',   'Sarasa Mono TC',    monospace;
+    --nerd-font:   'SarasaMonoTCEmojiLiteNerd',  'Sarasa Mono TC',    monospace;
+  }
+  body { font-family: sans-serif; margin: 40px; background: #1e1e2e; color: #cdd6f4; }
+  h1   { color: #cba6f7; }
+  h2   { color: #cba6f7; margin-top: 2em; border-bottom: 1px solid #313244; padding-bottom: 0.3em; }
+
+  /* ── hint box ─────────────────────────────── */
+  .hint {
+    background: #313244; border-radius: 8px; padding: 12px 16px;
+    font-size: 13px; color: #9399b2; margin: 1em 0; line-height: 1.8;
+  }
+  .hint code { background: #181825; padding: 1px 6px; border-radius: 4px; color: #a6e3a1; font-family: monospace; }
+  .hint .warn { color: #f9e2af; }
+
+  /* ── stats table ──────────────────────────── */
+  .stats-wrap { overflow-x: auto; margin: 1em 0; }
+  table.stats { border-collapse: collapse; width: 100%; min-width: 680px; font-size: 13px; }
+  table.stats th {
+    background: #313244; color: #cba6f7;
+    padding: 7px 12px; text-align: left; white-space: nowrap;
+  }
+  table.stats td { padding: 6px 12px; border-bottom: 1px solid #252530; }
+  table.stats tr:hover td { background: #252530; }
+  .n-all    { color: #a6e3a1; font-family: monospace; }
+  .n-colrv1 { color: #fab387; font-family: monospace; }
+  .n-nerd   { color: #94e2d5; font-family: monospace; }
+  .n-dim    { color: #45475a; font-family: monospace; }
+  .tfoot td { font-weight: bold; background: #252530 !important; border-top: 2px solid #45475a; }
+
+  /* ── ctrl bar ─────────────────────────────── */
+  .ctrl-bar { margin: 1em 0 0.5em; display: flex; gap: 8px; flex-wrap: wrap; }
+  .ctrl {
+    background: #313244; border: 1px solid #45475a; color: #cdd6f4;
+    padding: 4px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;
+  }
+  .ctrl:hover { background: #45475a; }
+
+  /* ── category details ─────────────────────── */
+  details { margin: 0.6em 0; }
+  details > summary {
+    cursor: pointer; padding: 9px 14px; background: #313244;
+    border-radius: 8px; font-weight: bold; color: #cdd6f4;
+    user-select: none; list-style: none;
+  }
+  details > summary::before       { content: '▶  '; font-size: 11px; color: #6c7086; }
+  details[open] > summary::before { content: '▼  '; }
+  details > summary::-webkit-details-marker { display: none; }
+
+  .cat-meta { margin-left: 10px; font-size: 12px; color: #9399b2; font-weight: normal; }
+  .cat-meta .n-all    { color: #a6e3a1; }
+  .cat-meta .n-colrv1 { color: #fab387; }
+
+  /* ── 4-col variant grid ───────────────────── */
+  .vgrid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; padding: 10px 0 4px;
+  }
+  @media (max-width: 900px) { .vgrid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .vgrid { grid-template-columns: 1fr; } }
+
+  .vcol { background: #181825; border-radius: 8px; padding: 10px 14px; }
+  .vcol-hd {
+    font-size: 11px; font-family: monospace; margin-bottom: 7px;
+    padding-bottom: 5px; border-bottom: 1px solid #313244;
+  }
+  .badge-color  { color: #fab387; }
+  .badge-lite   { color: #89dceb; }
+  .badge-colrv1 { color: #cba6f7; }
+  .badge-nerd   { color: #94e2d5; }
+
+  .emoji-block { font-size: 20px; line-height: 2; word-break: break-all; }
+  .f-color  { font-family: var(--color-font);  }
+  .f-lite   { font-family: var(--lite-font);   }
+  .f-colrv1 { font-family: var(--colrv1-font); }
+  .f-nerd   { font-family: var(--nerd-font);   }
+
+  .colrv1-sub { margin-top: 8px; padding-top: 7px; border-top: 1px solid #313244; }
+  .colrv1-sub-label { font-size: 11px; color: #fab387; margin-bottom: 3px; }
+
+  /* ── Nerd PUA 2-col grid ──────────────────── */
+  .ngrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 0 4px; }
+  @media (max-width: 600px) { .ngrid { grid-template-columns: 1fr; } }
+  .ncol { background: #181825; border-radius: 8px; padding: 10px 14px; }
+  .ncol-hd  { font-size: 12px; font-family: monospace; margin-bottom: 7px; }
+  .range-info { font-size: 11px; color: #6c7086; font-family: monospace; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h1>SarasaMonoTCEmoji — Emoji 分類覆蓋率</h1>
+
+<div class="hint">
+  <b>需安裝字體才能正確渲染：</b><br>
+  <code>SarasaMonoTCEmoji</code>（Color）、<code>SarasaMonoTCEmojiLite</code>（Lite）、
+  <code>SarasaMonoTCEmojiCOLRv1</code>（COLRv1）、<code>SarasaMonoTCEmojiLiteNerd</code>（Nerd Lite）<br>
+  未安裝者將以系統字形備援。<br>
+  <span class="warn">⚠ 此頁 emoji 為代表性樣本，非完整清單。
+  實際字體包含 Noto 全量 emoji（Color / Lite / Nerd Lite ~3,700+；COLRv1 向量彩色 540 個單碼字符，其餘單色備援）。</span>
+</div>
+
+<h2>統計摘要</h2>
+<div class="stats-wrap">
+  <table class="stats">
+    <thead>
+      <tr>
+        <th>分類</th>
+        <th>此頁收錄</th>
+        <th>Color（位圖彩色）</th>
+        <th>Lite（單色）</th>
+        <th>COLRv1 向量彩色</th>
+        <th>COLRv1 單色備援</th>
+        <th>Nerd Lite（+ PUA）</th>
+      </tr>
+    </thead>
+    <tbody id="stats-body">
+      <tr><td colspan="7" style="color:#6c7086;text-align:center">載入中…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Emoji 分類</h2>
+<div class="ctrl-bar">
+  <button class="ctrl" onclick="setAll(true,'emoji')">全部展開</button>
+  <button class="ctrl" onclick="setAll(false,'emoji')">全部收合</button>
+</div>
+<div id="cat-container"></div>
+
+<h2>Nerd Fonts PUA 圖示 <span style="font-size:14px;font-weight:normal;color:#9399b2">— Nerd Lite 專屬</span></h2>
+<div class="hint" style="margin-bottom:0.5em">
+  左欄：<code>SarasaMonoTCEmojiLiteNerd</code>（應顯示圖示）；右欄：<code>SarasaMonoTCEmojiLite</code>（□ = 正常缺字）。
+</div>
+<div class="ctrl-bar">
+  <button class="ctrl" onclick="setAll(true,'nerd')">全部展開</button>
+  <button class="ctrl" onclick="setAll(false,'nerd')">全部收合</button>
+</div>
+<div id="nerd-container"></div>
+
+<!-- ================================================================
+     DATA + RENDERING  (all DOM methods — no untrusted innerHTML)
+     ================================================================ -->
+<script>
+'use strict';
+
+// ── Emoji category data ───────────────────────────────────────────
+const CATEGORIES = [
+  { id: 'smileys',     icon: '😀', name: 'Smileys & Emotion',
+    chars: '😀😃😄😁😆😅🤣😂🙂🙃🫠😉😊😇🥰😍🤩😘😗😚😙🥲😋😛😜🤪😝🤑🤗🤭🫢🫣🤫🤔🫡🤐🤨😐😑😶🫥😏😒🙄😬🤥🫨😌😔😪🤤😴😷🤒🤕🤢🤮🤧🥵🥶🥴😵🤯🤠🥳🥸😎🤓🧐😕🫤😟🙁☹😮😯😲😳🥺😦😧😨😰😥😢😭😱😖😣😞😓😩😫🥱😤😡😠🤬😈👿💀☠💩🤡👹👺👻👽👾🤖' },
+  { id: 'people',      icon: '👋', name: 'People & Body',
+    chars: '👋🤚🖐✋🖖🫱🫲🫳🫴🫷🫸👌🤌🤏✌🤞🫰🤟🤘🤙👈👉👆🖕👇☝🫵👍👎✊👊🤛🤜👏🙌🫶👐🤲🤝🙏💪🦵🦶👂🦻👃👁👄💋🧠🦷🦴💅🤳👤👥🫂' },
+  { id: 'animals',     icon: '🐶', name: 'Animals & Nature',
+    chars: '🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐸🐵🙈🙉🙊🐔🐧🐦🐤🦆🦅🦉🦇🐺🐗🐴🦄🐝🐛🦋🐌🐞🐜🦟🦗🦂🐢🐍🦎🐙🦑🦐🦞🦀🐡🐠🐟🐬🐳🦈🦭🦦🦥🐊🐆🐅🦓🐘🦛🦏🐪🐫🦒🦘🐃🐄🐎🐖🐏🐑🦙🐐🦌🐕🐩🐈🐓🦃🦚🦜🦢🦩🕊🐇🦝🦔🌲🌳🌴🌵🌾💐🌷🌹🥀🌺🌸🌼🌻🍀🌿🌱🪴🍁🍂🍃🪨🪵' },
+  { id: 'food',        icon: '🍎', name: 'Food & Drink',
+    chars: '🍇🍈🍉🍊🍋🍌🍍🥭🍎🍏🍐🍑🍒🍓🫐🥝🍅🫒🥥🥑🍆🥔🥕🌽🌶🫑🥒🥬🥦🧄🧅🍄🥜🫘🌰🍞🥐🥖🫓🥨🥯🥞🧇🧀🍖🍗🥩🥓🌭🍔🍟🍕🫔🥪🥙🧆🥚🍳🥘🍲🫕🥣🥗🍿🧈🍱🍘🍙🍚🍛🍜🍝🍠🍢🍣🍤🍥🥮🍡🥟🥠🥡🦪🍦🍧🍨🍩🍪🎂🍰🧁🥧🍫🍬🍭🍮🍯🍼🥛☕🫖🍵🧃🥤🧋🍶🍺🍻🥂🍷🥃🍸🍹🧉🍾🧊' },
+  { id: 'travel',      icon: '✈️', name: 'Travel & Places',
+    chars: '🌍🌎🌏🌐🗺🧭🏔⛰🌋🗻🏕🏖🏜🏝🏛🏗🛖🏠🏡🏢🏣🏤🏥🏦🏨🏩🏪🏫🏬🏭🏯🏰💒🗼🗽⛪🕌🛕🕍⛩🛣🌅🌄🌠🎇🎆🌃🌆🌇🌉🌌⛺🚗🚕🚙🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚜🏍🛵🛺🚲🛴🛹🛼🚨🚥🚦🛑🚧⚓🛞🚢✈🛩🛫🛬🪂💺🚁🚀🛸' },
+  { id: 'activities',  icon: '⚽', name: 'Activities',
+    chars: '⚽🏀🏈⚾🥎🎾🏐🏉🥏🎱🏓🏸🏒⛳🎣🤿🎽🎿🛷🥌🎯🎰🎲🧩🧸🪅🪆🎭🎨🎪🎬🎤🎧🎼🎹🥁🪘🎷🎺🎸🪕🎻🪗🪈🎮🕹🃏🀄🎴🏆🥇🥈🥉🏅🎖🏵🎗🎫🎟' },
+  { id: 'objects',     icon: '💡', name: 'Objects',
+    chars: '💡🔦🕯🪔🧱🪜🧰🪛🔧🔨🛠⛏🪚🔩🪤🔗⛓🪝🧲🪣🧯🛢💈⚗🔭🔬🩺🩻💊💉🩹🩼🧫🧬🧪🩸🧹🧺🧻🚽🚿🛁🧴🧷🧼🫧🪥🛒📱💻🖥🖨⌨🖱💾💿📀🎥📸📷📹📞☎📺📻🧭⏱⏰🕰⌛⏳📡🔋🔌✉📧📦📫📮✏✒📝📁📂📅📆📌📍📢📣🔔🔕🎵🎶🪬🧿🪩🖼🎁🎀🎊🎋🎍🎎🎏🎐🎑' },
+  { id: 'symbols',     icon: '❤', name: 'Symbols',
+    chars: '❤🧡💛💚💙💜🖤🤍🤎💔💕💞💓💗💖💘💝💟☮✝☪🕉☸✡🔯☯⛎♈♉♊♋♌♍♎♏♐♑♒♓⚛☢☣🚫💯💢♨🌀🔱⚜〽✳❇🔰♻✅❌⭕🛑⛔📛⬆↗➡↘⬇↙⬅↖↕↔↩↪⤴⤵🔄⏩⏪⏫⏬▶⏸⏹⏺⏏🔀◀🔼🔽🟥🟧🟨🟩🟦🟪🟫⚫⚪🔴🟠🟡🟢🔵🟣🔶🔷🔸🔹🔺🔻💠🔘🔲🔳' },
+  { id: 'flags',       icon: '🚩', name: 'Flags',
+    chars: '🏁🚩🎌🏴🏳🇺🇸🇬🇧🇯🇵🇨🇳🇩🇪🇫🇷🇮🇹🇪🇸🇰🇷🇧🇷🇮🇳🇨🇦🇦🇺🇷🇺🇲🇽🇿🇦🇳🇬🇪🇬🇸🇦🇦🇷🇵🇹🇳🇱🇸🇪🇳🇴🇩🇰🇫🇮🇨🇭🇦🇹🇧🇪🇵🇱🇺🇦🇬🇷🇹🇷🇮🇱🇹🇼🇭🇰🇸🇬🇮🇩🇹🇭🇻🇳🇵🇭🇲🇾🇳🇿' },
+  { id: 'zwj',         icon: '👨‍👩‍👧', name: 'ZWJ Sequences（v2.0 / v2.3 重點支援）',
+    chars: '👨‍👩‍👧👨‍👩‍👦👨‍👩‍👧‍👦👩‍👩‍👧👩‍👩‍👦👨‍👨‍👧👨‍👨‍👦👩‍👧‍👦👩‍👧👩‍👦👨‍👧‍👦👩‍❤️‍👨👩‍❤️‍💋‍👨👮‍♀️👮‍♂️👷‍♀️👷‍♂️💂‍♀️💂‍♂️🕵️‍♀️🕵️‍♂️👩‍⚕️👨‍⚕️👩‍🏫👨‍🏫👩‍💻👨‍💻👩‍🎤👨‍🎤👩‍🍳👨‍🍳🏃‍♀️🏃‍♂️🚶‍♀️🚶‍♂️🧗‍♀️🧗‍♂️🧘‍♀️🧘‍♂️🧑‍🤝‍🧑🏳️‍🌈🏳️‍⚧️🏴‍☠️🐻‍❄️' },
+];
+
+// ── Nerd Fonts PUA sections ───────────────────────────────────────
+const NERD_SECTIONS = [
+  { id: 'powerline', name: 'Powerline Symbols', color: '#89dceb',
+    desc: 'prompt 分隔符、VCS 符號 — 1 欄寬（scale 500/2048）', range: [0xE0A0, 0xE0D7] },
+  { id: 'devicons',  name: 'Devicons',           color: '#a6e3a1',
+    desc: '語言 / 框架 logo — 2 欄寬（scale 1000/2048）',        range: [0xE700, 0xE7C5] },
+  { id: 'codicons',  name: 'Codicons (VS Code)', color: '#f9e2af',
+    desc: 'VS Code editor icons — 2 欄寬',                        range: [0xEA60, 0xEBEB] },
+  { id: 'octicons',  name: 'Octicons',           color: '#cba6f7',
+    desc: 'GitHub / editor icons — 2 欄寬',                       range: [0xF400, 0xF4FF] },
+];
+
+// Variant definitions (order = left→right in the 4-col grid)
+const VARIANTS = [
+  { key: 'color',  badgeCls: 'badge-color',  fontCls: 'f-color',  label: 'Color（彩色位圖）' },
+  { key: 'lite',   badgeCls: 'badge-lite',   fontCls: 'f-lite',   label: 'Lite（單色）' },
+  { key: 'colrv1', badgeCls: 'badge-colrv1', fontCls: 'f-colrv1', label: 'COLRv1（向量 / 備援）' },
+  { key: 'nerd',   badgeCls: 'badge-nerd',   fontCls: 'f-nerd',   label: 'Nerd Lite（同 Lite）' },
+];
+
+// ── Utilities ─────────────────────────────────────────────────────
+
+function graphemes(str) {
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    return [...new Intl.Segmenter().segment(str)].map(s => s.segment);
+  }
+  return [...str];
+}
+
+// Return 'U+XXXX' for a single-codepoint grapheme cluster (optionally + VS).
+// Returns null for ZWJ sequences / RI pairs (not in colrv1-emoji-list.json).
+function baseCodepoint(ch) {
+  const cps = [...ch];                          // ES6 iterator = code points
+  if (cps.length > 2) return null;
+  if (cps.length === 2) {
+    const vs = cps[1].codePointAt(0);
+    if (vs !== 0xFE0F && vs !== 0xFE0E) return null;
+  }
+  const cp = cps[0].codePointAt(0);
+  return 'U+' + cp.toString(16).toUpperCase().padStart(4, '0');
+}
+
+function rangeChars(start, end) {
+  let s = '';
+  for (let cp = start; cp <= end; cp++) s += String.fromCodePoint(cp);
+  return s;
+}
+
+function makeEl(tag, opts = {}) {
+  const el = document.createElement(tag);
+  if (opts.cls)   el.className   = opts.cls;
+  if (opts.text)  el.textContent = opts.text;
+  if (opts.style) el.setAttribute('style', opts.style);
+  return el;
+}
+
+function td(text, cls) {
+  const c = document.createElement('td');
+  c.textContent = text;
+  if (cls) c.className = cls;
+  return c;
+}
+
+// ── COLRv1 data ───────────────────────────────────────────────────
+async function loadColrv1() {
+  try {
+    const r = await fetch('docs/colrv1-emoji-list.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    return new Set(d.emoji.map(e => e.codepoint));
+  } catch (e) {
+    console.warn('variant-coverage: cannot load colrv1-emoji-list.json', e);
+    return new Set();
+  }
+}
+
+// ── Stats table ───────────────────────────────────────────────────
+function buildStats(colrv1Set) {
+  const seg   = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter() : null;
+  const tbody = document.getElementById('stats-body');
+  tbody.textContent = '';   // clear "載入中"
+
+  let sumTotal = 0, sumColored = 0;
+
+  for (const cat of CATEGORIES) {
+    const chars   = graphemes(cat.chars);
+    const colored = chars.filter(ch => { const cp = baseCodepoint(ch); return cp && colrv1Set.has(cp); }).length;
+    sumTotal   += chars.length;
+    sumColored += colored;
+
+    const row = tbody.insertRow();
+    row.appendChild(td(cat.icon + ' ' + cat.name));
+    row.appendChild(td(String(chars.length), 'n-all'));
+    row.appendChild(td('全部', 'n-all'));
+    row.appendChild(td('全部', 'n-all'));
+    row.appendChild(td(colored > 0 ? String(colored) : '0', colored > 0 ? 'n-colrv1' : 'n-dim'));
+    row.appendChild(td(String(chars.length - colored), 'n-dim'));
+    row.appendChild(td('全部', 'n-all'));
+  }
+
+  // Nerd PUA row
+  const nerdTotal = NERD_SECTIONS.reduce((s, n) => s + n.range[1] - n.range[0] + 1, 0);
+  const nerdRow = tbody.insertRow();
+  nerdRow.style.borderTop = '1px solid #45475a';
+  nerdRow.appendChild(td('🔧 Nerd Fonts PUA（4 集合）'));
+  ['—', '—', '—', '—', '—'].forEach(v => nerdRow.appendChild(td(v, 'n-dim')));
+  const nNerd = document.createElement('td');
+  nNerd.textContent = '+' + nerdTotal;
+  nNerd.className = 'n-nerd';
+  nerdRow.appendChild(nNerd);
+
+  // Total row
+  const totRow = tbody.insertRow();
+  totRow.className = 'tfoot';
+  totRow.appendChild(td('合計（此頁樣本）'));
+  totRow.appendChild(td(String(sumTotal), 'n-all'));
+  totRow.appendChild(td(String(sumTotal), 'n-all'));
+  totRow.appendChild(td(String(sumTotal), 'n-all'));
+  totRow.appendChild(td(String(sumColored), 'n-colrv1'));
+  totRow.appendChild(td(String(sumTotal - sumColored), 'n-dim'));
+  const totNerd = document.createElement('td');
+  const a1 = document.createElement('span'); a1.className = 'n-all';  a1.textContent = String(sumTotal);
+  const a2 = document.createElement('span'); a2.className = 'n-nerd'; a2.textContent = '+' + nerdTotal;
+  totNerd.appendChild(a1);
+  totNerd.appendChild(document.createTextNode(' '));
+  totNerd.appendChild(a2);
+  totRow.appendChild(totNerd);
+}
+
+// ── Emoji variant column helper ───────────────────────────────────
+function makeVcol(variant, emojiStr) {
+  const col = makeEl('div', { cls: 'vcol' });
+
+  // Header: "● Label"
+  const hd = makeEl('div', { cls: 'vcol-hd' });
+  const dot = makeEl('span', { cls: variant.badgeCls, text: '● ' });
+  hd.appendChild(dot);
+  hd.appendChild(document.createTextNode(variant.label));
+  col.appendChild(hd);
+
+  // Emoji display
+  const disp = makeEl('div', { cls: 'emoji-block ' + variant.fontCls, text: emojiStr });
+  col.appendChild(disp);
+
+  return col;
+}
+
+// ── Category sections ─────────────────────────────────────────────
+function buildCategories(colrv1Set) {
+  const container = document.getElementById('cat-container');
+
+  CATEGORIES.forEach((cat, idx) => {
+    const chars   = graphemes(cat.chars);
+    const colored = chars.filter(ch => { const cp = baseCodepoint(ch); return cp && colrv1Set.has(cp); }).length;
+    const colrv1Chars = chars.filter(ch => { const cp = baseCodepoint(ch); return cp && colrv1Set.has(cp); }).join('');
+
+    // <details>
+    const det = document.createElement('details');
+    if (idx < 3) det.open = true;
+    det.dataset.group = 'emoji';
+
+    // <summary>
+    const sum = document.createElement('summary');
+    sum.appendChild(document.createTextNode(cat.icon + ' ' + cat.name));
+
+    const meta = makeEl('span', { cls: 'cat-meta' });
+    const nAll = makeEl('span', { cls: 'n-all', text: chars.length + ' 個' });
+    meta.appendChild(nAll);
+    if (colored > 0) {
+      meta.appendChild(document.createTextNode(' ｜ COLRv1 向量 '));
+      meta.appendChild(makeEl('span', { cls: 'n-colrv1', text: String(colored) }));
+    }
+    sum.appendChild(meta);
+    det.appendChild(sum);
+
+    // 4-col grid
+    const grid = makeEl('div', { cls: 'vgrid' });
+
+    for (const v of VARIANTS) {
+      const col = makeVcol(v, cat.chars);
+
+      // COLRv1 column: append sub-row for vector-colored chars
+      if (v.key === 'colrv1' && colrv1Chars) {
+        const sub = makeEl('div', { cls: 'colrv1-sub' });
+        sub.appendChild(makeEl('div', { cls: 'colrv1-sub-label', text: '▸ 向量彩色（' + colored + ' 個）' }));
+        sub.appendChild(makeEl('div', { cls: 'emoji-block f-colrv1', text: colrv1Chars }));
+        col.appendChild(sub);
+      }
+
+      grid.appendChild(col);
+    }
+
+    det.appendChild(grid);
+    container.appendChild(det);
+  });
+}
+
+// ── Nerd PUA section ──────────────────────────────────────────────
+function buildNerd() {
+  const container = document.getElementById('nerd-container');
+
+  for (const sec of NERD_SECTIONS) {
+    const chars    = rangeChars(sec.range[0], sec.range[1]);
+    const count    = sec.range[1] - sec.range[0] + 1;
+    const rangeStr = 'U+' + sec.range[0].toString(16).toUpperCase()
+                   + ' – U+' + sec.range[1].toString(16).toUpperCase();
+
+    const det = document.createElement('details');
+    det.open = true;
+    det.dataset.group = 'nerd';
+
+    // summary
+    const sum = document.createElement('summary');
+    const nameSpan = makeEl('span', { text: sec.name, style: 'color:' + sec.color });
+    sum.appendChild(nameSpan);
+    const meta = makeEl('span', { cls: 'cat-meta' });
+    meta.appendChild(makeEl('span', { cls: 'n-nerd', text: count + ' 個' }));
+    meta.appendChild(document.createTextNode(' ｜ ' + sec.desc));
+    sum.appendChild(meta);
+    det.appendChild(sum);
+
+    // 2-col grid
+    const grid = makeEl('div', { cls: 'ngrid' });
+
+    // Nerd Lite column
+    const nCol = makeEl('div', { cls: 'ncol' });
+    const nHd  = makeEl('div', { cls: 'ncol-hd', style: 'color:' + sec.color,
+                                  text: 'Nerd Lite（應顯示圖示）' });
+    const nDisp = makeEl('div', { cls: 'emoji-block f-nerd', text: chars });
+    const nInfo  = makeEl('div', { cls: 'range-info',
+                                   text: rangeStr + ' | ' + count + ' codepoints' });
+    nCol.appendChild(nHd);
+    nCol.appendChild(nDisp);
+    nCol.appendChild(nInfo);
+
+    // Lite compare column
+    const lCol = makeEl('div', { cls: 'ncol' });
+    const lHd  = makeEl('div', { cls: 'ncol-hd', style: 'color:#6c7086',
+                                  text: 'Lite 對照（□ = 正常缺字）' });
+    const lDisp = makeEl('div', { cls: 'emoji-block f-lite', text: chars });
+    lCol.appendChild(lHd);
+    lCol.appendChild(lDisp);
+
+    grid.appendChild(nCol);
+    grid.appendChild(lCol);
+    det.appendChild(grid);
+    container.appendChild(det);
+  }
+}
+
+// ── Expand / collapse ─────────────────────────────────────────────
+function setAll(open, group) {
+  document.querySelectorAll('details[data-group="' + group + '"]')
+    .forEach(d => { d.open = open; });
+}
+
+// ── Main ──────────────────────────────────────────────────────────
+(async () => {
+  const colrv1Set = await loadColrv1();
+  buildStats(colrv1Set);
+  buildCategories(colrv1Set);
+  buildNerd();
+})();
+</script>
+</body>
+</html>
