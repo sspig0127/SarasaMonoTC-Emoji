@@ -20,4 +20,3 @@ tests/*.jpg
 tests/*.png
 openmoji/
 noto-emoji/
-check_emoji_coverage.py
