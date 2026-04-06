@@ -68,12 +68,13 @@ ZWJ 序列 / 旗幟 / 膚色變體全面支援。四條 merge pipeline 已全部
 ## v2.x — 後續維護 / 技術債
 
 - 追蹤 `astral-sh/setup-uv` node24 版，屆時更新 release workflow
+- 上游版本追蹤已自動化（`check-upstream.yml`）；Sarasa Gothic 已升至 v1.0.37
 - COLRv1 budget 幾乎已滿，不建議再輕易擴增：
   - config 緩衝：8,450 − 8,327 = **123 slots**（單碼 emoji 成本 10–100，實際空間極有限）
   - TrueType 硬上限距離：65,535 − Italic 65,232 = **303 slots**（絕對上限）
   - 若要再加，只適合 cost=1 的 sequence（components 已全部選入者）
 - ~~補 Italic / Bold / BoldItalic output font 自動化測試~~（✅ 已完成，200 tests）
-- 評估 Emoji 17.0 / Nerd Fonts 版本更新
+- ~~評估 Emoji 17.0 / Nerd Fonts 版本更新~~（✅ 已自動化：`check-upstream.yml` 每月 1 日偵測三個上游，有新版自動開 issue）
 
 ---
 
@@ -85,8 +86,8 @@ ZWJ 序列 / 旗幟 / 膚色變體全面支援。四條 merge pipeline 已全部
 
 | 項目 | 說明 |
 |------|------|
-| **Emoji 17.0 跟進** | Unicode 17.0（2025-09）新增 163 個 emoji，含新 ZWJ 序列與膚色組合。追蹤 Noto Emoji 上游，版本更新後重跑建構即可覆蓋 |
-| **Nerd Fonts 版本定期追蹤** | Nerd Fonts 3.x 持續更新；部分 icon（Material Design Icons）已遷移至新 PUA-A 段，舊 codepoint 棄用，建議每次 release 前確認基底版本。目前使用 v3.4.0；更新方式見 README「Nerd Fonts 版本對應」段落 |
+| **Emoji 17.0 跟進** | Unicode 17.0（2025-09）新增 163 個 emoji，含新 ZWJ 序列與膚色組合。**✅ 已自動化**：`check-upstream.yml` 每月偵測 `googlefonts/noto-emoji`，有新版自動開 issue；收到通知後下載新版字體、重跑建構即可覆蓋 |
+| **Nerd Fonts 版本定期追蹤** | Nerd Fonts 3.x 持續更新；部分 icon（Material Design Icons）已遷移至新 PUA-A 段，舊 codepoint 棄用。**✅ 已自動化**：`check-upstream.yml` 每月偵測 `ryanoasis/nerd-fonts`（目前採用 v3.4.0）；收到通知後確認 PUA 段有無 breaking change，再更新 NerdFontsSymbolsOnly.zip |
 | ~~**Ghostty 相容性驗證**~~ | ✅ v2.3 後已確認：Lite / Nerd Lite 在 Ghostty 少量測試通過，無 cursor desync 或 emoji 寬度異常。Color / COLRv1 未另行驗證（bitmap / COLRv1 在終端機環境本即次要） |
 
 ### 中期可評估（中工作量）
