@@ -39,6 +39,8 @@ v2.1 起支援 sequence emoji（ZWJ / 膚色 / 旗幟），四個變體（`Color
 
 四個變體可同時安裝，不互相衝突。
 
+> 💡 **快速預覽**：想先看看 emoji 覆蓋率？下滑至本頁面底部 [「Emoji 覆蓋率展示」](#emoji-覆蓋率展示) 段落，查看四個變體的實際渲染效果。
+
 ---
 
 ## 下載字體
@@ -545,6 +547,74 @@ Set Height 2160
 - **Emoji 範圍**：單一 codepoint + sequence emoji（ZWJ / 膚色 / 旗幟）
 - **工具**：純 Python + fonttools，無需 FontForge 或 FontLab
 - **OTS 相容**：`recalcBBoxes=False` 保留 Sarasa 原始 glyph raw bytes，通過 OTS 9.2 驗證
+
+---
+
+## Emoji 覆蓋率展示
+
+以下截圖來自 [`variant-coverage.html`](variant-coverage.html) 驗證頁面，展示四個變體在各類別 emoji 的實際渲染效果。
+
+### 統計摘要與 emoji 分類概觀
+
+![Summary statistics](docs/preview/00_Summary_statistics.png)
+
+### Emoji 分類詳細展示
+
+#### 😀 Smileys & Emotion（笑臉、表情）
+
+![Smileys & Emotion](docs/preview/01_Smileys_Emotion.png)
+
+#### 👋 People & Body（人物、肢體）
+
+![People & Body](docs/preview/02_People_Body.png)
+
+#### 🐶 Animals & Nature（動物、植物、自然）
+
+![Animals & Nature](docs/preview/03_Animals_Nautre.png)
+
+#### 🍎 Food & Drink（食物、飲料）
+
+![Food & Drink](docs/preview/04_Food_Drink.png)
+
+#### ✈️ Travel & Places（交通、地點）
+
+![Travel & Places](docs/preview/05_Travel_Places.png)
+
+#### ⚽ Activities（活動、運動）
+
+![Activities](docs/preview/06_Activities.png)
+
+#### 💡 Objects（物件、工具）
+
+![Objects](docs/preview/07_Objects.png)
+
+#### ❤ Symbols（符號）
+
+![Symbols](docs/preview/08_Symbols.png)
+
+#### 🚩 Flags（旗幟）
+
+![Flags](docs/preview/09_Flags.png)
+
+#### 👨‍👩‍👧 ZWJ Sequences（Zero-Width Joiner 多人家庭 emoji、膚色變體）
+
+![ZWJ Sequences](docs/preview/10_ZWJ.png)
+
+#### 🔧 Nerd Fonts PUA 圖示 — Nerd Lite 專屬
+
+**Nerd Lite** 變體獨有的開發圖示（Powerline、Devicons、Codicons、Octicons），左欄展示 **Nerd Lite 正常顯示**，右欄展示 **Lite 對照（缺字）**。
+
+##### Powerline Symbols（1 欄寬）
+
+![Nerd Fonts PUA 01 - Powerline](docs/preview/11_Nerd_Fonts_PUA_icons_01.png)
+
+##### Devicons（2 欄寬）
+
+![Nerd Fonts PUA 02 - Devicons](docs/preview/11_Nerd_Fonts_PUA_icons_02.png)
+
+##### Codicons / Octicons（2 欄寬）
+
+![Nerd Fonts PUA 03 - Codicons & Octicons](docs/preview/11_Nerd_Fonts_PUA_icons_03.png)
 
 ---
 
