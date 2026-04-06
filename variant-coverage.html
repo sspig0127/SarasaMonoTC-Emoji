@@ -101,7 +101,7 @@
   .badge-colrv1 { color: #cba6f7; }
   .badge-nerd   { color: #94e2d5; }
 
-  .emoji-block { font-size: 20px; line-height: 2; word-break: break-all; }
+  .emoji-block { font-size: 20px; line-height: 2; word-break: break-word; overflow-wrap: break-word; white-space: normal; }
   .f-color  { font-family: var(--color-font);  }
   .f-lite   { font-family: var(--lite-font);   }
   .f-colrv1 { font-family: var(--colrv1-font); }
@@ -111,9 +111,9 @@
   .colrv1-sub-label { font-size: 11px; color: #fab387; margin-bottom: 3px; }
 
   /* ── Nerd PUA 2-col grid ──────────────────── */
-  .ngrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 0 4px; }
+  .ngrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 0 4px; min-width: 0; }
   @media (max-width: 600px) { .ngrid { grid-template-columns: 1fr; } }
-  .ncol { background: #181825; border-radius: 8px; padding: 10px 14px; }
+  .ncol { background: #181825; border-radius: 8px; padding: 10px 14px; min-width: 0; }
   .ncol-hd  { font-size: 12px; font-family: monospace; margin-bottom: 7px; }
   .range-info { font-size: 11px; color: #6c7086; font-family: monospace; margin-top: 4px; }
 
