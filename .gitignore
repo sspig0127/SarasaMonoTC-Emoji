@@ -10,5 +10,11 @@ CLAUDE.md.bak-*
 SarasaMonoTCEmoji-*.zip
 SarasaMonoTCEmojiLite-*.zip
 SarasaMonoTCEmojiCOLRv1-*.zip
+SarasaMonoTCEmojiLiteNerd-*.zip
 bmp-color-verification.png
 verify-*.png
+family_*.png
+family_*.svg
+test-family-emoji.html
+tests/*.jpg
+tests/*.png
