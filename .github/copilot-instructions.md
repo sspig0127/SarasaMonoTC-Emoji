@@ -1,6 +1,6 @@
 # Copilot Instructions — SarasaMonoTC-Emoji
 
-> 目前版本：**v2.2.0**（2026-04-05）
+> 目前版本：**v2.3.0**（2026-04-06）
 > COLRv1 深度技術細節 → [`.github/colrv1-dev-notes.md`](./colrv1-dev-notes.md)（debug 時再 Read）
 
 ## 專案概述
@@ -49,12 +49,20 @@ SarasaMonoTC-Emoji/
 │   ├── colrv1-budget-expansion-eval.md  # COLRv1 budget 擴增可行性評估
 │   ├── nerd-fonts-variant-eval.md    # Nerd Lite 架構評估（歷史決策文件）
 │   └── release-notes-v*.md           # 各版本 release notes 草稿
+├── scripts/
+│   └── vhs/                     # VHS 終端機錄影腳本（Nerd Lite 宣傳素材）
+│       ├── 01-nerd-lite-hero.tape        # Nerd Lite 第一眼印象展示
+│       ├── 02-nerd-lite-workflow.tape    # 典型開發工作流展示
+│       └── 03-nerd-lite-cjk-emoji.tape   # CJK + emoji + Nerd icon 混排展示
 ├── tests/
 │   ├── conftest.py
 │   ├── test_config.py
 │   ├── test_emoji_merge.py
 │   └── test_font_output.py
-└── verify-emoji.html           # 本地瀏覽器視覺驗證工具（需 http-server port 8765）
+├── docs/
+│   └── upstream-versions.json    # 上游字體版本追蹤（Sarasa / Noto / Nerd Fonts）
+├── verify-emoji.html           # 本地瀏覽器視覺驗證工具（需 http-server port 8765）
+└── variant-coverage.html       # 四變體靜態覆蓋率對照表
 ```
 
 ---
@@ -72,8 +80,67 @@ uv run python build.py --colrv1 --styles Regular  # 快速單樣式測試
 
 uv run pytest tests/ -v --tb=short          # 執行測試
 
-uv run python -m http.server 8765           # 視覺驗證（搭配 verify-emoji.html）
+uv run python -m http.server 8765           # 視覺驗證（搭配 verify-emoji.html / variant-coverage.html）
+
+# VHS 終端機錄影（Nerd Lite 宣傳素材）
+vhs scripts/vhs/01-nerd-lite-hero.tape      # 產出 GIF 至 output/promo/gif/
+vhs scripts/vhs/02-nerd-lite-workflow.tape
+vhs scripts/vhs/03-nerd-lite-cjk-emoji.tape
 ```
+
+---
+
+## VHS 終端機錄影與宣傳素材
+
+### 概述
+
+`scripts/vhs/` 內的 `.tape` 腳本用於產生 Nerd Lite 變體的動態宣傳 GIF。所有錄影皆使用 `SarasaMonoTCEmojiLiteNerd` 字體，主題為 Catppuccin Mocha，尺寸 1600×900，字級 30–34pt。
+
+### 三支 GIF 主題與用途
+
+| 腳本 | 檔名 | 主題 | 重點展示 |
+|------|------|------|----------|
+| Tape 1 | `01-nerd-lite-hero.tape` | 終端機第一眼印象 | Powerline 分隔符、檔案 icon、混排字形 |
+| Tape 2 | `02-nerd-lite-workflow.tape` | 開發工作流（git / uv / pytest） | 實際使用情境，repo metadata + icon |
+| Tape 3 | `03-nerd-lite-cjk-emoji.tape` | CJK + emoji + Nerd icon 混排 | 多文字系統整合、旗幟、家庭 ZWJ |
+
+### 錄製前置
+
+1. **安裝 VHS CLI**：`brew install charmbracelet/tap/vhs`
+2. **安裝四變體字體至系統**：
+   ```bash
+   uv run python build.py --styles Regular  # 建構 Regular 權重
+   uv run python build.py --lite --styles Regular
+   uv run python build.py --nerd-lite --styles Regular
+   uv run python build.py --colrv1 --styles Regular
+   cp output/fonts/*/SarasaMonoTC*.ttf ~/Library/Fonts/
+   ```
+3. **檢驗字體已註冊**：系統偏好設定 → 字體簿（或 `fc-list | grep SarasaMonoTC`）
+
+### 手動錄製 / 重拍
+
+```bash
+cd /Users/mac/_SideProject/SarasaMonoTC-Emoji
+
+# 單支錄製
+vhs scripts/vhs/01-nerd-lite-hero.tape
+
+# 所有三支（依序）
+for tape in scripts/vhs/*.tape; do vhs "$tape"; done
+```
+
+### 產物位置
+
+- GIF 輸出至 `output/promo/gif/`（由 `.tape` 檔中 `Output` 指令指定）
+- 不納入 `.gitignore`（`.tape` 腳本與 GIF 皆應提交）
+- 尺寸：~200–300 KB per GIF；適合 GitHub / 社群平台直接貼用
+
+### VHS 腳本編輯重點
+
+- **路徑**：`Output` 指令需採 **絕對路徑** 且用引號括起（`vhs` parser 要求）
+- **字體名稱**：必須精確匹配系統已安裝的字族名（如 `SarasaMonoTCEmojiLiteNerd`）
+- **終端機寬度**：`1600x900` 對應 160–180 字符寬度；內容應避免超寬單行
+- **Powerline 符號驗證**：E0A0–E0D7 應透過 `fonttools dump -t cmap <.ttf>` 驗證存在；若缺失則錄影時會顯示為 `▯`
 
 ---
 
@@ -141,6 +208,7 @@ uv run python -m http.server 8765           # 視覺驗證（搭配 verify-emoji
 - 版本號 bump（`config.yaml` version 欄位）
 - Priority 清單調整（新增 / 移除 emoji codepoint）
 - 已知框架下的測試補充
+- 宣傳素材製作與維護（VHS tape 腳本編輯、截圖更新、`variant-coverage.html` 微調）
 
 ### 交接慣例
 
