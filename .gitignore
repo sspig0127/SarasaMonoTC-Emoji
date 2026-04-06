@@ -18,3 +18,6 @@ family_*.svg
 test-family-emoji.html
 tests/*.jpg
 tests/*.png
+openmoji/
+noto-emoji/
+check_emoji_coverage.py

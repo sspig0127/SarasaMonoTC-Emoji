@@ -14,5 +14,10 @@
     "repo": "ryanoasis/nerd-fonts",
     "version": "v3.4.0",
     "affects": ["Nerd Lite (SymbolsNerdFontMono-Regular.ttf)"]
+  },
+  "openmoji": {
+    "repo": "hfg-gmuend/openmoji",
+    "version": "v16.0.0",
+    "affects": ["評估用（ZWJ 覆蓋率 40%，目前不採用）；待覆蓋率達 80%+ 再評估替換 Lite glyph 源"]
   }
 }

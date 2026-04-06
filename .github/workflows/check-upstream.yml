@@ -26,22 +26,27 @@ jobs:
           SARASA_PINNED=$(jq -r '."sarasa-gothic".version' docs/upstream-versions.json)
           NOTO_PINNED=$(jq -r '."noto-emoji".version' docs/upstream-versions.json)
           NERD_PINNED=$(jq -r '."nerd-fonts".version' docs/upstream-versions.json)
+          OPENMOJI_PINNED=$(jq -r '.openmoji.version' docs/upstream-versions.json)
 
           SARASA_LATEST=$(gh release view --repo be5invis/Sarasa-Gothic --json tagName -q .tagName 2>/dev/null || echo "unknown")
           NOTO_LATEST=$(gh release view --repo googlefonts/noto-emoji --json tagName -q .tagName 2>/dev/null || echo "unknown")
           NERD_LATEST=$(gh release view --repo ryanoasis/nerd-fonts --json tagName -q .tagName 2>/dev/null || echo "unknown")
+          OPENMOJI_LATEST=$(gh release view --repo hfg-gmuend/openmoji --json tagName -q .tagName 2>/dev/null || echo "unknown")
 
-          echo "sarasa_pinned=$SARASA_PINNED"   >> "$GITHUB_OUTPUT"
-          echo "sarasa_latest=$SARASA_LATEST"   >> "$GITHUB_OUTPUT"
-          echo "noto_pinned=$NOTO_PINNED"       >> "$GITHUB_OUTPUT"
-          echo "noto_latest=$NOTO_LATEST"       >> "$GITHUB_OUTPUT"
-          echo "nerd_pinned=$NERD_PINNED"       >> "$GITHUB_OUTPUT"
-          echo "nerd_latest=$NERD_LATEST"       >> "$GITHUB_OUTPUT"
+          echo "sarasa_pinned=$SARASA_PINNED"       >> "$GITHUB_OUTPUT"
+          echo "sarasa_latest=$SARASA_LATEST"       >> "$GITHUB_OUTPUT"
+          echo "noto_pinned=$NOTO_PINNED"           >> "$GITHUB_OUTPUT"
+          echo "noto_latest=$NOTO_LATEST"           >> "$GITHUB_OUTPUT"
+          echo "nerd_pinned=$NERD_PINNED"           >> "$GITHUB_OUTPUT"
+          echo "nerd_latest=$NERD_LATEST"           >> "$GITHUB_OUTPUT"
+          echo "openmoji_pinned=$OPENMOJI_PINNED"   >> "$GITHUB_OUTPUT"
+          echo "openmoji_latest=$OPENMOJI_LATEST"   >> "$GITHUB_OUTPUT"
 
           UPDATES=""
-          [ "$SARASA_LATEST" != "$SARASA_PINNED" ] && [ "$SARASA_LATEST" != "unknown" ] && UPDATES="${UPDATES}sarasa,"
-          [ "$NOTO_LATEST"   != "$NOTO_PINNED"   ] && [ "$NOTO_LATEST"   != "unknown" ] && UPDATES="${UPDATES}noto,"
-          [ "$NERD_LATEST"   != "$NERD_PINNED"   ] && [ "$NERD_LATEST"   != "unknown" ] && UPDATES="${UPDATES}nerd,"
+          [ "$SARASA_LATEST"   != "$SARASA_PINNED"   ] && [ "$SARASA_LATEST"   != "unknown" ] && UPDATES="${UPDATES}sarasa,"
+          [ "$NOTO_LATEST"     != "$NOTO_PINNED"     ] && [ "$NOTO_LATEST"     != "unknown" ] && UPDATES="${UPDATES}noto,"
+          [ "$NERD_LATEST"     != "$NERD_PINNED"     ] && [ "$NERD_LATEST"     != "unknown" ] && UPDATES="${UPDATES}nerd,"
+          [ "$OPENMOJI_LATEST" != "$OPENMOJI_PINNED" ] && [ "$OPENMOJI_LATEST" != "unknown" ] && UPDATES="${UPDATES}openmoji,"
           echo "updates=$UPDATES" >> "$GITHUB_OUTPUT"
 
       - name: Check for existing open issue
@@ -63,14 +68,18 @@ jobs:
           NOTO_LATEST: ${{ steps.check.outputs.noto_latest }}
           NERD_PINNED: ${{ steps.check.outputs.nerd_pinned }}
           NERD_LATEST: ${{ steps.check.outputs.nerd_latest }}
+          OPENMOJI_PINNED: ${{ steps.check.outputs.openmoji_pinned }}
+          OPENMOJI_LATEST: ${{ steps.check.outputs.openmoji_latest }}
           UPDATES: ${{ steps.check.outputs.updates }}
         run: |
           sarasa_flag="✅ 否"
           noto_flag="✅ 否"
           nerd_flag="✅ 否"
+          openmoji_flag="✅ 否"
           sarasa_hint=""
           noto_hint=""
           nerd_hint=""
+          openmoji_hint=""
 
           if [ "$SARASA_LATEST" != "$SARASA_PINNED" ]; then
             sarasa_flag="⚠️ 是"
@@ -84,22 +93,28 @@ jobs:
             nerd_flag="⚠️ 是"
             nerd_hint="- **Nerd Fonts**：確認 PUA 段有無 breaking change（特別是 Material Design Icons），更新 NerdFontsSymbolsOnly.zip，確認 \`config.yaml single_column_ranges\` 是否需調整"
           fi
+          if [ "$OPENMOJI_LATEST" != "$OPENMOJI_PINNED" ]; then
+            openmoji_flag="🔍 新版（僅評估用）"
+            openmoji_hint="- **OpenMoji**：目前未採用（ZWJ 覆蓋率 40%，評估見 \`docs/openmoji-coverage-eval.md\`）。有新版時請重新 clone 並執行 \`check_emoji_coverage.py\` 確認 ZWJ 覆蓋率是否達 80%+"
+          fi
 
           MONTH=$(date +'%Y-%m')
 
           BODY="## 上游字體來源版本更新偵測
 
-          | 來源 | 目前使用 | 最新版本 | 需更新？ |
+          | 來源 | 目前版本 | 最新版本 | 需更新？ |
           |------|---------|---------|---------|
           | [Sarasa Gothic](https://github.com/be5invis/Sarasa-Gothic/releases) | \`$SARASA_PINNED\` | \`$SARASA_LATEST\` | $sarasa_flag |
           | [noto-emoji](https://github.com/googlefonts/noto-emoji/releases) | \`$NOTO_PINNED\` | \`$NOTO_LATEST\` | $noto_flag |
           | [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts/releases) | \`$NERD_PINNED\` | \`$NERD_LATEST\` | $nerd_flag |
+          | [OpenMoji](https://github.com/hfg-gmuend/openmoji/releases)（評估用）| \`$OPENMOJI_PINNED\` | \`$OPENMOJI_LATEST\` | $openmoji_flag |
 
           ### 評估建議
 
           $sarasa_hint
           $noto_hint
           $nerd_hint
+          $openmoji_hint
 
           更新採用版本後，請同步修改 \`docs/upstream-versions.json\` 並關閉此 issue。"
 
@@ -131,8 +146,10 @@ jobs:
           SARASA_PINNED: ${{ steps.check.outputs.sarasa_pinned }}
           NOTO_PINNED: ${{ steps.check.outputs.noto_pinned }}
           NERD_PINNED: ${{ steps.check.outputs.nerd_pinned }}
+          OPENMOJI_PINNED: ${{ steps.check.outputs.openmoji_pinned }}
         run: |
           echo "✅ 所有上游來源均為最新版本，無需更新。"
           echo "  Sarasa Gothic : $SARASA_PINNED"
           echo "  noto-emoji    : $NOTO_PINNED"
           echo "  Nerd Fonts    : $NERD_PINNED"
+          echo "  OpenMoji      : $OPENMOJI_PINNED（評估用，未採用）"
