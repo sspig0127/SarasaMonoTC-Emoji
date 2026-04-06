@@ -400,9 +400,10 @@ for cp, name in [(0x1F600, '😀'), (0x1F525, '🔥'), (0x4E00, '一')]:
 print(f'OK — Total glyphs: {len(f.getGlyphOrder())}')
 "
 
-# 瀏覽器目視驗證
+# 瀏覽器目視驗證（啟動本地伺服器）
 uv run python -m http.server 8765
-open http://localhost:8765/verify-emoji.html
+open http://localhost:8765/verify-emoji.html      # 渲染驗證
+open http://localhost:8765/variant-coverage.html  # 分類覆蓋率
 停止伺服器：
 
 **前景執行時：** 回到啟動伺服器的終端機視窗，按 `Ctrl+C` 即可。
@@ -431,10 +432,18 @@ kill 12345
 lsof -ti :8765 | xargs kill -9
 ```
 
-`verify-emoji.html` 目前已包含：
+**`verify-emoji.html`**（渲染驗證）目前已包含：
 - 來源字體 vs 合併後字體對照
 - COLRv1 高風險樣本區（大量 `PaintTransform -> PaintGlyph` 案例）
 - font URL cache-busting，避免瀏覽器沿用舊字體快取
+
+**`variant-coverage.html`**（分類覆蓋率）：
+- 四種變體並列顯示：Color / Lite / COLRv1 / Nerd Lite
+- 字體直接從 `output/` 載入（免系統安裝，即時反映建構結果）
+- 頁面頂部顯示各變體載入狀態（✓ / ✗），可快速確認建構是否完整
+- 10 個 emoji 分類（Smileys、People、Animals、Food、Travel、Activities、Objects、Symbols、Flags、ZWJ Sequences）× 4 欄並列
+- COLRv1 欄自動標示向量彩色子集（fetch `docs/colrv1-emoji-list.json`）
+- Nerd Fonts PUA 圖示（Powerline / Devicons / Codicons / Octicons）對照展示
 
 ---
 
