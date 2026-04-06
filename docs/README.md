@@ -20,6 +20,7 @@
 | [v2-sequence-implementation.md](v2-sequence-implementation.md) | v2.0 ZWJ 序列 / 旗幟 / 膚色變體的 merge 架構設計 |
 | [nerd-fonts-variant-eval.md](nerd-fonts-variant-eval.md) | Nerd Lite 第四變體的架構評估（為何選擇 PUA merge 方案） |
 | [colrv1-budget-expansion-eval.md](colrv1-budget-expansion-eval.md) | COLRv1 glyph budget 擴增可行性分析（v2.2） |
+| [openmoji-coverage-eval.md](openmoji-coverage-eval.md) | OpenMoji 黑白 SVG 替換 Lite glyph 源的覆蓋率評估（2026-04-06；OpenMoji 16.0.0 vs noto-emoji v2.051） |
 
 ### 📦 建構產物（Build Artifact）
 由 `build.py` 自動產生，不要手動修改。

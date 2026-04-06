@@ -102,7 +102,7 @@ ZWJ 序列 / 旗幟 / 膚色變體全面支援。四條 merge pipeline 已全部
 |------|------|
 | **CBDT 長期策略** | Android / Fedora 已遷移 COLRv1，CBDT 在非 Android 場景優先度持續下降。觀察生態系，評估未來是否降格 Color 變體為相容性備援 |
 | **Variable Font 探索** | 需依賴 Sarasa Gothic 上游提供 Variable 版本；目前條件不具備，列為長期觀察。Sarasa 版本更新已由 `check-upstream.yml` 自動偵測，收到 issue 通知時人工確認該版本是否引入 Variable 格式 |
-| **OpenMoji 替代 Lite glyph 源** | OpenMoji 黑白 SVG 風格一致，可能優於 Noto 彩色降色結果；需建立 SVG→glyf 轉換管線，工作量高 |
+| **OpenMoji 替代 Lite glyph 源** | 2026-04-06 覆蓋率評估（OpenMoji 16.0.0 vs noto-emoji v2.051）：ZWJ 序列僅覆蓋 40%（缺 961 個），完全替換不可行。單碼 emoji 品質有優勢，混合來源方案（OpenMoji 單碼 + Noto ZWJ）可行但 pipeline 複雜度高。**建議維持現狀，等 OpenMoji ZWJ 覆蓋率達 80%+ 再重新評估。** 評估細節 → [`docs/openmoji-coverage-eval.md`](./docs/openmoji-coverage-eval.md) |
 
 ---
 
