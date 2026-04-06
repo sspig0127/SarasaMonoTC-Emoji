@@ -1,3 +1,10 @@
+---
+type: history
+status: archived
+version: v1.x–v2.3
+audience: maintainer
+---
+
 # SarasaMonoTC-Emoji 歷史版本實作細節
 
 > 從 `ROADMAP.md` 分離（2026-03-30；v2.0 規劃細節於 2026-04-04 追加；v2.1 於 2026-04-04 追加；v2.0 存檔 + 已解決技術債 於 2026-04-06 更新）。

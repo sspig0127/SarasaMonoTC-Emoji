@@ -56,15 +56,15 @@ emoji:
   emoji_width_multiplier: 2
   # Skip codepoints already in base font to preserve Sarasa's existing glyphs
   skip_existing: true
-  # force_color_codepoints — BMP symbols that Sarasa renders monochrome.
-  # Listed here, their cmap entry is redirected to a CBDT/CBLC color stub
-  # (e.g. uni2764 → uni2764_color), overriding skip_existing for these codepoints.
-  # Verified present in both Sarasa and NotoColorEmoji (2026-03-29).
+  # force_color_codepoints — emoji/symbols that Sarasa renders monochrome but should be colorful.
+  # Their cmap entry is redirected to a CBDT/CBLC color stub (e.g. uni2764 → uni2764_color),
+  # overriding skip_existing. Supports both BMP (U+0000–U+FFFF) and supplementary plane.
+  # Verified present in both Sarasa and NotoColorEmoji (2026-04-06).
   #
-  # NOTE: 預設清單與 colrv1.force_colrv1_codepoints 相同。
-  # 修改此清單時，請同步修改 colrv1.force_colrv1_codepoints，
-  # 以確保三種變體（Color / COLRv1）的 BMP 強制彩色清單一致。
+  # NOTE: force_colrv1_codepoints 因 COLRv1 glyph budget 接近上限（剩餘 ~123 slots），
+  # 僅保留原有 15 項，不同步擴充。Color 變體無 budget 限制，可完整列出所有衝突 emoji。
   force_color_codepoints:
+    # --- 原有清單（已驗證） ---
     - "U+21A9"  # ↩ leftwards arrow with hook
     - "U+2328"  # ⌨ keyboard
     - "U+2600"  # ☀ black sun with rays
@@ -80,6 +80,120 @@ emoji:
     - "U+26A0"  # ⚠ warning sign
     - "U+263A"  # ☺ smiling face
     - "U+26A1"  # ⚡ high voltage / lightning
+    # --- 擴充清單：修復 CBLC name-conflict 導致的彩色遺失（2026-04-06） ---
+    # 來源：_filter_cblc_to_added_glyphs 診斷，確認存在於 NotoColorEmoji + Noto-COLRv1
+    # 符號與標點
+    - "U+203C"  # ‼ double exclamation mark
+    - "U+2049"  # ⁉ exclamation question mark
+    - "U+2139"  # ℹ information
+    - "U+24C2"  # Ⓜ circled M
+    # 方向箭頭
+    - "U+21AA"  # ↪ right arrow with hook
+    - "U+2194"  # ↔ left right arrow
+    - "U+2195"  # ↕ up down arrow
+    - "U+2196"  # ↖ northwest arrow
+    - "U+2197"  # ↗ northeast arrow
+    - "U+2198"  # ↘ southeast arrow
+    - "U+2199"  # ↙ southwest arrow
+    - "U+27B0"  # ➰ curly loop
+    - "U+27BF"  # ➿ double curly loop
+    - "U+2934"  # ⤴ right arrow curving up
+    - "U+2935"  # ⤵ right arrow curving down
+    - "U+2B05"  # ⬅ left arrow
+    # 時間 / 媒體控制
+    - "U+231A"  # ⌚ watch
+    - "U+231B"  # ⌛ hourglass done
+    - "U+23CF"  # ⏏ eject button
+    - "U+23E9"  # ⏩ fast-forward button
+    - "U+23EA"  # ⏪ fast reverse button
+    - "U+23EB"  # ⏫ fast up button
+    - "U+23EC"  # ⏬ fast down button
+    - "U+23ED"  # ⏭ next track button
+    - "U+23EE"  # ⏮ last track button
+    - "U+23EF"  # ⏯ play or pause button
+    - "U+23F0"  # ⏰ alarm clock
+    - "U+23F1"  # ⏱ stopwatch
+    - "U+23F2"  # ⏲ timer clock
+    - "U+23F3"  # ⏳ hourglass not done
+    - "U+23F8"  # ⏸ pause button
+    - "U+23F9"  # ⏹ stop button
+    - "U+23FA"  # ⏺ record button
+    # 幾何形狀
+    - "U+25AA"  # ▪ black small square
+    - "U+25AB"  # ▫ white small square
+    - "U+25B6"  # ▶ play button
+    - "U+25C0"  # ◀ reverse button
+    - "U+25FB"  # ◻ white medium square
+    - "U+25FC"  # ◼ black medium square
+    - "U+25FD"  # ◽ white medium-small square
+    - "U+25FE"  # ◾ black medium-small square
+    - "U+2B1B"  # ⬛ large black square
+    - "U+2B1C"  # ⬜ large white square
+    - "U+2B55"  # ⭕ hollow red circle
+    # 天氣 / 自然
+    - "U+2602"  # ☂ umbrella
+    - "U+2603"  # ☃ snowman
+    # 物件 / 活動
+    - "U+260E"  # ☎ telephone
+    - "U+2611"  # ☑ ballot box with check
+    - "U+261D"  # ☝ index pointing up
+    - "U+2668"  # ♨ hot springs
+    - "U+267B"  # ♻ recycling symbol
+    - "U+267E"  # ♾ infinity
+    - "U+269B"  # ⚛ atom symbol
+    - "U+26AA"  # ⚪ white circle
+    - "U+26AB"  # ⚫ black circle
+    - "U+26BD"  # ⚽ soccer ball
+    - "U+26BE"  # ⚾ baseball
+    - "U+2702"  # ✂ scissors
+    - "U+2714"  # ✔ check mark
+    - "U+2716"  # ✖ cross mark
+    - "U+2733"  # ✳ eight-spoked asterisk
+    - "U+2734"  # ✴ eight-pointed star
+    - "U+2747"  # ❇ sparkle
+    # 宗教 / 文化符號
+    - "U+2626"  # ☦ orthodox cross
+    - "U+262F"  # ☯ yin yang
+    - "U+2639"  # ☹ frowning face
+    - "U+271D"  # ✝ latin cross
+    - "U+2721"  # ✡ star of David
+    # 日文符號
+    - "U+3030"  # 〰 wavy dash
+    - "U+303D"  # 〽 part alternation mark
+    - "U+3297"  # ㊗ circled ideograph congratulation
+    - "U+3299"  # ㊙ circled ideograph secret
+    # --- 非 BMP（補充平面）emoji：glyph name 衝突導致 CBLC 遺失 ---
+    - "U+1F0CF"  # 🃏 joker
+    - "U+1F170"  # 🅰 A button blood type
+    - "U+1F171"  # 🅱 B button blood type
+    - "U+1F17E"  # 🅾 O button blood type
+    - "U+1F17F"  # 🅿 P button parking
+    - "U+1F18E"  # 🆎 AB button blood type
+    - "U+1F191"  # 🆑 CL button
+    - "U+1F192"  # 🆒 COOL button
+    - "U+1F193"  # 🆓 FREE button
+    - "U+1F194"  # 🆔 ID button
+    - "U+1F195"  # 🆕 NEW button
+    - "U+1F196"  # 🆖 NG button
+    - "U+1F197"  # 🆗 OK button
+    - "U+1F198"  # 🆘 SOS button
+    - "U+1F199"  # 🆙 UP! button
+    - "U+1F19A"  # 🆚 VS button
+    - "U+1F201"  # 🈁 Japanese "here" button
+    - "U+1F202"  # 🈂 Japanese "service charge" button
+    - "U+1F21A"  # 🈚 Japanese "free of charge" button
+    - "U+1F22F"  # 🈯 Japanese "reserved" button
+    - "U+1F232"  # 🈲 prohibited
+    - "U+1F233"  # 🈳 vacancy
+    - "U+1F234"  # 🈴 passing grade
+    - "U+1F235"  # 🈵 no vacancy
+    - "U+1F236"  # 🈶 not free of charge
+    - "U+1F237"  # 🈷 monthly amount
+    - "U+1F238"  # 🈸 application
+    - "U+1F239"  # 🈹 discount
+    - "U+1F23A"  # 🈺 open for business
+    - "U+1F250"  # 🉐 bargain button
+    - "U+1F251"  # 🉑 acceptable button
 
 # Lite variant — monochrome glyf emoji
 # Emoji source: Noto Emoji variable font (google/fonts repo, SIL OFL)
@@ -139,6 +253,9 @@ colrv1:
   # uni2764_colrv1), overriding skip_existing for these specific codepoints.
   # Verified present in both Sarasa and Noto-COLRv1 (2026-03-29).
   # Each entry consumes greedy budget; keep list small.
+  # NOTE: 此清單與 emoji.force_color_codepoints 已不同步（2026-04-06）。
+  # Color 變體新增了 103 項擴充清單（BMP + 非 BMP），但 COLRv1 budget 接近上限
+  # （剩餘 ~123 slots），故 COLRv1 維持原有 15 項，不擴充。
   force_colrv1_codepoints:
     - "U+21A9"  # ↩ leftwards arrow with hook
     - "U+2328"  # ⌨ keyboard

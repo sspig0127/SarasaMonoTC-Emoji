@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 路線圖
 
-> 最後更新：2026-04-06（v2.3.0 已發佈；Ghostty 相容性 Lite / Nerd Lite 驗證通過）
+> 最後更新：2026-04-06（v2.3.0 已發佈；Ghostty 相容性 Lite / Nerd Lite 驗證通過；CBLC name-conflict 技術債解決）
 >
 > **歷史版本實作細節** → [`docs/roadmap-history.md`](./docs/roadmap-history.md)（需要查閱時再 Read）
 > **COLRv1 深度技術細節** → [`.github/colrv1-dev-notes.md`](./.github/colrv1-dev-notes.md)
@@ -109,5 +109,5 @@ ZWJ 序列 / 旗幟 / 膚色變體全面支援。四條 merge pipeline 已全部
 
 | 項目 | 位置 | 說明 |
 |------|------|------|
-| CBLC filtering 可能移除有效 emoji | `emoji_merge.py:_filter_cblc_to_added_glyphs` | 名稱衝突時捨棄 color bitmap。Build log 列出被移除的 glyph 名稱（最多 10 個），可評估是否需加入 `force_color_codepoints` |
+| ~~CBLC filtering 可能移除有效 emoji~~ | `emoji_merge.py:_filter_cblc_to_added_glyphs` | ✅ 2026-04-06 解決：新增 103 項至 `force_color_codepoints`（71 BMP + 32 非 BMP），衝突從 127 → 24。剩餘 24 項均為有意保留 monochrome：ASCII 數字/標點、card suit、©®™、♀♂、控制字元、helper glyph |
 | COLRv1 sequence 仍為 budget-limited | `config.yaml`、`emoji_merge.py:merge_emoji_colrv1` | v2.2 已擴增至 811（8,327/8,450），config 剩餘 **123 slots**；單碼 emoji 成本通常 10–100 slots，實際上幾乎已滿，只夠加少量 cost=1 sequence |

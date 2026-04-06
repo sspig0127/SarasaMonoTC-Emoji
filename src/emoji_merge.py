@@ -1572,7 +1572,7 @@ def merge_emoji(
                 if orig_name in base_existing_names:
                     color_forced_rename[orig_name] = f"{orig_name}_color"
         if color_forced_rename:
-            print(f"  Forced BMP renames: {len(color_forced_rename)} "
+            print(f"  Forced renames: {len(color_forced_rename)} "
                   f"(e.g. {next(iter(color_forced_rename))} → "
                   f"{next(iter(color_forced_rename.values()))})")
         # Apply renames to emoji_cmap so _update_cmap uses the new names

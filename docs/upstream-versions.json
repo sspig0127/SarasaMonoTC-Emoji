@@ -1,0 +1,18 @@
+{
+  "_comment": "目前建構採用的上游版本。當 check-upstream workflow 偵測到新版時請更新此檔。",
+  "sarasa-gothic": {
+    "repo": "be5invis/Sarasa-Gothic",
+    "version": "v1.0.37",
+    "affects": ["Color", "Lite", "COLRv1", "Nerd Lite"]
+  },
+  "noto-emoji": {
+    "repo": "googlefonts/noto-emoji",
+    "version": "v2.051",
+    "affects": ["Color (NotoColorEmoji.ttf)", "COLRv1 (Noto-COLRv1.ttf)", "Lite (NotoEmoji[wght].ttf)"]
+  },
+  "nerd-fonts": {
+    "repo": "ryanoasis/nerd-fonts",
+    "version": "v3.4.0",
+    "affects": ["Nerd Lite (SymbolsNerdFontMono-Regular.ttf)"]
+  }
+}

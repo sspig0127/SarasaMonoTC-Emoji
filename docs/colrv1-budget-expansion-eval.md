@@ -1,3 +1,10 @@
+---
+type: decision-record
+status: current
+version: v2.2
+audience: future-developer
+---
+
 # COLRv1 Sequence 擴增可行性評估
 
 > 評估日期：2026-04-04

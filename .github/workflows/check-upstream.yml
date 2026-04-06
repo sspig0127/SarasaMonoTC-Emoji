@@ -1,0 +1,138 @@
+name: Check Upstream Updates
+
+# 每月 1 日 UTC 08:00 自動執行，也支援手動觸發
+on:
+  schedule:
+    - cron: '0 8 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check upstream releases
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+
+          SARASA_PINNED=$(jq -r '."sarasa-gothic".version' docs/upstream-versions.json)
+          NOTO_PINNED=$(jq -r '."noto-emoji".version' docs/upstream-versions.json)
+          NERD_PINNED=$(jq -r '."nerd-fonts".version' docs/upstream-versions.json)
+
+          SARASA_LATEST=$(gh release view --repo be5invis/Sarasa-Gothic --json tagName -q .tagName 2>/dev/null || echo "unknown")
+          NOTO_LATEST=$(gh release view --repo googlefonts/noto-emoji --json tagName -q .tagName 2>/dev/null || echo "unknown")
+          NERD_LATEST=$(gh release view --repo ryanoasis/nerd-fonts --json tagName -q .tagName 2>/dev/null || echo "unknown")
+
+          echo "sarasa_pinned=$SARASA_PINNED"   >> "$GITHUB_OUTPUT"
+          echo "sarasa_latest=$SARASA_LATEST"   >> "$GITHUB_OUTPUT"
+          echo "noto_pinned=$NOTO_PINNED"       >> "$GITHUB_OUTPUT"
+          echo "noto_latest=$NOTO_LATEST"       >> "$GITHUB_OUTPUT"
+          echo "nerd_pinned=$NERD_PINNED"       >> "$GITHUB_OUTPUT"
+          echo "nerd_latest=$NERD_LATEST"       >> "$GITHUB_OUTPUT"
+
+          UPDATES=""
+          [ "$SARASA_LATEST" != "$SARASA_PINNED" ] && [ "$SARASA_LATEST" != "unknown" ] && UPDATES="${UPDATES}sarasa,"
+          [ "$NOTO_LATEST"   != "$NOTO_PINNED"   ] && [ "$NOTO_LATEST"   != "unknown" ] && UPDATES="${UPDATES}noto,"
+          [ "$NERD_LATEST"   != "$NERD_PINNED"   ] && [ "$NERD_LATEST"   != "unknown" ] && UPDATES="${UPDATES}nerd,"
+          echo "updates=$UPDATES" >> "$GITHUB_OUTPUT"
+
+      - name: Check for existing open issue
+        if: steps.check.outputs.updates != ''
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COUNT=$(gh issue list --label "upstream-update" --state open --json number -q 'length')
+          echo "open_count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Build issue body
+        if: steps.check.outputs.updates != '' && steps.existing.outputs.open_count == '0'
+        id: body
+        env:
+          SARASA_PINNED: ${{ steps.check.outputs.sarasa_pinned }}
+          SARASA_LATEST: ${{ steps.check.outputs.sarasa_latest }}
+          NOTO_PINNED: ${{ steps.check.outputs.noto_pinned }}
+          NOTO_LATEST: ${{ steps.check.outputs.noto_latest }}
+          NERD_PINNED: ${{ steps.check.outputs.nerd_pinned }}
+          NERD_LATEST: ${{ steps.check.outputs.nerd_latest }}
+          UPDATES: ${{ steps.check.outputs.updates }}
+        run: |
+          sarasa_flag="✅ 否"
+          noto_flag="✅ 否"
+          nerd_flag="✅ 否"
+          sarasa_hint=""
+          noto_hint=""
+          nerd_hint=""
+
+          if [ "$SARASA_LATEST" != "$SARASA_PINNED" ]; then
+            sarasa_flag="⚠️ 是"
+            sarasa_hint="- **Sarasa Gothic**：下載新版 TTF，更新 \`fonts/\` 目錄，全變體重跑建構，確認測試通過"
+          fi
+          if [ "$NOTO_LATEST" != "$NOTO_PINNED" ]; then
+            noto_flag="⚠️ 是"
+            noto_hint="- **noto-emoji**：下載新版 NotoColorEmoji.ttf / Noto-COLRv1.ttf / NotoEmoji[wght].ttf，重跑對應變體建構"
+          fi
+          if [ "$NERD_LATEST" != "$NERD_PINNED" ]; then
+            nerd_flag="⚠️ 是"
+            nerd_hint="- **Nerd Fonts**：確認 PUA 段有無 breaking change（特別是 Material Design Icons），更新 NerdFontsSymbolsOnly.zip，確認 \`config.yaml single_column_ranges\` 是否需調整"
+          fi
+
+          MONTH=$(date +'%Y-%m')
+
+          BODY="## 上游字體來源版本更新偵測
+
+          | 來源 | 目前使用 | 最新版本 | 需更新？ |
+          |------|---------|---------|---------|
+          | [Sarasa Gothic](https://github.com/be5invis/Sarasa-Gothic/releases) | \`$SARASA_PINNED\` | \`$SARASA_LATEST\` | $sarasa_flag |
+          | [noto-emoji](https://github.com/googlefonts/noto-emoji/releases) | \`$NOTO_PINNED\` | \`$NOTO_LATEST\` | $noto_flag |
+          | [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts/releases) | \`$NERD_PINNED\` | \`$NERD_LATEST\` | $nerd_flag |
+
+          ### 評估建議
+
+          $sarasa_hint
+          $noto_hint
+          $nerd_hint
+
+          更新採用版本後，請同步修改 \`docs/upstream-versions.json\` 並關閉此 issue。"
+
+          # 使用 delimiter 避免多行字串的 $GITHUB_OUTPUT 問題
+          EOF_MARKER=$(openssl rand -hex 8)
+          {
+            echo "body<<$EOF_MARKER"
+            echo "$BODY"
+            echo "$EOF_MARKER"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "month=$MONTH" >> "$GITHUB_OUTPUT"
+
+      - name: Open issue
+        if: steps.check.outputs.updates != '' && steps.existing.outputs.open_count == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_TITLE: "🔔 上游字體更新：${{ steps.body.outputs.month }} 月度追蹤"
+          ISSUE_BODY: ${{ steps.body.outputs.body }}
+        run: |
+          gh issue create \
+            --title "$ISSUE_TITLE" \
+            --body "$ISSUE_BODY" \
+            --label "upstream-update"
+
+      - name: Summary (no updates)
+        if: steps.check.outputs.updates == ''
+        env:
+          SARASA_PINNED: ${{ steps.check.outputs.sarasa_pinned }}
+          NOTO_PINNED: ${{ steps.check.outputs.noto_pinned }}
+          NERD_PINNED: ${{ steps.check.outputs.nerd_pinned }}
+        run: |
+          echo "✅ 所有上游來源均為最新版本，無需更新。"
+          echo "  Sarasa Gothic : $SARASA_PINNED"
+          echo "  noto-emoji    : $NOTO_PINNED"
+          echo "  Nerd Fonts    : $NERD_PINNED"

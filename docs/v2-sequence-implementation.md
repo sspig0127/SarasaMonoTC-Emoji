@@ -1,3 +1,10 @@
+---
+type: decision-record
+status: current
+version: v2.0
+audience: future-developer
+---
+
 # v2.0 Sequence Emoji 實作設計
 
 > 最後更新：2026-04-01

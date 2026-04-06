@@ -1,3 +1,10 @@
+---
+type: history
+status: archived
+version: v2.1
+audience: maintainer
+---
+
 <img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" style="height:64px;margin-right:32px"/>
 
 # 我希望 以 SarasaMonoTCEmojiLite 為基礎, 加上 Nerd Font icons.  期待能夠在VHS 做終端機錄影 或其他終端機介面的軟體可以正常顯示icon
@@ -163,4 +170,3 @@ VHS 最終是透過 headless browser 渲染，**是否完全吃到多字型 fall
 [^16]: https://www.reddit.com/r/archlinux/comments/11t24on/i_have_nerdfonts_installed_but_still_some/
 
 [^17]: https://gitee.com/bearxup/nerd-fonts
-

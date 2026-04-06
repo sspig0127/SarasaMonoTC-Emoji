@@ -1,9 +1,19 @@
+---
+type: active
+status: current
+version: v2.x
+audience: maintainer
+---
+
 # Current Focus
 
-> 最後更新：2026-04-06
+> 最後更新：2026-04-06（本日工作：CBLC 技術債解決、Sarasa 1.0.37 下載、upstream 自動追蹤 workflow）
 
 ## 現在狀態
 
+- **CBLC name-conflict 技術債已解決**：`force_color_codepoints` 新增 103 項（71 BMP + 32 非 BMP），Color 變體衝突從 127 → 24，剩餘 24 為有意保留 monochrome（ASCII 數字、card suit 等）
+- **Sarasa Gothic 已更新至 1.0.37**（已重跑全四變體建構，200 tests 通過）
+- **月度上游版本追蹤 workflow**：`.github/workflows/check-upstream.yml` 已建立，`docs/upstream-versions.json` 記錄當前採用版本；需 push 後才正式啟用
 - `v2.3` 家庭 emoji 全人物渲染修復已發佈（Chromium TrueType composite bug 繞過，29 個字形）
 - `v2.2` COLRv1 budget 擴增已完成（skip-and-continue greedy + 10 priority emoji + 221 sequences；811 總計，8,327/8,450 slots）
 - `v2.1` Nerd Lite 第四變體已發佈（四個變體：Color / Lite / COLRv1 / Nerd Lite）
@@ -38,9 +48,9 @@
 
 ## 下次開工建議先做
 
-1. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
-2. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
-3. 評估 Emoji 17.0 / Nerd Fonts 版本更新
+1. Push 本日變更到 main，啟用月度追蹤 workflow
+2. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
+4. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
 
 ## 暫時不要重做的事
 

@@ -1,3 +1,10 @@
+---
+type: history
+status: archived
+version: v2.1
+audience: maintainer
+---
+
 # Nerd Lite MVP — 實作計畫
 
 > 建立：2026-04-04

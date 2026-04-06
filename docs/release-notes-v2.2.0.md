@@ -1,3 +1,10 @@
+---
+type: history
+status: archived
+version: v2.2
+audience: maintainer
+---
+
 # v2.2.0 Release Notes（草稿）
 
 本次 v2.2.0 聚焦在 **COLRv1 變體的 glyph budget 擴增**，讓 `SarasaMonoTCEmojiCOLRv1` 能在既有 TrueType 限制下，塞入更多實用 emoji 與 sequence，同時保留安全緩衝，不追求不可行的全量覆蓋。

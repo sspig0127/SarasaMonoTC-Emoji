@@ -1,3 +1,10 @@
+---
+type: decision-record
+status: current
+version: v2.1
+audience: future-developer
+---
+
 # Nerd Fonts 變體評估
 
 > 建立：2026-04-04
