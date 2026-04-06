@@ -44,13 +44,12 @@ audience: maintainer
 - 範圍：
   - 追蹤 `astral-sh/setup-uv` 的 node24 版
   - 維持四變體一致性
-  - 評估 Emoji 17.0 / Nerd Fonts 版本更新
+  - Emoji 17.0 / Nerd Fonts / Sarasa Gothic 版本更新（已自動化：`check-upstream.yml` 每月偵測，有新版開 issue）
 
 ## 下次開工建議先做
 
-1. Push 本日變更到 main，啟用月度追蹤 workflow
-2. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
-4. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
+1. 追蹤 `astral-sh/setup-uv` 的 node24 版，屆時更新 release workflow
+2. 視使用情境繼續調整 `colrv1.priority_sequences`（剩餘 123 slots 緩衝）
 
 ## 暫時不要重做的事
 
@@ -60,3 +59,4 @@ audience: maintainer
 - 不用再重做 `extract_emoji_sequences()` / shared metadata 的基礎設計
 - 不用重建 Lite 旗幟白名單：現在已全域套用，不需要分批加入
 - 不用再重做 Chromium composite bug 排查：已在 v2.3 透過 decomposition 修復
+- 不用再手動追蹤上游版本：`check-upstream.yml` 自動偵測，等 issue 通知即可
