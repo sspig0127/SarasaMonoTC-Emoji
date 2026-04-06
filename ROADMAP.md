@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 路線圖
 
-> 最後更新：2026-04-06（v2.3.0 已發佈；Chromium composite bug 修復）
+> 最後更新：2026-04-06（v2.3.0 已發佈；Ghostty 相容性 Lite / Nerd Lite 驗證通過）
 >
 > **歷史版本實作細節** → [`docs/roadmap-history.md`](./docs/roadmap-history.md)（需要查閱時再 Read）
 > **COLRv1 深度技術細節** → [`.github/colrv1-dev-notes.md`](./.github/colrv1-dev-notes.md)
@@ -28,34 +28,12 @@
 
 ---
 
-## v2.0 — 完整 Emoji 支援（已發佈 / 維護中）
+## v2.0 — 完整 Emoji 支援（已發佈，細節已歸檔）
 
-v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景。
+ZWJ 序列 / 旗幟 / 膚色變體全面支援。四條 merge pipeline 已全部串通。
 
-| 類型 | 範例 | 技術需求 |
-|------|------|---------|
-| 膚色變體 | 👋🏻 | codepoint sequence → GSUB ligature |
-| ZWJ 家庭 | 👨‍👩‍👧‍👦 | ZWJ（U+200D）序列 |
-| 旗幟 | 🇺🇸 | Regional Indicator 雙字元 |
-| 性別 / 職業 | 👩‍💻 | ZWJ + U+2640/2642 |
-
-**技術方向**：解析來源 emoji 字體的 GSUB（LookupType 4），建立 ZWJ sequence → glyph 對應，
-再把 sequence 規則生成到 merged font。細部設計見 [`docs/v2-sequence-implementation.md`](./docs/v2-sequence-implementation.md)。
-
-### 已完成
-
-- Color / Lite / COLRv1 三條 merge pipeline 全串通 sequence emoji
-- Lite：所有 RI-pair 旗幟全域套用 2-column 自訂旗面（53 helper glyph，無白名單）
-- Release workflow：`actions/checkout@v5` / `actions/cache@v5`
-- 代表樣本已驗證：`👩‍💻` / `👋🏻` / `🇺🇸`
-
-### 後續仍待補強（已歸入技術債）
-
-- 非 `Regular` style 的 output font 自動化測試（Italic / Bold / BoldItalic）
-- COLRv1 sequence 受 glyph budget 限制，非全量覆蓋（v2.2 已擴增至 811 emoji/sequences，8,327/8,450 slots）
-- Release workflow 最後一個 Node.js 20 warning：`astral-sh/setup-uv@v4`（等上游 node24 版）
-
-> 規劃細節（實作拆解 / 各階段 MVP / 測試快照）→ [`docs/roadmap-history.md`](./docs/roadmap-history.md)
+> 實作細節 → [`docs/roadmap-history.md`](./docs/roadmap-history.md)
+> Sequence 設計 → [`docs/v2-sequence-implementation.md`](./docs/v2-sequence-implementation.md)
 
 ---
 
@@ -109,7 +87,7 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 |------|------|
 | **Emoji 17.0 跟進** | Unicode 17.0（2025-09）新增 163 個 emoji，含新 ZWJ 序列與膚色組合。追蹤 Noto Emoji 上游，版本更新後重跑建構即可覆蓋 |
 | **Nerd Fonts 版本定期追蹤** | Nerd Fonts 3.x 持續更新；部分 icon（Material Design Icons）已遷移至新 PUA-A 段，舊 codepoint 棄用，建議每次 release 前確認基底版本。目前使用 v3.4.0；更新方式見 README「Nerd Fonts 版本對應」段落 |
-| **Ghostty 相容性驗證** | Ghostty 為 2025 年最熱門新終端機，grapheme width 計算比 wcswidth 嚴格，建議在 ® 跑 `verify-emoji.html` 確認無 cursor desync 或 emoji 寬度異常 |
+| ~~**Ghostty 相容性驗證**~~ | ✅ v2.3 後已確認：Lite / Nerd Lite 在 Ghostty 少量測試通過，無 cursor desync 或 emoji 寬度異常。Color / COLRv1 未另行驗證（bitmap / COLRv1 在終端機環境本即次要） |
 
 ### 中期可評估（中工作量）
 
@@ -132,5 +110,4 @@ v2.0.0 已補齊 sequence emoji 缺口；此段保留作為設計與維護背景
 | 項目 | 位置 | 說明 |
 |------|------|------|
 | CBLC filtering 可能移除有效 emoji | `emoji_merge.py:_filter_cblc_to_added_glyphs` | 名稱衝突時捨棄 color bitmap。Build log 列出被移除的 glyph 名稱（最多 10 個），可評估是否需加入 `force_color_codepoints` |
-| ~~output tests 只檢查 Regular~~ | ✅ 已解決（2026-04-05） | 四個變體 × 四種 style × 4 項檢查 = 64 個 all-styles 測試，共 200 tests |
 | COLRv1 sequence 仍為 budget-limited | `config.yaml`、`emoji_merge.py:merge_emoji_colrv1` | v2.2 已擴增至 811（8,327/8,450），config 剩餘 **123 slots**；單碼 emoji 成本通常 10–100 slots，實際上幾乎已滿，只夠加少量 cost=1 sequence |

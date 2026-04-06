@@ -1,6 +1,6 @@
 # SarasaMonoTC-Emoji 歷史版本實作細節
 
-> 從 `ROADMAP.md` 分離（2026-03-30；v2.0 規劃細節於 2026-04-04 追加；v2.1 於 2026-04-04 追加）。
+> 從 `ROADMAP.md` 分離（2026-03-30；v2.0 規劃細節於 2026-04-04 追加；v2.1 於 2026-04-04 追加；v2.0 存檔 + 已解決技術債 於 2026-04-06 更新）。
 > 僅在需要查閱特定版本技術決策時才 Read 此檔案。
 > 版本概覽與未來規劃 → [`ROADMAP.md`](../ROADMAP.md)
 > COLRv1 深度技術細節 → [`.github/colrv1-dev-notes.md`](../.github/colrv1-dev-notes.md)
@@ -186,10 +186,45 @@ Phase 1 挑選條件（3 項）：
 
 ---
 
+## v2.0 — 完整 Emoji 支援（已發佈，細節存檔）
+
+> 歸檔自 ROADMAP.md（2026-04-06）。v2.0.0 已發佈。
+> Sequence 設計 → [`docs/v2-sequence-implementation.md`](./v2-sequence-implementation.md)
+
+### 功能範圍
+
+| 類型 | 範例 | 技術需求 |
+|------|------|---------|
+| 膚色變體 | 👋🏻 | codepoint sequence → GSUB ligature |
+| ZWJ 家庭 | 👨‍👩‍👧‍👦 | ZWJ（U+200D）序列 |
+| 旗幟 | 🇺🇸 | Regional Indicator 雙字元 |
+| 性別 / 職業 | 👩‍💻 | ZWJ + U+2640/2642 |
+
+**技術方向**：解析來源 emoji 字體的 GSUB（LookupType 4），建立 ZWJ sequence → glyph 對應，再把 sequence 規則生成到 merged font。
+
+### 已完成
+
+- Color / Lite / COLRv1 三條 merge pipeline 全串通 sequence emoji（v2.3 起加入 Nerd Lite，共四條）
+- Lite：所有 RI-pair 旗幟全域套用 2-column 自訂旗面（53 helper glyph，無白名單）
+- Release workflow：`actions/checkout@v5` / `actions/cache@v5`
+- 代表樣本已驗證：`👩‍💻` / `👋🏻` / `🇺🇸`
+
+### 後來補強（v2.2–v2.3）
+
+- 非 `Regular` style 的 output font 自動化測試 → ✅ v2.2 後完成（200 tests）
+- COLRv1 sequence glyph budget → ✅ v2.2 擴增至 811（8,327/8,450 slots）
+- 家庭 emoji Chromium 截斷 → ✅ v2.3 composite decomposition 修復
+- Release workflow Node.js 20 warning：`astral-sh/setup-uv@v4` → 等上游 node24 版
+
+---
+
 ## 已解決技術債
 
 | 項目 | 修正版本 |
 |------|---------|
+| Ghostty 相容性（Lite / Nerd Lite 驗證通過） | v2.3 後 |
+| output tests 只檢查 Regular | v2.3（200 tests，四變體 × 四 style） |
+| 家庭 emoji 在 Chromium 截斷（composite 混合 8/16-bit arg） | v2.3 |
 | Release workflow Node.js 20 warning（checkout/cache 已升 v5；setup-uv 仍待 node24） | 2026-04 |
 | BMP 符號（☺ ⭐ ⚠ 等）在 COLRv1 呈現黑白 | v1.5 |
 | Mac platform name 移除時機 | v1.3 |
