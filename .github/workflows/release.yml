@@ -9,11 +9,15 @@ on:
       sarasa_version:
         description: 'Sarasa Gothic 版本號'
         required: false
-        default: '1.0.36'
+        default: '1.0.37'
       nerd_fonts_version:
         description: 'Nerd Fonts 版本號（Symbols Only）'
         required: false
         default: '3.4.0'
+      noto_emoji_version:
+        description: 'Noto Emoji 版本號（NotoColorEmoji / Noto-COLRv1；對應 upstream-versions.json）'
+        required: false
+        default: '2.051'
 
 jobs:
   release:
@@ -26,9 +30,10 @@ jobs:
       RELEASE_TAG: ${{ github.event.inputs.release_tag }}
       SARASA_VERSION: ${{ github.event.inputs.sarasa_version }}
       NERD_FONTS_VERSION: ${{ github.event.inputs.nerd_fonts_version }}
+      NOTO_EMOJI_VERSION: ${{ github.event.inputs.noto_emoji_version }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: 安裝系統工具
         run: sudo apt-get install -y p7zip-full
@@ -38,7 +43,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: fonts/
-          key: fonts-sarasa-${{ github.event.inputs.sarasa_version }}-nerd-${{ github.event.inputs.nerd_fonts_version }}
+          key: fonts-sarasa-${{ github.event.inputs.sarasa_version }}-nerd-${{ github.event.inputs.nerd_fonts_version }}-noto-${{ github.event.inputs.noto_emoji_version }}
 
       - name: 下載來源字體（cache miss 時執行）
         if: steps.cache-fonts.outputs.cache-hit != 'true'
@@ -56,17 +61,18 @@ jobs:
           echo "=== Extracted Sarasa fonts ==="
           ls fonts/SarasaMonoTC-*.ttf
 
-          # Noto Color Emoji（Color 變體）
-          curl -L -o fonts/NotoColorEmoji.ttf \
-            "https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf"
+          # Noto Color Emoji（Color 變體）—— pin 到 noto-emoji tag
+          curl -fL -o fonts/NotoColorEmoji.ttf \
+            "https://github.com/googlefonts/noto-emoji/raw/v${NOTO_EMOJI_VERSION}/fonts/NotoColorEmoji.ttf"
 
           # Noto Emoji variable（Lite 變體）
-          curl -L -o "fonts/NotoEmoji[wght].ttf" \
+          # NotoEmoji[wght].ttf 只在 google/fonts monorepo，該 repo 無 per-font tag，無法版本 pin
+          curl -fL -o "fonts/NotoEmoji[wght].ttf" \
             "https://github.com/google/fonts/raw/main/ofl/notoemoji/NotoEmoji%5Bwght%5D.ttf"
 
-          # Noto COLRv1（COLRv1 變體）
-          curl -L -o fonts/Noto-COLRv1.ttf \
-            "https://github.com/googlefonts/noto-emoji/raw/main/fonts/Noto-COLRv1.ttf"
+          # Noto COLRv1（COLRv1 變體）—— pin 到 noto-emoji tag
+          curl -fL -o fonts/Noto-COLRv1.ttf \
+            "https://github.com/googlefonts/noto-emoji/raw/v${NOTO_EMOJI_VERSION}/fonts/Noto-COLRv1.ttf"
 
           # Symbols Nerd Font Mono（Nerd Lite 變體）
           mkdir -p fonts/NerdFontsSymbolsOnly
