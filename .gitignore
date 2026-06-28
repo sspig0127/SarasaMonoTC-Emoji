@@ -21,3 +21,5 @@ tests/*.png
 tests/截圖/
 openmoji/
 noto-emoji/
+brag-output/
+.claude/
